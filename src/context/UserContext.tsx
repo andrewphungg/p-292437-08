@@ -1,24 +1,69 @@
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { User } from "../types/user";
 import { Event } from "../types/event";
-import { currentUser, mockEvents } from "../data/mockData";
+import { currentUser as initialUser, mockEvents, getAllFriends } from "../data/mockData";
 import { toast } from "sonner";
+import { useAuth } from "./AuthContext";
 
 interface UserContextType {
   user: User;
   events: Event[];
+  suggestedEvents: Event[];
+  suggestedFriends: User[];
   attendEvent: (eventId: string) => void;
   shareEvent: (eventId: string) => void;
   isAttending: (eventId: string) => boolean;
   hasShared: (eventId: string) => boolean;
+  addFriend: (friendId: string) => void;
+  isFriend: (friendId: string) => boolean;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User>(currentUser);
+  const { currentUser: authUser } = useAuth();
+  const [user, setUser] = useState<User>(initialUser);
   const [events, setEvents] = useState<Event[]>(mockEvents);
+  const [allUsers, setAllUsers] = useState<User[]>(getAllFriends());
+  const [suggestedEvents, setSuggestedEvents] = useState<Event[]>([]);
+  const [suggestedFriends, setSuggestedFriends] = useState<User[]>([]);
+
+  useEffect(() => {
+    if (authUser) {
+      // Update user with auth user data
+      setUser(prev => ({
+        ...prev,
+        ...authUser
+      }));
+    }
+  }, [authUser]);
+
+  // Update suggested events and friends when user or interests change
+  useEffect(() => {
+    if (user.interests && user.interests.length > 0) {
+      // Match events based on tags that match user interests
+      const matchedEvents = events.filter(event => 
+        event.tags.some(tag => user.interests.includes(tag))
+      );
+      setSuggestedEvents(matchedEvents);
+      
+      // Match potential friends based on shared interests
+      const potentialFriends = allUsers.filter(otherUser => {
+        // Skip current user
+        if (otherUser.id === user.id) return false;
+        // Skip existing friends
+        if (user.friends.some(friend => friend.id === otherUser.id)) return false;
+        
+        // Check for shared interests
+        return otherUser.interests && user.interests.some(interest => 
+          otherUser.interests?.includes(interest)
+        );
+      });
+      
+      setSuggestedFriends(potentialFriends);
+    }
+  }, [user, user.interests, events, allUsers]);
 
   const attendEvent = (eventId: string) => {
     if (user.attendedEvents.includes(eventId)) {
@@ -60,6 +105,31 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     toast.success(`Earned ${event.pointsForSharing} points for sharing!`);
   };
 
+  const addFriend = (friendId: string) => {
+    if (user.friends.some(friend => friend.id === friendId)) {
+      toast.info("You're already friends with this person.");
+      return;
+    }
+
+    const friendToAdd = allUsers.find(u => u.id === friendId);
+    if (!friendToAdd) return;
+
+    const newFriend = {
+      id: friendToAdd.id,
+      name: friendToAdd.name,
+      avatar: friendToAdd.avatar,
+      points: friendToAdd.points,
+      interests: friendToAdd.interests,
+    };
+
+    setUser({
+      ...user,
+      friends: [...user.friends, newFriend]
+    });
+
+    toast.success(`You are now friends with ${friendToAdd.name}!`);
+  };
+
   const isAttending = (eventId: string) => {
     return user.attendedEvents.includes(eventId);
   };
@@ -68,15 +138,23 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     return user.sharedEvents.includes(eventId);
   };
 
+  const isFriend = (friendId: string) => {
+    return user.friends.some(friend => friend.id === friendId);
+  };
+
   return (
     <UserContext.Provider 
       value={{ 
         user, 
         events, 
+        suggestedEvents,
+        suggestedFriends,
         attendEvent, 
         shareEvent, 
         isAttending, 
-        hasShared 
+        hasShared,
+        addFriend,
+        isFriend 
       }}
     >
       {children}

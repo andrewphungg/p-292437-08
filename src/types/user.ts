@@ -4,6 +4,7 @@ export interface Friend {
   name: string;
   avatar: string;
   points: number;
+  interests?: string[];
 }
 
 export interface User {
@@ -14,6 +15,7 @@ export interface User {
   graduationYear: number;
   university: string;
   points: number;
+  interests: string[];
   friends: Friend[];
   attendedEvents: string[];
   sharedEvents: string[];

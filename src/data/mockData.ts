@@ -10,24 +10,28 @@ export const currentUser: User = {
   graduationYear: 2023,
   university: "Stanford University",
   points: 450,
+  interests: ["Music", "Fun", "Networking", "Tech"],
   friends: [
     {
       id: "user-2",
       name: "Taylor Swift",
       avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=100&q=80",
       points: 780,
+      interests: ["Music", "Fun", "Concerts"]
     },
     {
       id: "user-3",
       name: "Jordan Lee",
       avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80",
       points: 320,
+      interests: ["Bars", "Drinks", "Random"]
     },
     {
       id: "user-4",
       name: "Casey Kim",
       avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80",
       points: 600,
+      interests: ["Tech", "Networking", "Career"]
     }
   ],
   attendedEvents: ["event-1", "event-3"],
@@ -108,6 +112,7 @@ export const getAllFriends = (): User[] => {
       graduationYear: 2023,
       university: "Princeton University",
       points: 780,
+      interests: ["Music", "Concerts", "Art", "Fashion"],
       friends: [],
       attendedEvents: ["event-1", "event-2", "event-3"],
       sharedEvents: ["event-1", "event-2"],
@@ -120,6 +125,7 @@ export const getAllFriends = (): User[] => {
       graduationYear: 2023,
       university: "Yale University",
       points: 320,
+      interests: ["Sports", "Bars", "Drinks", "Gaming"],
       friends: [],
       attendedEvents: ["event-2"],
       sharedEvents: ["event-2"],
@@ -132,9 +138,36 @@ export const getAllFriends = (): User[] => {
       graduationYear: 2022,
       university: "Harvard University",
       points: 600,
+      interests: ["Tech", "Networking", "Career", "Books"],
       friends: [],
       attendedEvents: ["event-1", "event-4"],
       sharedEvents: ["event-1", "event-4"],
+    },
+    {
+      id: "user-5",
+      name: "Morgan Rivera",
+      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80",
+      email: "morgan@example.com",
+      graduationYear: 2023,
+      university: "UC Berkeley",
+      points: 420,
+      interests: ["Tech", "Gaming", "Movies", "Networking"],
+      friends: [],
+      attendedEvents: ["event-4"],
+      sharedEvents: [],
+    },
+    {
+      id: "user-6",
+      name: "Jamie Chen",
+      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=100&q=80",
+      email: "jamie@example.com",
+      graduationYear: 2023,
+      university: "MIT",
+      points: 550,
+      interests: ["Music", "Tech", "Photography", "Travel"],
+      friends: [],
+      attendedEvents: ["event-1", "event-4"],
+      sharedEvents: ["event-4"],
     }
   ];
 };
