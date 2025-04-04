@@ -3,6 +3,7 @@ import React from "react";
 import { BottomNav } from "@/components/navigation/BottomNav";
 import { useUser } from "@/context/UserContext";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const Profile = () => {
   const { user } = useUser();
@@ -25,9 +26,10 @@ const Profile = () => {
         <div className="w-full max-w-md mx-auto mt-6 px-4">
           <div className="bg-[#FEFFEC] rounded-lg overflow-hidden">
             <div className="bg-gradient-to-r from-sunset-pink to-sunset-peach p-6 text-center">
-              <div className="w-24 h-24 mx-auto rounded-full border-4 border-white overflow-hidden">
-                <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
-              </div>
+              <Avatar className="w-24 h-24 mx-auto border-4 border-white">
+                <AvatarImage src={user.avatar} alt={user.name} />
+                <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+              </Avatar>
               <h2 className="mt-2 text-xl font-bold">{user.name}</h2>
               <p>{user.university}, {user.graduationYear}</p>
               
@@ -42,11 +44,10 @@ const Profile = () => {
                 {user.friends.map((friend) => (
                   <div key={friend.id} className="flex items-center justify-between bg-white p-3 rounded-lg">
                     <div className="flex items-center">
-                      <img 
-                        src={friend.avatar} 
-                        alt={friend.name} 
-                        className="w-10 h-10 rounded-full mr-3"
-                      />
+                      <Avatar className="w-10 h-10 mr-3">
+                        <AvatarImage src={friend.avatar} alt={friend.name} />
+                        <AvatarFallback>{friend.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
                       <span>{friend.name}</span>
                     </div>
                     <span className="bg-sunset-orange/20 px-2 py-1 rounded text-sunset-orange font-medium">

@@ -1,0 +1,45 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --sunset-pink: #FF8DAF;
+  --sunset-orange: #FF8E50;
+  --sunset-yellow: #EEC48F;
+  --sunset-peach: #FFC594;
+  --sunset-purple: #C997D6;
+}
+
+@layer utilities {
+  .text-sunset-pink {
+    color: var(--sunset-pink);
+  }
+  .text-sunset-orange {
+    color: var(--sunset-orange);
+  }
+  .text-sunset-yellow {
+    color: var(--sunset-yellow);
+  }
+  .text-sunset-peach {
+    color: var(--sunset-peach);
+  }
+  .text-sunset-purple {
+    color: var(--sunset-purple);
+  }
+  .bg-sunset-pink {
+    background-color: var(--sunset-pink);
+  }
+  .bg-sunset-orange {
+    background-color: var(--sunset-orange);
+  }
+  .bg-sunset-yellow {
+    background-color: var(--sunset-yellow);
+  }
+  .bg-sunset-peach {
+    background-color: var(--sunset-peach);
+  }
+  .bg-sunset-purple {
+    background-color: var(--sunset-purple);
+  }
+}

@@ -59,6 +59,29 @@ export const BottomNav = () => {
           </Link>
           
           <Link 
+            to="/premium" 
+            className={`flex flex-col items-center ${location.pathname === "/premium" ? "text-sunset-yellow" : ""}`}
+            aria-label="Premium"
+          >
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+                stroke={location.pathname === "/premium" ? "#EEC48F" : "black"}
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span className="text-xs">Premium</span>
+          </Link>
+          
+          <Link 
             to="/profile" 
             className={`flex flex-col items-center ${location.pathname === "/profile" ? "text-sunset-orange" : ""}`}
             aria-label="Profile"

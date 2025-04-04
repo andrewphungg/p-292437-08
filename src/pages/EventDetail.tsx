@@ -5,6 +5,7 @@ import { BottomNav } from "@/components/navigation/BottomNav";
 import { useUser } from "@/context/UserContext";
 import { Button } from "@/components/ui/button";
 import { LocationIcon, PriceIcon, TrendingIcon } from "@/components/icons";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -129,9 +130,18 @@ const EventDetail = () => {
                 <span className="text-sm">{event.attendees} people attending</span>
               </div>
               <div className="flex -space-x-2">
-                <img className="w-8 h-8 rounded-full border-2 border-white" src="https://cdn.builder.io/api/v1/image/assets/TEMP/2121a9ce94e3a43b9e6b48847c75e4dacd0e8b7e" alt="Person" />
-                <img className="w-8 h-8 rounded-full border-2 border-white" src="https://cdn.builder.io/api/v1/image/assets/TEMP/665807209513b8844334af2281e226ceaa3fcf1d" alt="Person" />
-                <img className="w-8 h-8 rounded-full border-2 border-white" src="https://cdn.builder.io/api/v1/image/assets/TEMP/9816c9d930bbcbdb130596d31bd3cecf9745e118" alt="Person" />
+                <Avatar className="w-8 h-8 border-2 border-white">
+                  <AvatarImage src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=100&q=80" alt="Person" />
+                  <AvatarFallback>TS</AvatarFallback>
+                </Avatar>
+                <Avatar className="w-8 h-8 border-2 border-white">
+                  <AvatarImage src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80" alt="Person" />
+                  <AvatarFallback>JL</AvatarFallback>
+                </Avatar>
+                <Avatar className="w-8 h-8 border-2 border-white">
+                  <AvatarImage src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="Person" />
+                  <AvatarFallback>CK</AvatarFallback>
+                </Avatar>
                 <div className="flex items-center justify-center w-8 h-8 rounded-full border-2 border-white bg-sunset-orange text-white text-xs">
                   +{event.attendees - 3}
                 </div>
