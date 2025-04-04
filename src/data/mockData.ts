@@ -1,3 +1,4 @@
+
 import { User } from "../types/user";
 import { Event } from "../types/event";
 
@@ -393,7 +394,7 @@ export const mockEvents: Event[] = [
   {
     id: "event-24",
     title: "Classical String Quartet",
-    image: "https://images.unsplash.com/photo-1461784180009-21b96e7dd6f8?auto=format&fit=crop&w=800&q=80",
+    image: "https://images.unsplash.com/photo-1514913274516-4aa04f176f8c?auto=format&fit=crop&w=800&q=80", // Updated image URL
     day: "Monday",
     date: "Mar 18",
     time: "7:00 PM",
