@@ -40,15 +40,15 @@ const Index = () => {
   });
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-b from-sunset-purple/30 via-sunset-pink/20 to-sunset-yellow/30">
+    <div className="w-full min-h-screen bg-gradient-to-br from-white via-sunset-purple/5 to-sunset-pink/10">
       <div className="flex flex-col items-center w-full pb-24">
-        <header className="text-[#303030] text-[55px] text-center w-full bg-[#FEFFEC]/90 py-5">
+        <header className="text-[#303030] text-[40px] sm:text-[55px] font-semibold text-center w-full bg-white/80 backdrop-blur-md py-5 shadow-sm">
           <span className="bg-gradient-to-r from-sunset-pink via-sunset-orange to-sunset-yellow bg-clip-text text-transparent">
             Joople
           </span>
         </header>
 
-        <div className="bg-sunset-orange/20 w-full py-2 text-center backdrop-blur-sm">
+        <div className="bg-sunset-orange/20 w-full py-2 text-center backdrop-blur-sm shadow-sm">
           <h1 className="text-xl font-bold text-sunset-orange">
             Connect with Fellow Graduates
           </h1>
@@ -70,7 +70,7 @@ const Index = () => {
             onValueChange={setActiveTab}
             className="w-full"
           >
-            <TabsList className="grid grid-cols-2 w-full mb-4">
+            <TabsList className="grid grid-cols-2 w-full mb-4 bg-white/60 backdrop-blur-sm shadow-sm">
               <TabsTrigger value="events">Events</TabsTrigger>
               <TabsTrigger value="friends">Find Friends</TabsTrigger>
             </TabsList>
@@ -128,8 +128,8 @@ const FilterCategories = ({
   };
   
   return (
-    <div className="p-3 bg-white/80 rounded-lg shadow-sm backdrop-blur-sm">
-      <h3 className="font-medium text-sm mb-2">Filter by category:</h3>
+    <div className="p-4 bg-white/80 rounded-xl shadow-sm backdrop-blur-md border border-sunset-purple/10">
+      <h3 className="font-medium text-sm mb-3 text-sunset-purple">Filter by category:</h3>
       <div className="flex flex-wrap gap-2">
         {categories.map(category => (
           <button
@@ -137,7 +137,7 @@ const FilterCategories = ({
             onClick={() => toggleCategory(category)}
             className={`text-xs px-3 py-1.5 rounded-full transition-colors ${
               selectedCategories.includes(category)
-                ? "bg-sunset-purple text-white"
+                ? "bg-sunset-purple text-white shadow-sm"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >

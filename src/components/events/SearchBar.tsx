@@ -24,7 +24,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, onFilterToggle }
       onSubmit={handleSubmit}
       className="w-[360px] max-w-[720px] mx-auto px-4"
     >
-      <div className="flex items-center gap-1 border bg-[#FEFFEC] p-1 rounded-[28px] border-[#E0E0E0] shadow-sm">
+      <div className="flex items-center gap-1 border bg-white/90 p-1 rounded-[28px] border-sunset-purple/20 shadow-md">
         <button type="button" className="p-2">
           <MenuIcon />
         </button>

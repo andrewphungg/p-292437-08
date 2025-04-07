@@ -18,7 +18,7 @@ const EventDetail = () => {
   
   if (!event) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen">
+      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-white via-sunset-purple/5 to-sunset-pink/10">
         <p>Event not found</p>
         <Button onClick={() => navigate("/")} className="mt-4">
           Back to Events
@@ -36,7 +36,7 @@ const EventDetail = () => {
   };
 
   return (
-    <div className="w-full min-h-screen bg-[radial-gradient(50%_50%_at_50%_50%,#C997D6_0%,#FF8DAF_30%,#EEC48F_75%,#FFF9C1_100%)]">
+    <div className="w-full min-h-screen bg-gradient-to-br from-white via-sunset-purple/5 to-sunset-pink/10">
       <div className="flex flex-col w-full pb-24">
         <div className="relative h-72">
           <img 
@@ -47,7 +47,7 @@ const EventDetail = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/30"></div>
           <button 
             onClick={() => navigate(-1)} 
-            className="absolute top-4 left-4 bg-white/80 p-2 rounded-full"
+            className="absolute top-4 left-4 bg-white/80 p-2 rounded-full shadow-md backdrop-blur-sm"
           >
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M15 10H5M5 10L10 5M5 10L10 15" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -55,7 +55,7 @@ const EventDetail = () => {
           </button>
         </div>
 
-        <div className="bg-[#FEFFEC] rounded-t-3xl -mt-6 p-6 flex-1">
+        <div className="bg-white/90 backdrop-blur-md rounded-t-3xl -mt-6 p-6 flex-1 shadow-lg border-t border-sunset-purple/10">
           <div className="flex justify-between items-start pt-6">
             <h1 className="text-2xl font-bold text-[#2A3F65]">{event.title}</h1>
             <div className="text-right">
@@ -85,18 +85,18 @@ const EventDetail = () => {
             {event.tags.map((tag, index) => (
               <span
                 key={index}
-                className="bg-white text-xs px-3 py-1 rounded-lg"
+                className="bg-white text-xs px-3 py-1 rounded-lg shadow-sm border border-sunset-purple/10"
               >
                 {tag}
               </span>
             ))}
           </div>
 
-          <div className="bg-sunset-yellow/20 rounded-lg p-4 mt-6">
+          <div className="bg-sunset-yellow/10 rounded-xl p-4 mt-6 border border-sunset-yellow/20 shadow-sm">
             <h2 className="font-bold text-lg mb-2">Event Points</h2>
             <div className="flex justify-between">
               <div className="flex items-center">
-                <div className="w-8 h-8 bg-sunset-orange/20 rounded-full flex items-center justify-center mr-2">
+                <div className="w-8 h-8 bg-sunset-orange/20 rounded-full flex items-center justify-center mr-2 shadow-sm">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#FF8E50" strokeWidth="2"/>
                     <path d="M12 6V12L16 14" stroke="#FF8E50" strokeWidth="2" strokeLinecap="round"/>
@@ -108,7 +108,7 @@ const EventDetail = () => {
                 </div>
               </div>
               <div className="flex items-center">
-                <div className="w-8 h-8 bg-sunset-pink/20 rounded-full flex items-center justify-center mr-2">
+                <div className="w-8 h-8 bg-sunset-pink/20 rounded-full flex items-center justify-center mr-2 shadow-sm">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M16 8L8 16M8 8L16 16" stroke="#FF8DAF" strokeWidth="2" strokeLinecap="round"/>
                     <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#FF8DAF" strokeWidth="2"/>
@@ -160,14 +160,14 @@ const EventDetail = () => {
           <div className="flex gap-3 mt-8">
             <Button 
               onClick={() => attendEvent(event.id)} 
-              className={`flex-1 ${attending ? 'bg-sunset-orange' : 'bg-sunset-orange/80'} hover:bg-sunset-orange`}
+              className={`flex-1 ${attending ? 'bg-sunset-orange' : 'bg-sunset-orange/80'} hover:bg-sunset-orange shadow-md`}
             >
               {attending ? 'Not Going' : 'Attend'} 
-              <span className="ml-1">{attending ? "-" : "+"}{event.pointsForAttending}pts</span>
+              <span className="ml-1">{attending ? "" : "+"}{event.pointsForAttending}pts</span>
             </Button>
             <Button 
               onClick={() => setShowShareModal(true)} 
-              className={`flex-1 ${shared ? 'bg-sunset-pink' : 'bg-sunset-pink/80'} hover:bg-sunset-pink`}
+              className={`flex-1 ${shared ? 'bg-sunset-pink' : 'bg-sunset-pink/80'} hover:bg-sunset-pink shadow-md`}
             >
               Share
               <span className="ml-1">+{event.pointsForSharing}pts</span>

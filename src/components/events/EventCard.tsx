@@ -42,9 +42,9 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
   return (
     <>
       <Link to={`/event/${id}`} className="block">
-        <article className="bg-[#FEFFEC]/90 p-[15px] rounded-lg border-[3px] border-[#BF8FF3]">
+        <article className="bg-white/90 backdrop-blur-md p-[15px] rounded-xl border border-sunset-purple/20 shadow-md hover:shadow-lg transition-shadow">
           <div className="flex gap-[15px]">
-            <div className="w-[111px] h-[126px] rounded-[8px] border-[1px] border-[rgba(0,0,0,0.5)] overflow-hidden">
+            <div className="w-[111px] h-[126px] rounded-lg overflow-hidden shadow-sm">
               <img
                 src={image}
                 alt={title}
@@ -54,24 +54,24 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
             <div className="flex-1">
               <div className="flex justify-between items-start">
                 <h3 className="text-base font-bold text-[#2A3F65]">{title}</h3>
-                <span className="text-sm">{day}</span>
+                <span className="text-sm text-gray-600">{day}</span>
               </div>
 
               <div className="flex items-center gap-2 mt-2.5">
                 <LocationIcon />
-                <span className="text-[10px]">{location}</span>
+                <span className="text-[10px] text-gray-600">{location}</span>
               </div>
 
               <div className="flex items-center gap-2 mt-2.5">
                 <PriceIcon />
-                <span className="text-[10px]">{price}</span>
+                <span className="text-[10px] text-gray-600">{price}</span>
               </div>
 
               <div className="flex gap-[7px] mt-2.5 flex-wrap">
                 {tags.map((tag, index) => (
                   <span
                     key={index}
-                    className="bg-white text-[9px] px-2.5 py-0.5 rounded-lg"
+                    className="bg-gray-100 text-[9px] px-2.5 py-0.5 rounded-lg"
                   >
                     {tag}
                   </span>
@@ -108,11 +108,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
                 </div>
                 {attending ? (
                   <span className="text-[10px] bg-sunset-orange/20 px-2 py-0.5 rounded text-sunset-orange">Not Going</span>
-                ) : (
-                  attending && (
-                    <span className="text-[10px] bg-sunset-orange/20 px-2 py-0.5 rounded text-sunset-orange">Attending</span>
-                  )
-                )}
+                ) : null}
               </div>
             </div>
           </div>

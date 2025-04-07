@@ -9,9 +9,9 @@ export const BottomNav = () => {
   const { user } = useUser();
   
   return (
-    <nav className="fixed bg-[#FEFFEC] border border-[#EEE] bottom-0 inset-x-0">
+    <nav className="fixed bg-white/90 backdrop-blur-md border-t border-gray-200 bottom-0 inset-x-0 shadow-lg z-50">
       <div className="max-w-md mx-auto">
-        <div className="flex justify-between items-center py-2 px-6">
+        <div className="flex justify-between items-center py-3 px-6">
           <Link 
             to="/leaderboard" 
             className={`flex flex-col items-center ${location.pathname === "/leaderboard" ? "text-sunset-purple" : ""}`}
@@ -32,7 +32,7 @@ export const BottomNav = () => {
                 strokeLinejoin="round"
               />
             </svg>
-            <span className="text-xs">Leaderboard</span>
+            <span className="text-xs font-medium mt-1">Leaderboard</span>
           </Link>
           
           <Link 
@@ -62,7 +62,7 @@ export const BottomNav = () => {
                 strokeLinejoin="round"
               />
             </svg>
-            <span className="text-xs">Discover</span>
+            <span className="text-xs font-medium mt-1">Discover</span>
           </Link>
           
           <Link 
@@ -85,7 +85,7 @@ export const BottomNav = () => {
                 strokeLinejoin="round"
               />
             </svg>
-            <span className="text-xs">Premium</span>
+            <span className="text-xs font-medium mt-1">Premium</span>
           </Link>
           
           <Link 
@@ -94,11 +94,11 @@ export const BottomNav = () => {
             aria-label="Profile"
           >
             <UserIcon />
-            <span className="text-xs">Profile</span>
+            <span className="text-xs font-medium mt-1">Profile</span>
           </Link>
         </div>
         
-        <div className="bg-gradient-to-r from-sunset-pink to-sunset-orange text-white text-center py-1 text-sm">
+        <div className="bg-gradient-to-r from-sunset-pink to-sunset-orange text-white text-center py-1.5 text-sm font-medium shadow-inner">
           <span>You have </span>
           <span className="font-bold">{user.points} points</span>
         </div>
