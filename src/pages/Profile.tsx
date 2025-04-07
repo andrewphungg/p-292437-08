@@ -4,9 +4,12 @@ import { BottomNav } from "@/components/navigation/BottomNav";
 import { useUser } from "@/context/UserContext";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { useAuth } from "@/context/AuthContext";
+import { User } from "@/types/user";
 
 const Profile = () => {
   const { user } = useUser();
+  const { logout, isAdmin } = useAuth();
 
   return (
     <div className="w-full min-h-screen bg-[radial-gradient(50%_50%_at_50%_50%,#C997D6_0%,#FF8DAF_30%,#EEC48F_75%,#FFF9C1_100%)]">
@@ -19,7 +22,7 @@ const Profile = () => {
 
         <div className="bg-gradient-to-r from-sunset-orange/20 to-sunset-peach/20 w-full py-4 text-center">
           <h1 className="text-2xl font-bold text-sunset-orange">
-            My Profile
+            My Profile {isAdmin && "(Admin)"}
           </h1>
         </div>
 
@@ -27,34 +30,54 @@ const Profile = () => {
           <div className="bg-[#FEFFEC] rounded-lg overflow-hidden">
             <div className="bg-gradient-to-r from-sunset-pink to-sunset-peach p-6 text-center">
               <Avatar className="w-24 h-24 mx-auto border-4 border-white">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                {user.avatar ? (
+                  <AvatarImage src={user.avatar} alt={user.name} className="object-cover" />
+                ) : (
+                  <AvatarFallback className="bg-gray-200 text-gray-600 text-xl">
+                    {user.name ? user.name.charAt(0).toUpperCase() : "?"}
+                  </AvatarFallback>
+                )}
               </Avatar>
-              <h2 className="mt-2 text-xl font-bold">{user.name}</h2>
-              <p>{user.university}, {user.graduationYear}</p>
+              <h2 className="mt-3 text-xl font-bold">{user.name}</h2>
+              <p className="mt-1">{user.university}, {user.graduationYear}</p>
               
               <div className="mt-4 inline-block bg-white/80 px-4 py-2 rounded-full">
                 <span className="font-bold text-sunset-orange">{user.points} points</span>
               </div>
+
+              {isAdmin && (
+                <div className="mt-3">
+                  <Badge className="bg-sunset-purple text-white">Admin Account</Badge>
+                </div>
+              )}
             </div>
             
             <div className="p-4">
               <h3 className="text-lg font-bold mb-3">My Friends</h3>
               <div className="space-y-3">
-                {user.friends.map((friend) => (
-                  <div key={friend.id} className="flex items-center justify-between bg-white p-3 rounded-lg">
-                    <div className="flex items-center">
-                      <Avatar className="w-10 h-10 mr-3">
-                        <AvatarImage src={friend.avatar} alt={friend.name} />
-                        <AvatarFallback>{friend.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      <span>{friend.name}</span>
+                {user.friends.length > 0 ? (
+                  user.friends.map((friend) => (
+                    <div key={friend.id} className="flex items-center justify-between bg-white p-3 rounded-lg">
+                      <div className="flex items-center">
+                        <Avatar className="w-10 h-10 mr-3">
+                          {friend.avatar ? (
+                            <AvatarImage src={friend.avatar} alt={friend.name} className="object-cover" />
+                          ) : (
+                            <AvatarFallback className="bg-gray-200 text-gray-600">
+                              {friend.name.charAt(0)}
+                            </AvatarFallback>
+                          )}
+                        </Avatar>
+                        <span>{friend.name}</span>
+                      </div>
+                      <span className="bg-sunset-orange/20 px-2 py-1 rounded text-sunset-orange font-medium">
+                        {friend.points} pts
+                      </span>
                     </div>
-                    <span className="bg-sunset-orange/20 px-2 py-1 rounded text-sunset-orange font-medium">
-                      {friend.points} pts
-                    </span>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-center text-gray-500 py-4">No friends yet</p>
+                )}
               </div>
               
               <Button className="w-full mt-4 bg-sunset-purple hover:bg-sunset-purple/90">
@@ -85,6 +108,14 @@ const Profile = () => {
                   <p className="text-sm">Rank</p>
                 </div>
               </div>
+              
+              <Button 
+                variant="destructive" 
+                className="w-full mt-6" 
+                onClick={logout}
+              >
+                Log Out
+              </Button>
             </div>
           </div>
         </div>
@@ -106,3 +137,12 @@ function getAllFriends() {
     { id: "user-3", points: 320 },
   ];
 }
+
+// Add the Badge component that we're using
+const Badge = ({ children, className }: { children: React.ReactNode; className?: string }) => {
+  return (
+    <span className={`px-2 py-1 rounded-md text-xs font-medium ${className}`}>
+      {children}
+    </span>
+  );
+};

@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { InfoIcon } from "lucide-react";
 
 const Auth = () => {
   const [authMode, setAuthMode] = useState<"login" | "signup">("signup");
@@ -111,6 +113,15 @@ const Auth = () => {
                 </form>
               </TabsContent>
             </Tabs>
+            
+            {authMode === "login" && (
+              <Alert className="mt-4 bg-sunset-yellow/20 border-sunset-orange">
+                <InfoIcon className="h-4 w-4" />
+                <AlertDescription>
+                  <span className="font-medium">Admin Login:</span> admin@joople.com / admin123
+                </AlertDescription>
+              </Alert>
+            )}
           </div>
         </div>
       </div>

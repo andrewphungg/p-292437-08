@@ -79,21 +79,21 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
               <div className="flex gap-2">
                 <button 
                   type="button" 
-                  aria-label="Share" 
+                  aria-label={shared ? "Unshare" : "Share"} 
                   onClick={handleShare}
-                  className={`flex items-center justify-center ${shared ? 'bg-sunset-pink/30' : ''} p-1 rounded-full`}
+                  className={`flex items-center justify-center ${shared ? 'bg-sunset-pink/30' : ''} p-1 rounded-full hover:bg-sunset-pink/20 transition-colors`}
                 >
                   <ShareIcon />
-                  <span className="text-[8px] ml-1">+{pointsForSharing}pts</span>
+                  <span className="text-[8px] ml-1">{shared ? "-" : "+"}{pointsForSharing}pts</span>
                 </button>
                 <button 
                   type="button" 
-                  aria-label="Attend" 
+                  aria-label={attending ? "Unattend" : "Attend"} 
                   onClick={handleAttend}
-                  className={`flex items-center justify-center ${attending ? 'bg-sunset-orange/30' : ''} p-1 rounded-full`}
+                  className={`flex items-center justify-center ${attending ? 'bg-sunset-orange/30' : ''} p-1 rounded-full hover:bg-sunset-orange/20 transition-colors`}
                 >
                   <HeartIcon />
-                  <span className="text-[8px] ml-1">+{pointsForAttending}pts</span>
+                  <span className="text-[8px] ml-1">{attending ? "-" : "+"}{pointsForAttending}pts</span>
                 </button>
               </div>
               {attending && (

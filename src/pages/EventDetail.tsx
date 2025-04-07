@@ -31,7 +31,7 @@ const EventDetail = () => {
   return (
     <div className="w-full min-h-screen bg-[radial-gradient(50%_50%_at_50%_50%,#C997D6_0%,#FF8DAF_30%,#EEC48F_75%,#FFF9C1_100%)]">
       <div className="flex flex-col w-full pb-24">
-        <div className="relative h-64">
+        <div className="relative h-72">
           <img 
             src={event.image} 
             alt={event.title} 
@@ -47,33 +47,33 @@ const EventDetail = () => {
           </button>
         </div>
 
-        <div className="bg-[#FEFFEC] rounded-t-3xl -mt-6 p-5 flex-1">
-          <div className="flex justify-between items-start">
+        <div className="bg-[#FEFFEC] rounded-t-3xl -mt-6 p-6 flex-1">
+          <div className="flex justify-between items-start pt-4">
             <h1 className="text-2xl font-bold text-[#2A3F65]">{event.title}</h1>
             <div className="text-right">
               <div className="text-sm font-medium">{event.day}</div>
-              <div className="text-xs text-gray-500">{event.date}, {event.time}</div>
+              <div className="text-xs text-gray-500 mt-1">{event.date}, {event.time}</div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 mt-4">
+          <div className="flex items-center gap-2 mt-6">
             <LocationIcon />
             <span className="text-sm">{event.location}</span>
           </div>
 
-          <div className="flex items-center gap-2 mt-2">
+          <div className="flex items-center gap-2 mt-3">
             <PriceIcon />
             <span className="text-sm">{event.price}</span>
           </div>
 
           {event.isTrending && (
-            <div className="flex items-center gap-2 mt-2">
+            <div className="flex items-center gap-2 mt-3">
               <TrendingIcon />
               <span className="text-sm text-[#E0A000]">Trending Now</span>
             </div>
           )}
 
-          <div className="flex gap-2 mt-4 flex-wrap">
+          <div className="flex gap-2 mt-5 flex-wrap">
             {event.tags.map((tag, index) => (
               <span
                 key={index}
@@ -153,18 +153,16 @@ const EventDetail = () => {
             <Button 
               onClick={() => attendEvent(event.id)} 
               className={`flex-1 ${attending ? 'bg-sunset-orange' : 'bg-sunset-orange/80'} hover:bg-sunset-orange`}
-              disabled={attending}
             >
-              {attending ? 'Going' : 'Attend'} 
-              {!attending && <span className="ml-1">+{event.pointsForAttending}pts</span>}
+              {attending ? 'Not Going' : 'Attend'} 
+              <span className="ml-1">{attending ? "-" : "+"}{event.pointsForAttending}pts</span>
             </Button>
             <Button 
               onClick={() => shareEvent(event.id)} 
               className={`flex-1 ${shared ? 'bg-sunset-pink' : 'bg-sunset-pink/80'} hover:bg-sunset-pink`}
-              disabled={shared}
             >
-              {shared ? 'Shared' : 'Share'} 
-              {!shared && <span className="ml-1">+{event.pointsForSharing}pts</span>}
+              {shared ? 'Unshare' : 'Share'} 
+              <span className="ml-1">{shared ? "-" : "+"}{event.pointsForSharing}pts</span>
             </Button>
           </div>
         </div>
