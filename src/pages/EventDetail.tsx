@@ -1,16 +1,18 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { BottomNav } from "@/components/navigation/BottomNav";
 import { useUser } from "@/context/UserContext";
 import { Button } from "@/components/ui/button";
 import { LocationIcon, PriceIcon, TrendingIcon } from "@/components/icons";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { ShareModal } from "@/components/events/ShareModal";
 
 const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { events, attendEvent, shareEvent, isAttending, hasShared } = useUser();
+  const { events, attendEvent, shareEvent, isAttending, hasShared, user } = useUser();
+  const [showShareModal, setShowShareModal] = useState(false);
   
   const event = events.find(e => e.id === id);
   
@@ -28,6 +30,11 @@ const EventDetail = () => {
   const attending = isAttending(event.id);
   const shared = hasShared(event.id);
 
+  const handleShareComplete = () => {
+    shareEvent(event.id);
+    setShowShareModal(false);
+  };
+
   return (
     <div className="w-full min-h-screen bg-[radial-gradient(50%_50%_at_50%_50%,#C997D6_0%,#FF8DAF_30%,#EEC48F_75%,#FFF9C1_100%)]">
       <div className="flex flex-col w-full pb-24">
@@ -37,6 +44,7 @@ const EventDetail = () => {
             alt={event.title} 
             className="w-full h-full object-cover"
           />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/30"></div>
           <button 
             onClick={() => navigate(-1)} 
             className="absolute top-4 left-4 bg-white/80 p-2 rounded-full"
@@ -48,7 +56,7 @@ const EventDetail = () => {
         </div>
 
         <div className="bg-[#FEFFEC] rounded-t-3xl -mt-6 p-6 flex-1">
-          <div className="flex justify-between items-start pt-4">
+          <div className="flex justify-between items-start pt-6">
             <h1 className="text-2xl font-bold text-[#2A3F65]">{event.title}</h1>
             <div className="text-right">
               <div className="text-sm font-medium">{event.day}</div>
@@ -131,15 +139,15 @@ const EventDetail = () => {
               </div>
               <div className="flex -space-x-2">
                 <Avatar className="w-8 h-8 border-2 border-white">
-                  <AvatarImage src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=100&q=80" alt="Person" />
+                  <AvatarImage src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=100&q=80" alt="Person" className="object-cover" />
                   <AvatarFallback>TS</AvatarFallback>
                 </Avatar>
                 <Avatar className="w-8 h-8 border-2 border-white">
-                  <AvatarImage src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80" alt="Person" />
+                  <AvatarImage src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80" alt="Person" className="object-cover" />
                   <AvatarFallback>JL</AvatarFallback>
                 </Avatar>
                 <Avatar className="w-8 h-8 border-2 border-white">
-                  <AvatarImage src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="Person" />
+                  <AvatarImage src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="Person" className="object-cover" />
                   <AvatarFallback>CK</AvatarFallback>
                 </Avatar>
                 <div className="flex items-center justify-center w-8 h-8 rounded-full border-2 border-white bg-sunset-orange text-white text-xs">
@@ -158,15 +166,23 @@ const EventDetail = () => {
               <span className="ml-1">{attending ? "-" : "+"}{event.pointsForAttending}pts</span>
             </Button>
             <Button 
-              onClick={() => shareEvent(event.id)} 
+              onClick={() => setShowShareModal(true)} 
               className={`flex-1 ${shared ? 'bg-sunset-pink' : 'bg-sunset-pink/80'} hover:bg-sunset-pink`}
             >
-              {shared ? 'Unshare' : 'Share'} 
-              <span className="ml-1">{shared ? "-" : "+"}{event.pointsForSharing}pts</span>
+              Share
+              <span className="ml-1">+{event.pointsForSharing}pts</span>
             </Button>
           </div>
         </div>
       </div>
+
+      <ShareModal
+        open={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        onShare={handleShareComplete}
+        eventName={event.title}
+        friends={user.friends}
+      />
 
       <BottomNav />
     </div>

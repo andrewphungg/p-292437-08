@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { BottomNav } from "@/components/navigation/BottomNav";
 import { getFriendLeaderboard } from "@/data/mockData";
@@ -32,14 +33,14 @@ const Leaderboard = () => {
                       <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
                     </div>
                     <div 
-                      className={`absolute -top-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center
+                      className={`absolute -top-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center text-white font-bold
                         ${index === 0 ? 'bg-[#FFD700]' : index === 1 ? 'bg-[#C0C0C0]' : 'bg-[#CD7F32]'}`}
                     >
                       {index + 1}
                     </div>
                   </div>
                   <p className="mt-2 font-bold text-sm">{user.name}</p>
-                  <p className="text-xs">{user.points} pts</p>
+                  <p className="text-xs font-semibold">{user.points} pts</p>
                 </div>
               ))}
             </div>
@@ -52,7 +53,7 @@ const Leaderboard = () => {
                     <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white">
                       <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
                     </div>
-                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center text-xs">
+                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center text-xs font-medium">
                       {index + 4}
                     </div>
                   </div>
@@ -60,28 +61,34 @@ const Leaderboard = () => {
                     <p className="font-medium">{user.name}</p>
                     <p className="text-xs text-gray-500">{user.university}</p>
                   </div>
-                  <div className="flex-shrink-0 bg-sunset-orange/20 px-2 py-1 rounded">
-                    <p className="text-sunset-orange font-bold">{user.points} pts</p>
+                  <div className="flex-shrink-0 bg-sunset-orange/20 px-3 py-1 rounded-lg">
+                    <p className="text-sunset-orange font-bold text-sm">{user.points} pts</p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="bg-white rounded-lg mt-4 p-4">
-            <h2 className="text-lg font-bold mb-2">How to Earn Points</h2>
-            <ul className="text-sm space-y-2">
-              <li className="flex items-center">
-                <span className="w-2 h-2 bg-sunset-pink rounded-full mr-2"></span>
-                <span>Attend an event: 75-150 points</span>
+          <div className="bg-white/80 backdrop-blur-sm rounded-lg mt-4 p-5 border border-white/50 shadow-lg">
+            <h2 className="text-lg font-bold mb-3 text-sunset-purple">How to Earn Points</h2>
+            <ul className="space-y-3">
+              <li className="flex items-center bg-sunset-pink/10 p-3 rounded-lg">
+                <div className="w-8 h-8 bg-sunset-pink/20 rounded-full flex items-center justify-center mr-3">
+                  <span className="text-sunset-pink font-bold">1</span>
+                </div>
+                <span className="text-gray-800">Attend an event: 75-150 points</span>
               </li>
-              <li className="flex items-center">
-                <span className="w-2 h-2 bg-sunset-orange rounded-full mr-2"></span>
-                <span>Share an event: 30-60 points</span>
+              <li className="flex items-center bg-sunset-orange/10 p-3 rounded-lg">
+                <div className="w-8 h-8 bg-sunset-orange/20 rounded-full flex items-center justify-center mr-3">
+                  <span className="text-sunset-orange font-bold">2</span>
+                </div>
+                <span className="text-gray-800">Share an event: 30-60 points</span>
               </li>
-              <li className="flex items-center">
-                <span className="w-2 h-2 bg-sunset-purple rounded-full mr-2"></span>
-                <span>Invite friends: 100 points</span>
+              <li className="flex items-center bg-sunset-purple/10 p-3 rounded-lg">
+                <div className="w-8 h-8 bg-sunset-purple/20 rounded-full flex items-center justify-center mr-3">
+                  <span className="text-sunset-purple font-bold">3</span>
+                </div>
+                <span className="text-gray-800">Invite friends: 100 points</span>
               </li>
             </ul>
           </div>

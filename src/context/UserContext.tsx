@@ -14,11 +14,11 @@ interface UserContextType {
   attendEvent: (eventId: string) => void;
   unattendEvent: (eventId: string) => void;
   shareEvent: (eventId: string) => void;
-  unshareEvent: (eventId: string) => void;
   isAttending: (eventId: string) => boolean;
   hasShared: (eventId: string) => boolean;
   addFriend: (friendId: string) => void;
   isFriend: (friendId: string) => boolean;
+  getEventById: (eventId: string) => Event | undefined;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -101,44 +101,33 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       attendedEvents: user.attendedEvents.filter(id => id !== eventId)
     });
 
-    toast.info(`No longer attending this event. ${event.pointsForAttending} points removed.`);
+    toast.info(`No longer attending this event.`);
   };
 
   const shareEvent = (eventId: string) => {
-    if (user.sharedEvents.includes(eventId)) {
-      return unshareEvent(eventId);
-    }
-
     const event = events.find(e => e.id === eventId);
     if (!event) return;
 
-    const newPoints = user.points + event.pointsForSharing;
-    
-    setUser({
-      ...user,
-      points: newPoints,
-      sharedEvents: [...user.sharedEvents, eventId]
-    });
+    // Only add points if the user hasn't already shared this event
+    if (!user.sharedEvents.includes(eventId)) {
+      const newPoints = user.points + event.pointsForSharing;
+      
+      setUser({
+        ...user,
+        points: newPoints,
+        sharedEvents: [...user.sharedEvents, eventId]
+      });
 
-    toast.success(`Earned ${event.pointsForSharing} points for sharing!`);
+      toast.success(`Earned ${event.pointsForSharing} points for sharing!`);
+    }
   };
 
-  const unshareEvent = (eventId: string) => {
-    if (!user.sharedEvents.includes(eventId)) return;
+  const isAttending = (eventId: string) => {
+    return user.attendedEvents.includes(eventId);
+  };
 
-    const event = events.find(e => e.id === eventId);
-    if (!event) return;
-
-    // Subtract points when un-sharing
-    const newPoints = Math.max(0, user.points - event.pointsForSharing);
-    
-    setUser({
-      ...user,
-      points: newPoints,
-      sharedEvents: user.sharedEvents.filter(id => id !== eventId)
-    });
-
-    toast.info(`Unshared this event. ${event.pointsForSharing} points removed.`);
+  const hasShared = (eventId: string) => {
+    return user.sharedEvents.includes(eventId);
   };
 
   const addFriend = (friendId: string) => {
@@ -166,16 +155,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     toast.success(`You are now friends with ${friendToAdd.name}!`);
   };
 
-  const isAttending = (eventId: string) => {
-    return user.attendedEvents.includes(eventId);
-  };
-
-  const hasShared = (eventId: string) => {
-    return user.sharedEvents.includes(eventId);
-  };
-
-  const isFriend = (friendId: string) => {
-    return user.friends.some(friend => friend.id === friendId);
+  const getEventById = (eventId: string) => {
+    return events.find(event => event.id === eventId);
   };
 
   return (
@@ -188,11 +169,11 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         attendEvent,
         unattendEvent,
         shareEvent,
-        unshareEvent,
         isAttending, 
         hasShared,
         addFriend,
-        isFriend 
+        isFriend,
+        getEventById
       }}
     >
       {children}

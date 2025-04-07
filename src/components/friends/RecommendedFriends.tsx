@@ -29,14 +29,21 @@ export const RecommendedFriends = () => {
             className="bg-white/80 p-4 rounded-lg flex items-start justify-between"
           >
             <div className="flex items-start gap-3">
-              <Avatar className="w-12 h-12 rounded-full">
-                <AvatarImage 
-                  src={friend.avatar} 
-                  alt={friend.name} 
-                  className="object-cover"
-                />
-                <AvatarFallback className="bg-gray-200 text-gray-600">{friend.name.charAt(0)}</AvatarFallback>
-              </Avatar>
+              <div className="flex-shrink-0">
+                <Avatar className="w-12 h-12">
+                  {friend.avatar ? (
+                    <AvatarImage 
+                      src={friend.avatar} 
+                      alt={friend.name} 
+                      className="object-cover"
+                    />
+                  ) : (
+                    <AvatarFallback className="bg-gray-200 text-gray-600">
+                      {friend.name.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+              </div>
               
               <div>
                 <h4 className="font-medium">{friend.name}</h4>
