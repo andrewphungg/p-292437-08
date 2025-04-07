@@ -155,6 +155,11 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     toast.success(`You are now friends with ${friendToAdd.name}!`);
   };
 
+  // Add the missing isFriend function
+  const isFriend = (friendId: string) => {
+    return user.friends.some(friend => friend.id === friendId);
+  };
+
   const getEventById = (eventId: string) => {
     return events.find(event => event.id === eventId);
   };

@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { User } from "@/types/user";
+import { User, Friend } from "@/types/user";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { CheckCircle, X } from "lucide-react";
@@ -12,7 +12,7 @@ interface ShareModalProps {
   onClose: () => void;
   onShare: () => void;
   eventName: string;
-  friends: User[];
+  friends: Friend[];
 }
 
 export const ShareModal = ({ open, onClose, onShare, eventName, friends }: ShareModalProps) => {
