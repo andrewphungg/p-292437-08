@@ -42,7 +42,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
   return (
     <>
       <Link to={`/event/${id}`} className="block">
-        <article className="bg-[#FEFFEC] p-[15px] rounded-lg border-[3px] border-[#BF8FF3]">
+        <article className="bg-[#FEFFEC]/90 p-[15px] rounded-lg border-[3px] border-[#BF8FF3]">
           <div className="flex gap-[15px]">
             <div className="w-[111px] h-[126px] rounded-[8px] border-[1px] border-[rgba(0,0,0,0.5)] overflow-hidden">
               <img
@@ -98,16 +98,20 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
                   </button>
                   <button 
                     type="button" 
-                    aria-label={attending ? "Unattend" : "Attend"} 
+                    aria-label={attending ? "Not Going" : "Attend"} 
                     onClick={handleAttend}
                     className={`flex items-center justify-center ${attending ? 'bg-sunset-orange/30' : ''} p-1 rounded-full hover:bg-sunset-orange/20 transition-colors`}
                   >
                     <HeartIcon />
-                    <span className="text-[8px] ml-1">{attending ? "-" : "+"}{pointsForAttending}pts</span>
+                    <span className="text-[8px] ml-1">{attending ? "" : "+"}{pointsForAttending}pts</span>
                   </button>
                 </div>
-                {attending && (
-                  <span className="text-[10px] bg-sunset-orange/20 px-2 py-0.5 rounded text-sunset-orange">Attending</span>
+                {attending ? (
+                  <span className="text-[10px] bg-sunset-orange/20 px-2 py-0.5 rounded text-sunset-orange">Not Going</span>
+                ) : (
+                  attending && (
+                    <span className="text-[10px] bg-sunset-orange/20 px-2 py-0.5 rounded text-sunset-orange">Attending</span>
+                  )
                 )}
               </div>
             </div>
