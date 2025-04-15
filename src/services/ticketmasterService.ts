@@ -1,3 +1,4 @@
+
 import { Event } from "@/types/event";
 
 // Hard-coded API key for all users
