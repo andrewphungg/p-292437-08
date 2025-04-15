@@ -8,6 +8,7 @@ import { Event } from "@/types/event";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { HeartConfetti } from "@/components/animations/HeartConfetti";
 
 interface EventCardProps {
   event: Event;
@@ -16,31 +17,6 @@ interface EventCardProps {
   onRemove?: () => void;
   isSaved?: boolean;
 }
-
-// Heart confetti component - made more subtle
-const HeartConfetti = () => {
-  return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden">
-      {[...Array(8)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute text-red-500"
-          initial={{ opacity: 1, scale: Math.random() * 0.3 + 0.7 }}
-          animate={{ 
-            opacity: 0, 
-            scale: 0,
-            x: `${(Math.random() - 0.5) * 100}px`, 
-            y: `${Math.random() * -100 - 50}px`, 
-            rotate: `${Math.random() * 360}deg` 
-          }}
-          transition={{ duration: 0.6, delay: i * 0.05 }}
-        >
-          ❤️
-        </motion.div>
-      ))}
-    </div>
-  );
-};
 
 export function EventCard({ 
   event, 
@@ -66,7 +42,7 @@ export function EventCard({
   const [saved, setSaved] = useState(isSaved || false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [hasShownConfetti, setHasShownConfetti] = useState(false);
-  const [undoToast, setUndoToast] = useState<string | null>(null);
+  const [undoToastId, setUndoToastId] = useState<string | null>(null);
 
   // Format date properly
   const formattedDate = new Date(date).toLocaleDateString("en-US", {
@@ -99,19 +75,19 @@ export function EventCard({
     }
     
     // Dismiss any existing toast
-    if (undoToast) {
-      toast.dismiss(undoToast);
+    if (undoToastId) {
+      toast.dismiss(undoToastId);
     }
     
     // Show a toast with undo button
-    const toastId = toast(
+    const id = toast(
       <div className="flex justify-between w-full items-center">
         <span>{wasSaved ? "Event removed" : "Event saved"}</span>
         <button
           className="bg-white/20 hover:bg-white/30 px-2 py-1 rounded text-sm flex items-center transition-colors"
           onClick={() => {
             setSaved(wasSaved);
-            toast.dismiss(toastId);
+            toast.dismiss(id);
           }}
         >
           <span className="flex items-center">
@@ -123,10 +99,11 @@ export function EventCard({
       {
         position: "bottom-center",
         duration: 3000,
+        id: `save-toast-${id}` // Give unique ID to prevent duplicates
       }
     );
     
-    setUndoToast(toastId);
+    setUndoToastId(id);
   };
   
   const handleRemove = (e: React.MouseEvent) => {
@@ -134,21 +111,23 @@ export function EventCard({
     e.stopPropagation();
     
     // Dismiss any existing toast
-    if (undoToast) {
-      toast.dismiss(undoToast);
+    if (undoToastId) {
+      toast.dismiss(undoToastId);
     }
     
     // Show a toast with undo option
     if (onRemove) {
-      const toastId = toast(
+      const id = toast(
         <div className="flex justify-between w-full items-center">
           <span>Event removed from saved</span>
           <button
             className="bg-white/20 hover:bg-white/30 px-2 py-1 rounded text-sm flex items-center transition-colors"
             onClick={() => {
               // This assumes onRemove has a callback for undoing
-              window.location.reload();
-              toast.dismiss(toastId);
+              if (onRemove && typeof onRemove === 'function') {
+                // We'll implement proper undo functionality in SavedEvents
+                toast.dismiss(id);
+              }
             }}
           >
             <span className="flex items-center">
@@ -160,10 +139,11 @@ export function EventCard({
         {
           position: "bottom-center",
           duration: 3000,
+          id: `remove-toast-${id}` // Give unique ID to prevent duplicates
         }
       );
       
-      setUndoToast(toastId);
+      setUndoToastId(id);
       onRemove();
     }
   };
@@ -193,7 +173,7 @@ export function EventCard({
       <Link to={`/event/${id}`}>
         <motion.div
           initial={{ scale: 1 }}
-          whileHover={{ y: -4, transition: { duration: 0.2 } }}
+          whileHover={{ y: -2, transition: { duration: 0.2 } }}
         >
           <Card className={cn(
             "overflow-hidden hover:shadow-md transition-shadow duration-300 rounded-3xl shadow-sm border-gray-100 dark:border-gray-800", 
@@ -206,19 +186,21 @@ export function EventCard({
                 alt={title} 
                 className="w-full h-32 object-cover rounded-t-3xl"
               />
-              {isTrending && (
-                <Tag variant="trending" className="absolute top-2 left-2 text-xs">
-                  <span className="mr-1">🔥</span> Trending
-                </Tag>
-              )}
-              {isEditorsPick && (
-                <Tag variant="editors" className="absolute top-2 right-2 text-xs">
-                  <span className="mr-1">✨</span> Editor's Pick
-                </Tag>
-              )}
+              <div className="flex flex-col gap-1 absolute top-2 left-2">
+                {isTrending && (
+                  <Tag variant="trending" className="text-xs">
+                    <span className="mr-1">🔥</span> Trending
+                  </Tag>
+                )}
+                {isEditorsPick && (
+                  <Tag variant="editors" className="text-xs">
+                    <span className="mr-1">✨</span> Editor's Pick
+                  </Tag>
+                )}
+              </div>
               <motion.button 
                 onClick={handleSave}
-                whileTap={{ scale: 1.2 }}
+                whileTap={{ scale: 1.1 }}
                 className={cn(
                   "absolute bottom-2 right-2 p-1.5 rounded-full transition-colors shadow-sm",
                   saved ? "bg-red-500 text-white" : "bg-white/90 text-gray-500 hover:text-gray-700 dark:bg-gray-800/90 dark:text-gray-300 dark:hover:text-white"
@@ -248,7 +230,7 @@ export function EventCard({
     <Link to={`/event/${id}`} className="block mb-6">
       <motion.div
         initial={{ scale: 1 }}
-        whileHover={{ y: -4, transition: { duration: 0.2 } }}
+        whileHover={{ y: -2, transition: { duration: 0.2 } }}
       >
         <Card className={cn(
           "overflow-hidden hover:shadow-md transition-all duration-300 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm", 
@@ -262,16 +244,18 @@ export function EventCard({
                 alt={title} 
                 className="w-full h-48 md:h-full object-cover rounded-t-3xl md:rounded-l-3xl md:rounded-tr-none"
               />
-              {isTrending && (
-                <Tag variant="trending" className="absolute top-2 left-2 text-xs">
-                  <span className="mr-1">🔥</span> Trending
-                </Tag>
-              )}
-              {isEditorsPick && (
-                <Tag variant="editors" className="absolute top-2 right-2 text-xs">
-                  <span className="mr-1">✨</span> Editor's Pick
-                </Tag>
-              )}
+              <div className="flex flex-col gap-1 absolute top-2 left-2">
+                {isTrending && (
+                  <Tag variant="trending" className="text-xs">
+                    <span className="mr-1">🔥</span> Trending
+                  </Tag>
+                )}
+                {isEditorsPick && (
+                  <Tag variant="editors" className="text-xs">
+                    <span className="mr-1">✨</span> Editor's Pick
+                  </Tag>
+                )}
+              </div>
             </div>
             
             <div className="p-5 flex flex-col flex-1 justify-between">
@@ -291,7 +275,7 @@ export function EventCard({
                     )}
                     <motion.button 
                       onClick={handleSave}
-                      whileTap={{ scale: 1.2 }}
+                      whileTap={{ scale: 1.1 }}
                       className={cn(
                         "p-1.5 rounded-full transition-colors",
                         saved ? "text-red-500 bg-red-50 dark:bg-red-900/20" : "text-gray-400 hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-gray-300 dark:hover:text-white"

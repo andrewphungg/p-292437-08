@@ -17,6 +17,7 @@ import Profile from "./pages/Profile";
 import Premium from "./pages/Premium";
 import NotFound from "./pages/NotFound";
 import Settings from "./pages/Settings";
+import Explore from "./pages/Explore";
 
 // Add custom CSS for centered toast notifications
 import "./styles/custom-toasts.css";
@@ -35,7 +36,7 @@ const createGlobalStyle = () => {
 
 const queryClient = new QueryClient();
 
-const App = () => {
+const App: React.FC = () => {
   // Create global styles on mount
   useEffect(() => {
     createGlobalStyle();
@@ -56,6 +57,7 @@ const App = () => {
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/premium" element={<Premium />} />
                     <Route path="/settings" element={<Settings />} />
+                    <Route path="/explore" element={<Explore />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                   <Toaster />

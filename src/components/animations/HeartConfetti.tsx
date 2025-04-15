@@ -4,20 +4,29 @@ import { motion } from "framer-motion";
 
 export const HeartConfetti = () => {
   return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden">
-      {[...Array(8)].map((_, i) => (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden z-10">
+      {[...Array(6)].map((_, i) => (
         <motion.div
           key={i}
           className="absolute text-red-500"
-          initial={{ opacity: 1, scale: Math.random() * 0.3 + 0.7 }}
+          style={{
+            left: `${Math.random() * 75 + 10}%`,
+            top: `${Math.random() * 75 + 10}%`,
+            fontSize: `${Math.random() * 10 + 14}px`
+          }}
+          initial={{ opacity: 1, scale: Math.random() * 0.2 + 0.8 }}
           animate={{ 
             opacity: 0, 
             scale: 0,
-            x: `${(Math.random() - 0.5) * 100}px`, 
-            y: `${Math.random() * -100 - 50}px`, 
-            rotate: `${Math.random() * 360}deg` 
+            y: `${Math.random() * -50 - 20}px`, 
+            x: `${(Math.random() - 0.5) * 60}px`,
+            rotate: `${Math.random() * 180 - 90}deg` 
           }}
-          transition={{ duration: 0.6, delay: i * 0.05 }}
+          transition={{ 
+            duration: 0.5, 
+            delay: i * 0.04,
+            ease: "easeOut"
+          }}
         >
           ❤️
         </motion.div>

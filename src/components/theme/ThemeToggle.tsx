@@ -29,10 +29,10 @@ export function ThemeToggle({ className, variant = "default" }: ThemeToggleProps
           size="icon"
           onClick={toggleTheme}
           className={cn(
-            "rounded-full bg-background/10 border-primary/20 backdrop-blur-md shadow-md transition-all",
+            "rounded-full backdrop-blur-md shadow-md transition-all",
             theme === "dark" 
-              ? "hover:bg-primary/20 text-yellow-300 border-yellow-300/30" 
-              : "hover:bg-secondary/20 text-foreground",
+              ? "bg-gray-800/60 border-gray-600/30 text-yellow-300 hover:bg-gray-700/60" 
+              : "bg-white/70 border-primary/20 text-gray-700 hover:bg-white/90",
             className
           )}
           aria-label="Toggle theme"

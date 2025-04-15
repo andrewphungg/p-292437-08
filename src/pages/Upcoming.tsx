@@ -8,9 +8,14 @@ import { FilterOptions } from "@/components/events/FilterMenu";
 import { Calendar, CheckCircle, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Check } from "lucide-react";
 
 export default function Upcoming() {
   const [filters, setFilters] = useState<Partial<FilterOptions>>({});
+  const [calendarDialogOpen, setCalendarDialogOpen] = useState(false);
+  const [selectedCalendars, setSelectedCalendars] = useState<string[]>([]);
+  const [calendarSyncEnabled, setCalendarSyncEnabled] = useState(false);
   
   // Get events data
   const { data: allEvents = [], isLoading } = useEvents(filters);
@@ -19,14 +24,34 @@ export default function Upcoming() {
   const upcomingEvents = allEvents.slice(0, 3);
   const pastEvents = allEvents.slice(3, 6);
   
+  // Calendar sync functionality
+  const availableCalendars = [
+    { id: "google", name: "Google Calendar", icon: "🗓️" },
+    { id: "outlook", name: "Microsoft Outlook", icon: "📅" },
+    { id: "apple", name: "Apple Calendar", icon: "📆" },
+  ];
+  
+  const toggleCalendarSelection = (calendarId: string) => {
+    setSelectedCalendars(prev => 
+      prev.includes(calendarId) 
+        ? prev.filter(id => id !== calendarId) 
+        : [...prev, calendarId]
+    );
+  };
+  
+  const handleCalendarSync = () => {
+    setCalendarSyncEnabled(true);
+    setCalendarDialogOpen(false);
+  };
+  
   const header = (
     <header className="sticky top-0 z-20 bg-white/80 dark:bg-gray-900/90 backdrop-blur-md shadow-sm">
       <div className="text-center py-6">
         <motion.h1 
-          className="text-3xl font-bold bg-gradient-to-r from-sunset-orange via-sunset-yellow to-sunset-peach bg-clip-text text-transparent pb-1"
+          className="text-4xl font-bold bg-gradient-to-r from-sunset-orange via-sunset-yellow to-sunset-peach bg-clip-text text-transparent pb-1"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.4 }}
         >
           Joople
         </motion.h1>
@@ -36,9 +61,14 @@ export default function Upcoming() {
       </div>
       
       <div className="flex justify-center border-b border-gray-200 dark:border-gray-800 pb-4">
-        <Button variant="ghost" className="text-sunset-orange flex items-center gap-2">
+        <Button 
+          variant="ghost" 
+          className="text-sunset-orange flex items-center gap-2"
+          onClick={() => setCalendarDialogOpen(true)}
+        >
           <Calendar size={18} />
-          <span>Sync Calendar</span>
+          <span>{calendarSyncEnabled ? "Calendar Synced" : "Sync Calendar"}</span>
+          {calendarSyncEnabled && <Check size={14} className="text-green-500" />}
         </Button>
       </div>
     </header>
@@ -91,6 +121,63 @@ export default function Upcoming() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Calendar Sync Dialog */}
+      <Dialog open={calendarDialogOpen} onOpenChange={setCalendarDialogOpen}>
+        <DialogContent className="sm:max-w-md rounded-3xl">
+          <DialogHeader>
+            <DialogTitle>Connect Your Calendars</DialogTitle>
+          </DialogHeader>
+          
+          <div className="py-6">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+              Sync your events with your favorite calendar apps to never miss an event.
+            </p>
+            
+            <div className="space-y-3">
+              {availableCalendars.map(calendar => (
+                <div 
+                  key={calendar.id}
+                  className={`p-3 rounded-xl flex items-center justify-between cursor-pointer transition-colors ${
+                    selectedCalendars.includes(calendar.id)
+                      ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'
+                      : 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
+                  }`}
+                  onClick={() => toggleCalendarSelection(calendar.id)}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="text-2xl">{calendar.icon}</div>
+                    <div className="font-medium">{calendar.name}</div>
+                  </div>
+                  
+                  {selectedCalendars.includes(calendar.id) && (
+                    <div className="bg-blue-500 text-white p-1 rounded-full">
+                      <Check size={16} />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          <div className="flex gap-3">
+            <Button 
+              variant="outline" 
+              className="flex-1 rounded-xl"
+              onClick={() => setCalendarDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              className="flex-1 rounded-xl"
+              onClick={handleCalendarSync}
+              disabled={selectedCalendars.length === 0}
+            >
+              Connect
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }

@@ -1,108 +1,99 @@
 
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { CalendarIcon, UserIcon } from "@/components/icons";
-import { useUser } from "@/context/UserContext";
+import { Home, Calendar, Star, User } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
-export const BottomNav = () => {
+// A fixed, persistent bottom navigation component
+export function BottomNav() {
   const location = useLocation();
-  const { user } = useUser();
   
+  const isActive = (path: string) => location.pathname === path;
+  
+  const navItems = [
+    {
+      path: "/",
+      label: "Home",
+      icon: Home,
+      color: "text-primary",
+      bgColor: "bg-primary/10",
+    },
+    {
+      path: "/upcoming",
+      label: "Upcoming",
+      icon: Calendar,
+      color: "text-green-500",
+      bgColor: "bg-green-500/10",
+    },
+    {
+      path: "/premium",
+      label: "Premium",
+      icon: Star,
+      color: "text-amber-500",
+      bgColor: "bg-amber-500/10",
+    },
+    {
+      path: "/profile",
+      label: "Profile",
+      icon: User,
+      color: "text-pink-500",
+      bgColor: "bg-pink-500/10",
+    },
+  ];
+
   return (
-    <nav className="fixed bg-white/90 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 dark:bg-gray-900/90 bottom-0 inset-x-0 shadow-lg z-50">
-      <div className="max-w-md mx-auto">
-        <div className="flex justify-between items-center py-3 px-6">
-          <Link 
-            to="/leaderboard" 
-            className={`flex flex-col items-center ${location.pathname === "/leaderboard" ? "text-sunset-purple" : "text-gray-700 dark:text-gray-300"}`}
-            aria-label="Leaderboard"
-          >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M18 20V10M12 20V4M6 20V14"
-                stroke={location.pathname === "/leaderboard" ? "#C997D6" : "currentColor"}
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <span className="text-xs font-medium mt-1">Leaderboard</span>
-          </Link>
-          
-          <Link 
-            to="/" 
-            className={`flex flex-col items-center ${location.pathname === "/" ? "text-sunset-pink" : "text-gray-700 dark:text-gray-300"}`}
-            aria-label="Discover"
-          >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M3 11L12 2L21 11"
-                stroke={location.pathname === "/" ? "#FF8DAF" : "currentColor"}
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M5 12V19C5 19.5304 5.21071 20.0391 5.58579 20.4142C5.96086 20.7893 6.46957 21 7 21H10V16C10 15.4696 10.2107 14.9609 10.5858 14.5858C10.9609 14.2107 11.4696 14 12 14C12.5304 14 13.0391 14.2107 13.4142 14.5858C13.7893 14.9609 14 15.4696 14 16V21H17C17.5304 21 18.0391 20.7893 18.4142 20.4142C18.7893 20.0391 19 19.5304 19 19V12"
-                stroke={location.pathname === "/" ? "#FF8DAF" : "currentColor"}
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <span className="text-xs font-medium mt-1">Discover</span>
-          </Link>
-          
-          <Link 
-            to="/premium" 
-            className={`flex flex-col items-center ${location.pathname === "/premium" ? "text-sunset-yellow" : "text-gray-700 dark:text-gray-300"}`}
-            aria-label="Premium"
-          >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
-                stroke={location.pathname === "/premium" ? "#EEC48F" : "currentColor"}
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <span className="text-xs font-medium mt-1">Premium</span>
-          </Link>
-          
-          <Link 
-            to="/profile" 
-            className={`flex flex-col items-center ${location.pathname === "/profile" ? "text-sunset-orange" : "text-gray-700 dark:text-gray-300"}`}
-            aria-label="Profile"
-          >
-            <UserIcon color={location.pathname === "/profile" ? "#FF7D4D" : "currentColor"} />
-            <span className="text-xs font-medium mt-1">Profile</span>
-          </Link>
-        </div>
-        
-        <div className="bg-gradient-to-r from-sunset-pink to-sunset-orange text-white text-center py-1.5 text-sm font-medium shadow-inner">
-          <span>You have </span>
-          <span className="font-bold">{user.points} points</span>
+    <motion.nav 
+      className="fixed bottom-0 inset-x-0 z-50 shadow-lg bottom-nav-fixed"
+      initial={{ y: 100 }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.4, type: "spring", stiffness: 100 }}
+    >
+      <div className="max-w-xl mx-auto bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 rounded-t-3xl">
+        <div className="flex items-center justify-around p-3 pt-2">
+          {navItems.map(item => (
+            <NavItem
+              key={item.path}
+              {...item}
+              active={isActive(item.path)}
+            />
+          ))}
         </div>
       </div>
-    </nav>
+    </motion.nav>
   );
-};
+}
+
+interface NavItemProps {
+  path: string;
+  label: string;
+  icon: React.ElementType;
+  color: string;
+  bgColor: string;
+  active: boolean;
+}
+
+function NavItem({ path, label, icon: Icon, color, bgColor, active }: NavItemProps) {
+  return (
+    <Link
+      to={path}
+      className={cn(
+        "flex flex-col items-center space-y-1 transition-all rounded-xl px-3 py-1.5",
+        active ? `${color} ${bgColor}` : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+      )}
+    >
+      <div className="relative">
+        {active && (
+          <motion.span
+            layoutId="navIndicator"
+            className={cn("absolute inset-0 rounded-full z-0", bgColor)}
+            transition={{ type: "spring", duration: 0.4 }}
+            style={{ opacity: 0.8 }}
+          />
+        )}
+        <Icon size={active ? 22 : 20} className={cn("relative z-10 transition-transform", active && "scale-105")} />
+      </div>
+      <span className={cn("text-xs font-medium", active && "font-semibold")}>{label}</span>
+    </Link>
+  );
+}

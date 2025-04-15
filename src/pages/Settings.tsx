@@ -23,9 +23,12 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/providers/ThemeProvider";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface SettingsItemProps {
   icon: React.ReactNode;
@@ -63,34 +66,57 @@ const SettingsItem: React.FC<SettingsItemProps> = ({
 
 export default function Settings() {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const { theme, setTheme } = useTheme();
+  
+  // Settings state
   const [pushNotifications, setPushNotifications] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [language, setLanguage] = useState("English");
-  const [isCalendarSyncDialogOpen, setIsCalendarSyncDialogOpen] = useState(false);
-  const [selectedCalendars, setSelectedCalendars] = useState<string[]>([]);
   const [calendarSyncEnabled, setCalendarSyncEnabled] = useState(false);
+  
+  // UI state for dialogs
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [isPrivacySettingsOpen, setIsPrivacySettingsOpen] = useState(false);
+  const [isSecuritySettingsOpen, setIsSecuritySettingsOpen] = useState(false);
+  const [isPreferencesOpen, setIsPreferencesOpen] = useState(false);
+  const [isCalendarSyncDialogOpen, setIsCalendarSyncDialogOpen] = useState(false);
+  const [isHelpCenterOpen, setIsHelpCenterOpen] = useState(false);
+  const [isLanguageDialogOpen, setIsLanguageDialogOpen] = useState(false);
+  const [isSignOutDialogOpen, setIsSignOutDialogOpen] = useState(false);
+  
+  // Form state
+  const [selectedCalendars, setSelectedCalendars] = useState<string[]>([]);
+  const [displayName, setDisplayName] = useState("Jane Doe");
+  const [email, setEmail] = useState("jane.doe@example.com");
+  const [bio, setBio] = useState("Event enthusiast and food lover");
+  const [privacySettings, setPrivacySettings] = useState({
+    profileVisibility: "public",
+    locationSharing: true,
+    attendanceVisibility: "friends"
+  });
+  const [securitySettings, setSecuritySettings] = useState({
+    twoFactorAuth: false,
+    loginAlerts: true,
+  });
+  const [eventPreferences, setEventPreferences] = useState({
+    music: true,
+    food: true, 
+    arts: false,
+    sports: false,
+    tech: true,
+  });
 
   const goBack = () => {
     navigate(-1);
   };
   
   const handleSignOut = () => {
-    toast({
-      title: "Signed out successfully",
-      description: "You have been signed out of your account.",
-    });
     // In a real app, would handle actual sign out logic here
-    setTimeout(() => navigate("/"), 1000);
+    setTimeout(() => navigate("/"), 500);
   };
   
   const handleThemeToggle = () => {
     setTheme(theme === "dark" ? "light" : "dark");
-    toast({
-      title: `${theme === "dark" ? "Light" : "Dark"} mode activated`,
-      description: `App display has been changed to ${theme === "dark" ? "light" : "dark"} mode.`,
-    });
   };
   
   const handleNotificationChange = (type: 'push' | 'email', value: boolean) => {
@@ -99,59 +125,15 @@ export default function Settings() {
     } else {
       setEmailNotifications(value);
     }
-    
-    toast({
-      title: `${type === 'push' ? 'Push' : 'Email'} notifications ${value ? 'enabled' : 'disabled'}`,
-      description: `You will ${value ? 'now' : 'no longer'} receive ${type} notifications.`,
-    });
-  };
-
-  const handleEditProfile = () => {
-    toast({
-      title: "Edit Profile",
-      description: "Profile editor opened.",
-    });
-    navigate("/profile");
   };
   
-  const handlePrivacySettings = () => {
-    toast({
-      title: "Privacy Settings",
-      description: "Privacy settings opened.",
-    });
-  };
-  
-  const handleSecuritySettings = () => {
-    toast({
-      title: "Security Settings",
-      description: "Security settings opened.",
-    });
-  };
-  
-  const handlePreferences = () => {
-    toast({
-      title: "Preferences",
-      description: "Event preferences opened.",
-    });
-  };
-  
-  const handleLanguageChange = () => {
-    const languages = ["English", "Spanish", "French", "German", "Mandarin"];
-    const nextIndex = (languages.indexOf(language) + 1) % languages.length;
-    setLanguage(languages[nextIndex]);
-    
-    toast({
-      title: "Language changed",
-      description: `App language has been changed to ${languages[nextIndex]}.`,
-    });
-  };
-  
-  const handleHelpCenter = () => {
-    toast({
-      title: "Help Center",
-      description: "Help center opened.",
-    });
-  };
+  const availableLanguages = [
+    "English", 
+    "Spanish", 
+    "French", 
+    "German", 
+    "Mandarin"
+  ];
   
   const availableCalendars = [
     { id: "google", name: "Google Calendar", icon: "🗓️" },
@@ -170,11 +152,11 @@ export default function Settings() {
   const handleCalendarSync = () => {
     setCalendarSyncEnabled(true);
     setIsCalendarSyncDialogOpen(false);
-    
-    toast({
-      title: "Calendar synced successfully",
-      description: `Your events will sync with ${selectedCalendars.length} calendar(s).`,
-    });
+  };
+  
+  const handleLanguageChange = (newLanguage: string) => {
+    setLanguage(newLanguage);
+    setIsLanguageDialogOpen(false);
   };
   
   const header = (
@@ -205,7 +187,7 @@ export default function Settings() {
               icon={<User size={20} />} 
               title="Edit Profile"
               description="Change your profile information"
-              onClick={handleEditProfile}
+              onClick={() => setIsEditProfileOpen(true)}
             />
             
             <Separator className="dark:bg-gray-800" />
@@ -214,7 +196,7 @@ export default function Settings() {
               icon={<Shield size={20} />} 
               title="Privacy"
               description="Manage your privacy settings"
-              onClick={handlePrivacySettings}
+              onClick={() => setIsPrivacySettingsOpen(true)}
             />
             
             <Separator className="dark:bg-gray-800" />
@@ -223,7 +205,7 @@ export default function Settings() {
               icon={<Lock size={20} />} 
               title="Security"
               description="Update password & security options"
-              onClick={handleSecuritySettings}
+              onClick={() => setIsSecuritySettingsOpen(true)}
             />
 
             <Separator className="dark:bg-gray-800" />
@@ -232,7 +214,7 @@ export default function Settings() {
               icon={<UserCog size={20} />} 
               title="Preferences"
               description="Customize your event preferences"
-              onClick={handlePreferences}
+              onClick={() => setIsPreferencesOpen(true)}
             />
             
             <Separator className="dark:bg-gray-800" />
@@ -300,7 +282,7 @@ export default function Settings() {
               icon={<Globe size={20} />} 
               title="Language"
               description={`Current language: ${language}`}
-              onClick={handleLanguageChange}
+              onClick={() => setIsLanguageDialogOpen(true)}
             />
           </CardContent>
         </Card>
@@ -313,7 +295,7 @@ export default function Settings() {
               icon={<HelpCircle size={20} />} 
               title="Help Center"
               description="Get help and contact support"
-              onClick={handleHelpCenter}
+              onClick={() => setIsHelpCenterOpen(true)}
             />
             
             <Separator className="dark:bg-gray-800" />
@@ -322,7 +304,7 @@ export default function Settings() {
               icon={<LogOut size={20} />} 
               title="Sign Out"
               description="Sign out from your account"
-              onClick={handleSignOut}
+              onClick={() => setIsSignOutDialogOpen(true)}
             />
           </CardContent>
         </Card>
@@ -332,6 +314,291 @@ export default function Settings() {
           <div className="mt-1">© 2025 Joople Inc.</div>
         </div>
       </div>
+
+      {/* Edit Profile Dialog */}
+      <Dialog open={isEditProfileOpen} onOpenChange={setIsEditProfileOpen}>
+        <DialogContent className="sm:max-w-md rounded-3xl">
+          <DialogHeader>
+            <DialogTitle>Edit Profile</DialogTitle>
+          </DialogHeader>
+          
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Display Name</Label>
+              <Input 
+                id="name" 
+                value={displayName} 
+                onChange={(e) => setDisplayName(e.target.value)} 
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input 
+                id="email" 
+                type="email" 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="bio">Bio</Label>
+              <Input 
+                id="bio" 
+                value={bio} 
+                onChange={(e) => setBio(e.target.value)} 
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsEditProfileOpen(false)}
+              className="rounded-xl"
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => setIsEditProfileOpen(false)}
+              className="rounded-xl"
+            >
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Privacy Settings Dialog */}
+      <Dialog open={isPrivacySettingsOpen} onOpenChange={setIsPrivacySettingsOpen}>
+        <DialogContent className="sm:max-w-md rounded-3xl">
+          <DialogHeader>
+            <DialogTitle>Privacy Settings</DialogTitle>
+          </DialogHeader>
+          
+          <div className="py-4 space-y-6">
+            <div className="space-y-2">
+              <Label>Profile Visibility</Label>
+              <RadioGroup 
+                value={privacySettings.profileVisibility}
+                onValueChange={(value) => 
+                  setPrivacySettings({...privacySettings, profileVisibility: value})
+                }
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="public" id="public" />
+                  <Label htmlFor="public">Public</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="friends" id="friends" />
+                  <Label htmlFor="friends">Friends Only</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="private" id="private" />
+                  <Label htmlFor="private">Private</Label>
+                </div>
+              </RadioGroup>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-medium">Location Sharing</h3>
+                <p className="text-xs text-gray-500">Allow others to see your location</p>
+              </div>
+              <Switch 
+                checked={privacySettings.locationSharing} 
+                onCheckedChange={(checked) => 
+                  setPrivacySettings({...privacySettings, locationSharing: checked})
+                } 
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Event Attendance Visibility</Label>
+              <RadioGroup 
+                value={privacySettings.attendanceVisibility}
+                onValueChange={(value) => 
+                  setPrivacySettings({...privacySettings, attendanceVisibility: value})
+                }
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="public" id="attendance-public" />
+                  <Label htmlFor="attendance-public">Public</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="friends" id="attendance-friends" />
+                  <Label htmlFor="attendance-friends">Friends Only</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="private" id="attendance-private" />
+                  <Label htmlFor="attendance-private">Private</Label>
+                </div>
+              </RadioGroup>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsPrivacySettingsOpen(false)}
+              className="rounded-xl"
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => setIsPrivacySettingsOpen(false)}
+              className="rounded-xl"
+            >
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Security Settings Dialog */}
+      <Dialog open={isSecuritySettingsOpen} onOpenChange={setIsSecuritySettingsOpen}>
+        <DialogContent className="sm:max-w-md rounded-3xl">
+          <DialogHeader>
+            <DialogTitle>Security Settings</DialogTitle>
+          </DialogHeader>
+          
+          <div className="py-4 space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-medium">Two-Factor Authentication</h3>
+                <p className="text-xs text-gray-500">Secure your account with 2FA</p>
+              </div>
+              <Switch 
+                checked={securitySettings.twoFactorAuth} 
+                onCheckedChange={(checked) => 
+                  setSecuritySettings({...securitySettings, twoFactorAuth: checked})
+                } 
+              />
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-medium">Login Alerts</h3>
+                <p className="text-xs text-gray-500">Get alerted of new account logins</p>
+              </div>
+              <Switch 
+                checked={securitySettings.loginAlerts} 
+                onCheckedChange={(checked) => 
+                  setSecuritySettings({...securitySettings, loginAlerts: checked})
+                } 
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Button variant="outline" className="w-full">
+                Change Password
+              </Button>
+              
+              <Button variant="outline" className="w-full text-destructive hover:bg-destructive/5">
+                Delete Account
+              </Button>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsSecuritySettingsOpen(false)}
+              className="rounded-xl"
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => setIsSecuritySettingsOpen(false)}
+              className="rounded-xl"
+            >
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Preferences Dialog */}
+      <Dialog open={isPreferencesOpen} onOpenChange={setIsPreferencesOpen}>
+        <DialogContent className="sm:max-w-md rounded-3xl">
+          <DialogHeader>
+            <DialogTitle>Event Preferences</DialogTitle>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <p className="text-sm text-gray-500 mb-4">
+              Select the types of events you're interested in to get personalized recommendations.
+            </p>
+            
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="pref-music">Music Events</Label>
+                <Switch 
+                  id="pref-music"
+                  checked={eventPreferences.music} 
+                  onCheckedChange={(checked) => 
+                    setEventPreferences({...eventPreferences, music: checked})
+                  } 
+                />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <Label htmlFor="pref-food">Food & Dining</Label>
+                <Switch 
+                  id="pref-food"
+                  checked={eventPreferences.food} 
+                  onCheckedChange={(checked) => 
+                    setEventPreferences({...eventPreferences, food: checked})
+                  } 
+                />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <Label htmlFor="pref-arts">Arts & Culture</Label>
+                <Switch 
+                  id="pref-arts"
+                  checked={eventPreferences.arts} 
+                  onCheckedChange={(checked) => 
+                    setEventPreferences({...eventPreferences, arts: checked})
+                  } 
+                />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <Label htmlFor="pref-sports">Sports</Label>
+                <Switch 
+                  id="pref-sports"
+                  checked={eventPreferences.sports} 
+                  onCheckedChange={(checked) => 
+                    setEventPreferences({...eventPreferences, sports: checked})
+                  } 
+                />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <Label htmlFor="pref-tech">Technology</Label>
+                <Switch 
+                  id="pref-tech"
+                  checked={eventPreferences.tech} 
+                  onCheckedChange={(checked) => 
+                    setEventPreferences({...eventPreferences, tech: checked})
+                  } 
+                />
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              onClick={() => setIsPreferencesOpen(false)}
+              className="rounded-xl w-full"
+            >
+              Save Preferences
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Calendar Sync Dialog */}
       <Dialog open={isCalendarSyncDialogOpen} onOpenChange={setIsCalendarSyncDialogOpen}>
@@ -385,6 +652,127 @@ export default function Settings() {
               disabled={selectedCalendars.length === 0}
             >
               Connect
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Language Dialog */}
+      <Dialog open={isLanguageDialogOpen} onOpenChange={setIsLanguageDialogOpen}>
+        <DialogContent className="sm:max-w-md rounded-3xl">
+          <DialogHeader>
+            <DialogTitle>Select Language</DialogTitle>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <RadioGroup 
+              value={language} 
+              onValueChange={handleLanguageChange}
+              className="space-y-2"
+            >
+              {availableLanguages.map(lang => (
+                <div 
+                  key={lang}
+                  className="flex items-center space-x-2 p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md cursor-pointer"
+                  onClick={() => handleLanguageChange(lang)}
+                >
+                  <RadioGroupItem value={lang} id={`lang-${lang}`} />
+                  <Label htmlFor={`lang-${lang}`}>{lang}</Label>
+                </div>
+              ))}
+            </RadioGroup>
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Help Center Dialog */}
+      <Dialog open={isHelpCenterOpen} onOpenChange={setIsHelpCenterOpen}>
+        <DialogContent className="sm:max-w-md rounded-3xl">
+          <DialogHeader>
+            <DialogTitle>Help Center</DialogTitle>
+          </DialogHeader>
+          
+          <div className="py-4 space-y-4">
+            <Tabs defaultValue="faq" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-4">
+                <TabsTrigger value="faq">FAQs</TabsTrigger>
+                <TabsTrigger value="contact">Contact Us</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="faq">
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-medium mb-1">How do I save events?</h3>
+                    <p className="text-sm text-gray-500">
+                      Click the heart icon on any event card to save it to your list.
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-medium mb-1">Can I get a refund?</h3>
+                    <p className="text-sm text-gray-500">
+                      Refund policies vary by event. Check the event details page for specific information.
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-medium mb-1">How do I change my password?</h3>
+                    <p className="text-sm text-gray-500">
+                      Go to Settings → Security → Change Password to update your credentials.
+                    </p>
+                  </div>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="contact">
+                <div className="space-y-4">
+                  <p className="text-sm text-gray-500">
+                    Have a question or need help? Reach out to our support team.
+                  </p>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="support-email">Email</Label>
+                    <Input id="support-email" placeholder="Your email" />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="support-message">Message</Label>
+                    <Input id="support-message" placeholder="How can we help?" />
+                  </div>
+                  
+                  <Button className="w-full">Send Message</Button>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Sign Out Confirmation */}
+      <Dialog open={isSignOutDialogOpen} onOpenChange={setIsSignOutDialogOpen}>
+        <DialogContent className="sm:max-w-md rounded-3xl">
+          <DialogHeader>
+            <DialogTitle>Sign Out</DialogTitle>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <p className="text-center">Are you sure you want to sign out?</p>
+          </div>
+          
+          <div className="flex gap-3">
+            <Button 
+              variant="outline" 
+              className="flex-1"
+              onClick={() => setIsSignOutDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive"
+              className="flex-1"
+              onClick={handleSignOut}
+            >
+              Sign Out
             </Button>
           </div>
         </DialogContent>
