@@ -37,8 +37,7 @@ export function EventCard({
     tags,
     attendees,
     isTrending,
-    isEditorsPick,
-    source
+    isEditorsPick
   } = event;
 
   const { user, addSavedEvent, removeSavedEvent } = useUser();
@@ -153,39 +152,14 @@ export function EventCard({
       "Nightlife": "🌃",
       "Social": "👥",
       "Fitness": "💪",
+      "Comedy": "😂",
+      "Family": "👨‍👩‍👧‍👦"
     };
     
     return iconMap[category] || "🎟️";
   };
   
-  // Source Icon/Label component
-  const SourceLabel = () => {
-    let icon = "🎟️";
-    let color = "bg-gray-100 text-gray-600";
-    
-    switch(source) {
-      case "ticketmaster":
-        icon = "🎭";
-        color = "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300";
-        break;
-      case "eventbrite":
-        icon = "📅";
-        color = "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-300";
-        break;
-      case "internal":
-      default:
-        icon = "🎟️";
-        color = "bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-300";
-    }
-    
-    return (
-      <div className={`px-2 py-0.5 text-xs rounded-full flex items-center ${color}`}>
-        <span className="mr-1">{icon}</span>
-        <span className="font-medium">{source}</span>
-      </div>
-    );
-  };
-  
+  // Compact card variant
   if (variant === "compact") {
     return (
       <Link to={`/event/${id}`}>
@@ -231,7 +205,6 @@ export function EventCard({
             <div className="p-3">
               <div className="flex justify-between items-start">
                 <h3 className="font-bold text-sm line-clamp-1">{title}</h3>
-                <SourceLabel />
               </div>
               <p className="text-xs text-muted-foreground mt-1 flex items-center">
                 <Calendar size={12} className="mr-1 text-primary" /> {formattedDate}
@@ -247,6 +220,7 @@ export function EventCard({
     );
   }
   
+  // Default card variant
   return (
     <Link to={`/event/${id}`} className="block mb-6">
       <motion.div
@@ -276,9 +250,6 @@ export function EventCard({
                     <span className="mr-1">✨</span> Editor's Pick
                   </Tag>
                 )}
-                <div className="mt-1">
-                  <SourceLabel />
-                </div>
               </div>
             </div>
             

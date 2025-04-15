@@ -20,6 +20,7 @@ export function useTicketmasterEvents(options?: {
   startDate?: string;
   endDate?: string;
   enabled?: boolean;
+  size?: number;
 }) {
   const {
     keyword,
@@ -28,7 +29,8 @@ export function useTicketmasterEvents(options?: {
     stateCode,
     startDate,
     endDate,
-    enabled = true
+    enabled = true,
+    size = 50
   } = options || {};
 
   const queryFn = async () => {
@@ -46,7 +48,7 @@ export function useTicketmasterEvents(options?: {
   };
 
   const query = useQuery({
-    queryKey: ['ticketmasterEvents', { keyword, category, city, stateCode, startDate, endDate }],
+    queryKey: ['ticketmasterEvents', { keyword, category, city, stateCode, startDate, endDate, size }],
     queryFn,
     enabled,
     staleTime: 1000 * 60 * 15, // 15 minutes
@@ -143,5 +145,6 @@ export function useFilteredEvents(filters: {
     keyword,
     startDate,
     endDate,
+    size: 50
   });
 }
