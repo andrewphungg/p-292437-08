@@ -43,7 +43,7 @@ export function EventCard({
 
   const { user, addSavedEvent, removeSavedEvent } = useUser();
   
-  // Fix: Convert id to string to match the expected type
+  // Fix: Convert id to string
   const eventId = String(id);
   const [saved, setSaved] = useState(isSaved || (user.savedEvents?.includes(eventId) || false));
   const [showConfetti, setShowConfetti] = useState(false);
@@ -120,7 +120,8 @@ export function EventCard({
       }
     );
     
-    setUndoToastId(toastId);
+    // Fix: Convert toast ID to string before setting it
+    setUndoToastId(String(toastId));
   };
   
   const handleRemove = (e: React.MouseEvent) => {

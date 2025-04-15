@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -18,42 +19,60 @@ import {
   Check,
   RefreshCcw
 } from "lucide-react";
-import { useEvents } from "@/hooks/useEvents";
+import { useUser } from "@/context/UserContext";
 import { Event } from "@/types/event";
 import { toast } from "sonner";
 import { HeartConfetti } from "@/components/animations/HeartConfetti";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTicketmasterEvents } from "@/hooks/useTicketmasterEvents";
 
 export default function EventDetail() {
   const { id } = useParams<{ id: string }>();
-  const { data: events = [] } = useEvents();
+  const { getEventById, savedEvents, addSavedEvent, removeSavedEvent } = useUser();
   const [isAttending, setIsAttending] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [event, setEvent] = useState<Event | undefined>(undefined);
+  const [similarEvents, setSimilarEvents] = useState<Event[]>([]);
   
-  // Find the event by id
-  const event = events.find(e => e.id === id) as Event | undefined;
-
-  // Find similar events (based on same category or shared tags)
-  const similarEvents = events
-    .filter(e => 
-      e.id !== id && 
-      (e.category === event?.category || 
-       e.tags.some(tag => event?.tags.includes(tag)))
-    )
-    .slice(0, 3);
+  // Get events from Ticketmaster
+  const { data: allEvents = [], isLoading } = useTicketmasterEvents();
   
-  // Also attended events (people who attended this event also attended these)
-  const alsoAttendedEvents = events
-    .filter(e => e.id !== id && e.attendees > 40)
-    .slice(0, 2);
+  // Find the event and similar events
+  useEffect(() => {
+    if (id && allEvents.length > 0) {
+      const currentEvent = allEvents.find(e => String(e.id) === id);
+      setEvent(currentEvent);
+      
+      if (currentEvent) {
+        // Find similar events (based on same category or shared tags)
+        const similar = allEvents
+          .filter(e => 
+            String(e.id) !== id && 
+            (e.category === currentEvent.category || 
+             e.tags.some(tag => currentEvent.tags.includes(tag)))
+          )
+          .slice(0, 3);
+        
+        setSimilarEvents(similar);
+      }
+      
+      // Check if event is already saved
+      if (savedEvents && savedEvents.some(e => String(e.id) === id)) {
+        setIsSaved(true);
+      }
+    } else {
+      // Fallback to user context if not found in Ticketmaster events
+      const fallbackEvent = getEventById(id || "");
+      setEvent(fallbackEvent);
+    }
+  }, [id, allEvents, savedEvents, getEventById]);
   
   // Mock attendees data
   const attendees = [
     { id: "u1", name: "Jamie Smith", avatar: "https://i.pravatar.cc/150?img=32" },
     { id: "u2", name: "Alex Johnson", avatar: "https://i.pravatar.cc/150?img=33" },
     { id: "u3", name: "Sam Taylor", avatar: "https://i.pravatar.cc/150?img=34" },
-    // More would be here in a real app
   ];
   
   const handleAttend = () => {
@@ -82,12 +101,17 @@ export default function EventDetail() {
   };
   
   const handleSave = () => {
+    if (!event) return;
+    
     const wasSaved = isSaved;
     setIsSaved(!wasSaved);
     
     if (!wasSaved) {
+      addSavedEvent(String(event.id));
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 600);
+    } else {
+      removeSavedEvent(String(event.id));
     }
     
     toast(
@@ -97,6 +121,11 @@ export default function EventDetail() {
           className="bg-white/20 hover:bg-white/30 px-2 py-1 rounded text-sm flex items-center transition-colors"
           onClick={() => {
             setIsSaved(wasSaved);
+            if (wasSaved) {
+              addSavedEvent(String(event.id));
+            } else {
+              removeSavedEvent(String(event.id));
+            }
           }}
         >
           <span className="flex items-center">
@@ -111,6 +140,17 @@ export default function EventDetail() {
       }
     );
   };
+  
+  if (isLoading) {
+    return (
+      <AppLayout>
+        <div className="py-20 text-center">
+          <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading event details...</p>
+        </div>
+      </AppLayout>
+    );
+  }
   
   if (!event) {
     return (
@@ -160,6 +200,11 @@ export default function EventDetail() {
         : `${event.price.currency || '$'}${event.price.min}${event.price.max ? ` - ${event.price.currency || '$'}${event.price.max}` : ""}`))
     : "Price not available";
   
+  // Format location
+  const locationName = typeof event.location === 'object' ? event.location.name : String(event.location);
+  const locationAddress = typeof event.location === 'object' ? event.location.address : '';
+  const locationCity = typeof event.location === 'object' ? event.location.city : '';
+  
   return (
     <AppLayout header={header}>
       <div className="pb-10 relative">
@@ -175,6 +220,17 @@ export default function EventDetail() {
           {event.isTrending && (
             <div className="absolute top-4 left-4">
               <Tag variant="trending">Trending</Tag>
+            </div>
+          )}
+          
+          {/* Source Badge */}
+          {event.source && (
+            <div className="absolute top-4 right-4">
+              <Badge variant="outline" className="bg-white/80 dark:bg-black/50 backdrop-blur-sm">
+                {event.source === 'ticketmaster' ? '🎭 Ticketmaster' : 
+                 event.source === 'eventbrite' ? '📅 Eventbrite' : 
+                 '🎟️ ' + event.source}
+              </Badge>
             </div>
           )}
         </div>
@@ -224,15 +280,11 @@ export default function EventDetail() {
             <MapPin size={20} className="shrink-0 text-blue-600 dark:text-blue-400 mr-3 mt-0.5" />
             <div>
               <h3 className="font-semibold dark:text-white">Location</h3>
-              {typeof event.location === 'string' ? (
-                <p className="text-gray-600 dark:text-gray-300 text-sm">{event.location}</p>
-              ) : (
-                <>
-                  <p className="text-gray-600 dark:text-gray-300 text-sm">{event.location.name}</p>
-                  <p className="text-gray-600 dark:text-gray-300 text-sm">
-                    {event.location.address}, {event.location.city}
-                  </p>
-                </>
+              <p className="text-gray-600 dark:text-gray-300 text-sm">{locationName}</p>
+              {locationAddress && locationCity && (
+                <p className="text-gray-600 dark:text-gray-300 text-sm">
+                  {locationAddress}, {locationCity}
+                </p>
               )}
             </div>
           </div>
@@ -314,41 +366,6 @@ export default function EventDetail() {
           </div>
         )}
         
-        {/* People Also Attended */}
-        {alsoAttendedEvents.length > 0 && (
-          <div className="mb-8">
-            <Separator className="mb-6 dark:bg-gray-800" />
-            
-            <h2 className="text-lg font-semibold mb-4 dark:text-white">People who attended also went to</h2>
-            <div className="grid grid-cols-2 gap-4">
-              {alsoAttendedEvents.map(event => (
-                <Link 
-                  key={event.id} 
-                  to={`/event/${event.id}`}
-                  className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-3xl overflow-hidden hover:shadow-md transition-shadow"
-                >
-                  <div className="h-24 overflow-hidden">
-                    <img 
-                      src={event.image} 
-                      alt={event.title} 
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="p-3">
-                    <h3 className="font-medium text-sm line-clamp-2 dark:text-gray-100">{event.title}</h3>
-                    <div className="flex items-center justify-between mt-1">
-                      <span className="text-xs text-gray-500 dark:text-gray-400">{typeof event.date === 'string' ? event.date : new Date(event.date).toLocaleDateString()}</span>
-                      <span className="text-xs font-medium text-green-600 dark:text-green-400">
-                        {typeof event.price === 'string' ? event.price : (event.price.isFree ? "Free" : `${event.price.currency}${event.price.min}+`)}
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-        
         {/* Similar Events */}
         {similarEvents.length > 0 && (
           <div>
@@ -372,9 +389,12 @@ export default function EventDetail() {
                   <div className="p-3">
                     <h3 className="font-medium text-sm line-clamp-2 dark:text-gray-100">{event.title}</h3>
                     <div className="flex items-center justify-between mt-1">
-                      <span className="text-xs text-gray-500 dark:text-gray-400">{typeof event.date === 'string' ? event.date : new Date(event.date).toLocaleDateString()}</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        {new Date(event.date).toLocaleDateString()}
+                      </span>
                       <span className="text-xs font-medium text-green-600 dark:text-green-400">
-                        {typeof event.price === 'string' ? event.price : (event.price.isFree ? "Free" : `${event.price.currency}${event.price.min}+`)}
+                        {typeof event.price === 'string' ? event.price : 
+                          (event.price.isFree ? "Free" : `${event.price.currency}${event.price.min}+`)}
                       </span>
                     </div>
                   </div>

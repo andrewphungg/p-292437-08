@@ -1,23 +1,41 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SavedEvents } from "@/components/events/SavedEvents";
 import { useUser } from "@/context/UserContext";
-import { HistoryIcon, BadgeCheck, Calendar, MapPin, Calendar as CalendarIcon, Settings } from "lucide-react";
+import { useTicketmasterEvents } from "@/hooks/useTicketmasterEvents";
+import { BadgeCheck, Calendar, MapPin, Calendar as CalendarIcon, Settings, HistoryIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { Event } from "@/types/event";
 
 export default function Profile() {
-  const { user, savedEvents } = useUser();
+  const { user } = useUser();
   const [activeTab, setActiveTab] = useState("saved");
+  const [userSavedEvents, setUserSavedEvents] = useState<Event[]>([]);
+  
+  // Get events from Ticketmaster
+  const { data: allEvents = [], isLoading } = useTicketmasterEvents();
   
   // Default bio text if user hasn't set one
   const bioText = user.bio || "No bio set. Add a short description about yourself in the settings.";
+  
+  // Fetch saved events based on user's saved event IDs
+  useEffect(() => {
+    if (user.savedEvents && user.savedEvents.length > 0 && allEvents.length > 0) {
+      const savedEventsList = user.savedEvents
+        .map(eventId => allEvents.find(event => String(event.id) === eventId))
+        .filter((event): event is Event => !!event);
+      
+      setUserSavedEvents(savedEventsList);
+    } else {
+      setUserSavedEvents([]);
+    }
+  }, [user.savedEvents, allEvents]);
   
   const header = (
     <header className="bg-gradient-to-b from-sunset-purple/20 to-transparent py-8 text-center relative">
@@ -30,7 +48,7 @@ export default function Profile() {
         <h1 className="mt-4 text-2xl font-bold">{user.name || "Your Name"}</h1>
         <div className="flex items-center justify-center mt-1">
           <MapPin size={14} className="text-gray-500 mr-1" />
-          <span className="text-gray-500 text-sm">{user.location || "Your Location"}</span>
+          <span className="text-gray-500 text-sm">{user.location || "Add your location in settings"}</span>
         </div>
         
         <div className="mt-4 flex justify-center">
@@ -82,7 +100,13 @@ export default function Profile() {
           </TabsList>
           
           <TabsContent value="saved" className="space-y-4">
-            <SavedEvents savedEvents={savedEvents} />
+            {isLoading ? (
+              <div className="py-10 text-center">
+                <p className="text-muted-foreground">Loading saved events...</p>
+              </div>
+            ) : (
+              <SavedEvents savedEvents={userSavedEvents} />
+            )}
           </TabsContent>
           
           <TabsContent value="attending">

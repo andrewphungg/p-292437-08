@@ -9,6 +9,11 @@ const getApiKey = () => {
   return localStorage.getItem("ticketmasterApiKey") || DEFAULT_API_KEY;
 };
 
+// Set API key in localStorage
+export const setApiKey = (apiKey: string) => {
+  localStorage.setItem("ticketmasterApiKey", apiKey);
+};
+
 // This interface defines the structure of a Ticketmaster event
 interface TicketmasterEvent {
   id: string;

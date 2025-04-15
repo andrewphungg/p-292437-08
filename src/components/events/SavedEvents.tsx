@@ -16,7 +16,7 @@ interface RemovedEvent {
 }
 
 export function SavedEvents({ savedEvents: initialEvents }: SavedEventsProps) {
-  const [savedEvents, setSavedEvents] = useState<Event[]>(initialEvents);
+  const [savedEvents, setSavedEvents] = useState<Event[]>(initialEvents || []);
   const [lastRemovedEvent, setLastRemovedEvent] = useState<RemovedEvent | null>(null);
   const [undoToastId, setUndoToastId] = useState<string | null>(null);
   
@@ -58,7 +58,8 @@ export function SavedEvents({ savedEvents: initialEvents }: SavedEventsProps) {
         }
       );
       
-      setUndoToastId(toastId);
+      // Fix: Convert toast ID to string before setting it
+      setUndoToastId(String(toastId));
     }
   };
   

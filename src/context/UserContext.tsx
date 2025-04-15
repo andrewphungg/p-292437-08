@@ -5,12 +5,14 @@ import { Event } from "../types/event";
 import { currentUser as initialUser, mockEvents, getAllFriends } from "../data/mockData";
 import { toast } from "sonner";
 import { useAuth } from "./AuthContext";
+import { useTicketmasterEvents } from "@/hooks/useTicketmasterEvents";
 
 interface UserContextType {
   user: User;
   events: Event[];
   suggestedEvents: Event[];
   suggestedFriends: User[];
+  savedEvents: Event[]; // Add this field to make it available in the context
   attendEvent: (eventId: string) => void;
   unattendEvent: (eventId: string) => void;
   shareEvent: (eventId: string) => void;
@@ -33,6 +35,23 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [allUsers, setAllUsers] = useState<User[]>(getAllFriends());
   const [suggestedEvents, setSuggestedEvents] = useState<Event[]>([]);
   const [suggestedFriends, setSuggestedFriends] = useState<User[]>([]);
+  const [savedEvents, setSavedEvents] = useState<Event[]>([]);
+  
+  // Fetch events from Ticketmaster
+  const { data: ticketmasterEvents = [] } = useTicketmasterEvents();
+  
+  // Update events when new ticketmaster events are available
+  useEffect(() => {
+    if (ticketmasterEvents.length > 0) {
+      setEvents(prevEvents => {
+        // Filter out any event with same ID from our existing events
+        const filteredPrevEvents = prevEvents.filter(event => 
+          !ticketmasterEvents.some(tmEvent => String(tmEvent.id) === String(event.id))
+        );
+        return [...filteredPrevEvents, ...ticketmasterEvents];
+      });
+    }
+  }, [ticketmasterEvents]);
 
   useEffect(() => {
     if (authUser) {
@@ -43,6 +62,19 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       }));
     }
   }, [authUser]);
+  
+  // Update saved events whenever user.savedEvents or events change
+  useEffect(() => {
+    if (user.savedEvents && user.savedEvents.length > 0 && events.length > 0) {
+      const userSavedEvents = user.savedEvents
+        .map(eventId => events.find(event => String(event.id) === eventId))
+        .filter((event): event is Event => !!event);
+      
+      setSavedEvents(userSavedEvents);
+    } else {
+      setSavedEvents([]);
+    }
+  }, [user.savedEvents, events]);
 
   // Update suggested events and friends when user or interests change
   useEffect(() => {
@@ -164,7 +196,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const getEventById = (eventId: string) => {
-    return events.find(event => event.id === eventId);
+    return events.find(event => String(event.id) === eventId);
   };
 
   // Add profile updating function
@@ -206,6 +238,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         events, 
         suggestedEvents,
         suggestedFriends,
+        savedEvents, // Export saved events
         attendEvent,
         unattendEvent,
         shareEvent,

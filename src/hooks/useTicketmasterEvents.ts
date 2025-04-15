@@ -51,9 +51,11 @@ export function useTicketmasterEvents(options?: {
     enabled,
     staleTime: 1000 * 60 * 15, // 15 minutes
     refetchOnWindowFocus: false,
-    onError: (error) => {
-      console.error('Error fetching events:', error);
-      toast.error('Failed to fetch events. Please try again later.');
+    meta: {
+      errorHandler: (error: Error) => {
+        console.error('Error fetching events:', error);
+        toast.error('Failed to fetch events. Please try again later.');
+      }
     }
   });
 
