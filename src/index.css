@@ -162,4 +162,16 @@
       transform: scale(1);
     }
   }
+  
+  .hover-lift {
+    @apply transition-transform duration-300 hover:-translate-y-1;
+  }
+  
+  .hover-glow {
+    @apply transition-shadow duration-300 hover:shadow-lg hover:shadow-primary/20;
+  }
+  
+  .interactive-card {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/20;
+  }
 }
