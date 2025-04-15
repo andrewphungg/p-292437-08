@@ -21,6 +21,9 @@ export interface User {
   bio?: string; // User biography
   location?: string; // User location
   role?: string;
+  university?: string; // Added university field
+  graduationYear?: number; // Added graduationYear field
+  joinedAt?: Date; // Date when the user joined
   settings?: {
     theme?: 'light' | 'dark' | 'system';
     notifications?: boolean;

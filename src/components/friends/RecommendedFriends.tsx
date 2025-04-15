@@ -1,83 +1,101 @@
 
 import React from "react";
-import { useUser } from "@/context/UserContext";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { User } from "@/types/user";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { ArrowRight, UserPlus } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Card } from "@/components/ui/card";
+import { Tag } from "@/components/ui/tag";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
-export const RecommendedFriends = () => {
-  const { suggestedFriends, addFriend, isFriend } = useUser();
+interface RecommendedFriendsProps {
+  friends: User[];
+  className?: string;
+}
 
-  if (suggestedFriends.length === 0) {
-    return (
-      <div className="text-center p-8">
-        <p className="text-muted-foreground">
-          No suggested friends at the moment. Try updating your interests!
-        </p>
+export function RecommendedFriends({ friends, className }: RecommendedFriendsProps) {
+  return (
+    <Card className={cn("p-4 rounded-3xl", className)}>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="font-bold text-lg">People You May Know</h2>
+        <Link to="/friends" className="text-primary text-sm flex items-center font-medium">
+          View All <ArrowRight size={16} className="ml-1" />
+        </Link>
       </div>
-    );
-  }
+
+      <div className="space-y-4">
+        {friends.length === 0 ? (
+          <p className="text-center text-muted-foreground py-4">No recommended friends at the moment</p>
+        ) : (
+          friends.map((friend) => (
+            <FriendSuggestion friend={friend} key={friend.id} />
+          ))
+        )}
+      </div>
+    </Card>
+  );
+}
+
+function FriendSuggestion({ friend }: { friend: User }) {
+  const [isAdded, setIsAdded] = React.useState(false);
+
+  const handleAddFriend = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsAdded(!isAdded);
+  };
 
   return (
-    <div className="space-y-4">
-      <h3 className="font-semibold text-lg">People you might know</h3>
-      
-      <div className="space-y-3">
-        {suggestedFriends.map((friend) => (
-          <div 
-            key={friend.id} 
-            className="bg-white/80 p-4 rounded-lg flex items-start justify-between"
-          >
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0">
-                <Avatar className="w-12 h-12">
-                  {friend.avatar ? (
-                    <AvatarImage 
-                      src={friend.avatar} 
-                      alt={friend.name} 
-                      className="object-cover"
-                    />
-                  ) : (
-                    <AvatarFallback className="bg-gray-200 text-gray-600">
-                      {friend.name.charAt(0).toUpperCase()}
-                    </AvatarFallback>
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2 }}
+      className="flex items-center justify-between"
+    >
+      <div className="flex items-center">
+        <Avatar className="h-12 w-12">
+          <AvatarImage src={friend.avatar} alt={friend.name} />
+          <AvatarFallback>{friend.name[0]}</AvatarFallback>
+        </Avatar>
+        <div className="ml-3">
+          <h3 className="font-semibold text-sm">{friend.name}</h3>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1 mt-1">
+            <span className="text-xs text-muted-foreground">{friend.university || "University not specified"}</span>
+            {friend.interests && friend.interests.length > 0 && (
+              <>
+                <span className="hidden sm:inline text-muted-foreground">·</span>
+                <div className="flex gap-1">
+                  <Tag variant="default" className="text-[10px] px-1.5 py-0 h-auto">
+                    {friend.interests[0]}
+                  </Tag>
+                  {friend.interests.length > 1 && (
+                    <Tag variant="default" className="text-[10px] px-1.5 py-0 h-auto">
+                      {friend.interests[1]}
+                    </Tag>
                   )}
-                </Avatar>
-              </div>
-              
-              <div>
-                <h4 className="font-medium">{friend.name}</h4>
-                <p className="text-sm text-muted-foreground">{friend.university}</p>
-                
-                {friend.interests && friend.interests.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {friend.interests.slice(0, 3).map((interest) => (
-                      <Badge key={interest} variant="outline" className="text-xs">
-                        {interest}
-                      </Badge>
-                    ))}
-                    {friend.interests.length > 3 && (
-                      <Badge variant="outline" className="text-xs">
-                        +{friend.interests.length - 3} more
-                      </Badge>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            <Button
-              variant={isFriend(friend.id) ? "outline" : "default"}
-              size="sm"
-              onClick={() => addFriend(friend.id)}
-              disabled={isFriend(friend.id)}
-              className={isFriend(friend.id) ? "" : "bg-sunset-purple hover:bg-sunset-purple/90"}
-            >
-              {isFriend(friend.id) ? "Added" : "Add Friend"}
-            </Button>
+                </div>
+              </>
+            )}
           </div>
-        ))}
+        </div>
       </div>
-    </div>
+      <Button
+        size="sm"
+        variant={isAdded ? "outline" : "default"}
+        className={`rounded-full ${
+          isAdded ? "border-green-500 text-green-500" : "text-white"
+        }`}
+        onClick={handleAddFriend}
+      >
+        {isAdded ? (
+          <>Added</>
+        ) : (
+          <>
+            <UserPlus size={14} className="mr-1" /> Add
+          </>
+        )}
+      </Button>
+    </motion.div>
   );
-};
+}

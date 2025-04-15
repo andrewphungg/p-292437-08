@@ -1,18 +1,7 @@
-
 import { Event } from "@/types/event";
 
-// Default API key
-const DEFAULT_API_KEY = "CYB4SkyODasGUeUeBSlZZDXphPms6AL7";
-
-// Get API key from localStorage or use the default one
-const getApiKey = () => {
-  return localStorage.getItem("ticketmasterApiKey") || DEFAULT_API_KEY;
-};
-
-// Set API key in localStorage
-export const setApiKey = (apiKey: string) => {
-  localStorage.setItem("ticketmasterApiKey", apiKey);
-};
+// Hard-coded API key for all users
+const API_KEY = "CYB4SkyODasGUeUeBSlZZDXphPms6AL7";
 
 // This interface defines the structure of a Ticketmaster event
 interface TicketmasterEvent {
@@ -30,10 +19,18 @@ interface TicketmasterEvent {
     start: {
       localDate: string;
       localTime: string;
+      dateTime?: string;
+      dateTBD?: boolean;
+      dateTBA?: boolean;
+      timeTBA?: boolean;
+      noSpecificTime?: boolean;
     };
     end?: {
       localDate?: string;
       localTime?: string;
+    };
+    status?: {
+      code: string;
     };
   };
   _embedded?: {
@@ -42,6 +39,14 @@ interface TicketmasterEvent {
       city?: {
         name: string;
       };
+      state?: {
+        name: string;
+        stateCode: string;
+      };
+      country?: {
+        name: string;
+        countryCode: string;
+      };
       address?: {
         line1: string;
       };
@@ -49,6 +54,10 @@ interface TicketmasterEvent {
         longitude: string;
         latitude: string;
       };
+    }[];
+    attractions?: {
+      name: string;
+      type: string;
     }[];
   };
   classifications?: {
@@ -84,20 +93,18 @@ export const fetchTicketmasterEvents = async (
   } = {}
 ): Promise<Event[]> => {
   try {
-    // Get the API key from localStorage or use default
-    const apiKey = getApiKey();
-    
     // Construct the API URL with parameters
     const baseUrl = "https://app.ticketmaster.com/discovery/v2/events.json";
     
-    // Fix: Use proper URLSearchParams constructor
+    // Use URLSearchParams to create a proper query string
     const queryParams = new URLSearchParams();
-    queryParams.append("apikey", apiKey);
+    queryParams.append("apikey", API_KEY);
     queryParams.append("size", params.size?.toString() || "50"); // Get more events
+    queryParams.append("countryCode", params.countryCode || "US"); // Default to US events
     
     // Add other params
     Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && key !== 'size') {
+      if (value !== undefined && !['size', 'countryCode'].includes(key)) {
         queryParams.append(key, String(value));
       }
     });
@@ -107,33 +114,34 @@ export const fetchTicketmasterEvents = async (
       queryParams.append("radius", "50");
     }
 
-    // Simulate fetching from the API since we're hitting CORS issues
-    console.log(`Would fetch from: ${baseUrl}?${queryParams.toString()}`);
+    const apiUrl = `${baseUrl}?${queryParams.toString()}`;
+    console.log(`Fetching Ticketmaster events from: ${apiUrl}`);
     
-    // Generate more sample events data instead of real API call for now
-    const sampleEvents = generateSampleEvents(50);
-    return sampleEvents;
-    
-    /* Uncomment this for real API implementation
-    const response = await fetch(`${baseUrl}?${queryParams.toString()}`);
-    if (!response.ok) {
-      throw new Error(`Error fetching events: ${response.statusText}`);
-    }
+    try {
+      // Try to fetch from the real API
+      const response = await fetch(apiUrl, { mode: 'cors' });
+      
+      if (!response.ok) {
+        throw new Error(`Error fetching events: ${response.statusText}`);
+      }
 
-    const data = await response.json();
-    console.log("Ticketmaster API response:", data);
-    
-    // Check if events exist
-    if (!data._embedded || !data._embedded.events) {
-      console.log("No events found");
-      return [];
-    }
+      const data = await response.json();
+      
+      // Check if events exist
+      if (!data._embedded || !data._embedded.events) {
+        console.log("No events found from Ticketmaster API");
+        return generateSampleEvents(50); // Return sample events when no events found
+      }
 
-    // Map Ticketmaster events to our Event type
-    return data._embedded.events.map((event: TicketmasterEvent) => mapTicketmasterEvent(event));
-    */
+      // Map Ticketmaster events to our Event type
+      return data._embedded.events.map((event: TicketmasterEvent) => mapTicketmasterEvent(event));
+    } catch (error) {
+      console.error("Error fetching from real Ticketmaster API:", error);
+      // Fallback to sample events
+      return generateSampleEvents(50);
+    }
   } catch (error) {
-    console.error("Error fetching Ticketmaster events:", error);
+    console.error("Error in Ticketmaster service:", error);
     return generateSampleEvents(50); // Return sample events on error
   }
 };
@@ -160,18 +168,24 @@ const mapTicketmasterEvent = (event: TicketmasterEvent): Event => {
     event.classifications?.[0]?.subGenre?.name,
   ].filter(Boolean) as string[];
 
+  // Format date parts
+  const eventDate = new Date(event.dates.start.localDate);
+  const day = eventDate.toLocaleDateString('en-US', { weekday: 'long' });
+  
   return {
     id: event.id,
     title: event.name,
     description: event.description || `${event.name} - Live event from Ticketmaster`,
     image: bestImage?.url || "https://via.placeholder.com/400x225?text=No+Image+Available",
     date: event.dates.start.localDate,
+    day,
     startTime: event.dates.start.localTime,
     endTime: event.dates.end?.localTime,
+    time: event.dates.start.localTime, // For backward compatibility
     location: {
       name: venue?.name || "Venue TBA",
       address: venue?.address?.line1 || "",
-      city: venue?.city?.name || "San Francisco",
+      city: venue?.city?.name || (venue?.state?.name ? venue.state.name : "Unknown Location"),
       coordinates: venue?.location ? {
         lat: parseFloat(venue.location.latitude),
         lng: parseFloat(venue.location.longitude),
@@ -319,59 +333,98 @@ const generateSampleEvents = (count: number): Event[] => {
   return events;
 };
 
+// Generate a single sample event
+const generateSampleEvent = (index: number): Event => {
+  const categories = ["Music", "Sports", "Arts", "Family", "Comedy", "Tech", "Food"];
+  const cities = ["San Francisco", "Los Angeles", "New York", "Chicago", "Miami", "Austin", "Seattle", "Boston"];
+  const venues = [
+    "Madison Square Garden", "Barclays Center", "Chase Center", "Staples Center", 
+    "Red Rocks Amphitheatre", "The Fillmore", "Radio City Music Hall", "Hollywood Bowl"
+  ];
+  const eventImages = [
+    "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1496337589254-7e19d01cec44?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?auto=format&fit=crop&w=800&q=80"
+  ];
+  
+  const category = categories[Math.floor(Math.random() * categories.length)];
+  const city = cities[Math.floor(Math.random() * cities.length)];
+  const venue = venues[Math.floor(Math.random() * venues.length)];
+  const image = eventImages[Math.floor(Math.random() * eventImages.length)];
+  
+  // Random date between now and 3 months from now
+  const startDate = new Date();
+  const endDate = new Date();
+  endDate.setMonth(endDate.getMonth() + 3);
+  const eventDate = new Date(
+    startDate.getTime() + Math.random() * (endDate.getTime() - startDate.getTime())
+  );
+  
+  // Format date as YYYY-MM-DD
+  const dateString = eventDate.toISOString().split('T')[0];
+  const day = eventDate.toLocaleDateString('en-US', { weekday: 'long' });
+  
+  // Random time between 9AM and 10PM
+  const hour = Math.floor(Math.random() * 13) + 9;
+  const minute = Math.floor(Math.random() * 60);
+  const startTime = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:00`;
+  const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')} ${hour >= 12 ? 'PM' : 'AM'}`;
+  
+  return {
+    id: `sample-${index}`,
+    title: getRandomTitle(category),
+    description: getRandomDescription(category),
+    image,
+    date: dateString,
+    day,
+    time,
+    startTime,
+    location: {
+      name: venue,
+      address: `${Math.floor(Math.random() * 999) + 1} ${getRandomStreet()}`,
+      city,
+    },
+    price: {
+      min: Math.floor(Math.random() * 185) + 15,
+      max: Math.floor(Math.random() * 100) + 200,
+      currency: "$",
+      isFree: Math.random() < 0.1,
+    },
+    category,
+    tags: getRandomTags(category),
+    mood: ["Energetic", "Social"],
+    attendees: Math.floor(Math.random() * 200) + 10,
+    source: "ticketmaster",
+    url: "https://www.ticketmaster.com/",
+    isTrending: Math.random() > 0.8,
+    isEditorsPick: Math.random() > 0.9,
+    pointsForAttending: Math.floor(Math.random() * 50) + 30,
+    pointsForSharing: Math.floor(Math.random() * 20) + 10,
+  };
+};
+
 const getRandomTitle = (category: string): string => {
   const musicTitles = [
     "Summer Vibes Tour", "Acoustic Sunset Sessions", "Electric Dreams Festival",
-    "Rhythm & Blues Night", "Jazz in the Park", "Symphony Under the Stars",
-    "Rock Revolution", "Hip Hop Showcase", "EDM Explosion", "Classical Masterpieces",
-    "Indie Spotlight", "Country Roads Tour", "Pop Sensations Live", "DJ Collective",
-    "Music Fusion Experience", "Unplugged Concert Series"
+    "Rhythm & Blues Night", "Jazz in the Park", "Symphony Under the Stars"
   ];
   
   const sportsTitles = [
     "Championship Finals", "All-Star Weekend", "Playoff Showdown",
-    "Season Opener", "Rivalry Match", "Alumni Game",
-    "Charity Tournament", "Sports Expo", "Marathon Challenge", "Finals Faceoff"
+    "Season Opener", "Rivalry Match", "Alumni Game"
   ];
   
   const artsTitles = [
     "Modern Art Exhibition", "Theatre Production: New Horizons", "Dance Showcase",
-    "Cultural Heritage Festival", "Photography Exposition", "Film Festival Premiere",
-    "Literary Evening", "Sculpture Garden Opening", "Immersive Art Experience", "Opera Night"
-  ];
-  
-  const familyTitles = [
-    "Family Fun Day", "Children's Theater Show", "Interactive Science Expo",
-    "Disney on Ice", "Animal Adventure", "Magic Show for Kids",
-    "Educational Workshop Series", "Family Game Night", "Puppet Show Festival", "STEM Challenge"
-  ];
-  
-  const comedyTitles = [
-    "Stand-up Comedy Night", "Improv Showcase", "Comedy All-Stars",
-    "Laugh Factory Tour", "Comedians Unite", "Satire Festival",
-    "Comedy Club Special", "Humor & Drinks", "Late Night Comedy Show", "Open Mic Hilarity"
-  ];
-  
-  const techTitles = [
-    "Tech Innovation Summit", "Developers Conference", "AI & Machine Learning Expo",
-    "Startup Pitch Night", "Blockchain Seminar", "Digital Transformation Forum",
-    "UX/UI Design Workshop", "Coding Bootcamp", "Tech Career Fair", "Future of Web Development"
-  ];
-  
-  const foodTitles = [
-    "Taste of the City", "Wine & Food Festival", "Culinary Masterclass",
-    "Craft Beer Expo", "Farm-to-Table Dinner", "Dessert Festival",
-    "International Food Fair", "Chefs Collaboration Dinner", "Vegan Food Festival", "BBQ Championship"
+    "Cultural Heritage Festival", "Photography Exposition", "Film Festival Premiere"
   ];
   
   switch(category) {
     case "Music": return musicTitles[Math.floor(Math.random() * musicTitles.length)];
     case "Sports": return sportsTitles[Math.floor(Math.random() * sportsTitles.length)];
     case "Arts": return artsTitles[Math.floor(Math.random() * artsTitles.length)];
-    case "Family": return familyTitles[Math.floor(Math.random() * familyTitles.length)];
-    case "Comedy": return comedyTitles[Math.floor(Math.random() * comedyTitles.length)];
-    case "Tech": return techTitles[Math.floor(Math.random() * techTitles.length)];
-    case "Food": return foodTitles[Math.floor(Math.random() * foodTitles.length)];
     default: return "Exciting Event";
   }
 };
@@ -380,10 +433,7 @@ const getRandomDescription = (category: string): string => {
   const descriptions = [
     `Join us for this amazing ${category.toLowerCase()} event that you won't want to miss!`,
     `Experience the best in ${category.toLowerCase()} with top talent and unforgettable moments.`,
-    `A premier ${category.toLowerCase()} event featuring world-class performances and entertainment.`,
-    `Don't miss this incredible opportunity to enjoy ${category.toLowerCase()} at its finest.`,
-    `Bringing together the best in ${category.toLowerCase()} for an unforgettable experience.`,
-    `A must-attend ${category.toLowerCase()} event that will leave you wanting more.`
+    `A premier ${category.toLowerCase()} event featuring world-class performances and entertainment.`
   ];
   
   return descriptions[Math.floor(Math.random() * descriptions.length)];
@@ -395,6 +445,32 @@ const getRandomStreet = (): string => {
     "Washington Ave", "Mission St", "Valencia St", "Hayes St", "Castro St"
   ];
   return streets[Math.floor(Math.random() * streets.length)];
+};
+
+const getRandomTags = (category: string): string[] => {
+  const tagsByCategory: Record<string, string[]> = {
+    "Music": ["Rock", "Pop", "Jazz", "EDM", "Hip Hop", "Classical", "Country"],
+    "Sports": ["Basketball", "Football", "Soccer", "Baseball", "Tennis", "Golf"],
+    "Arts": ["Theater", "Dance", "Exhibition", "Gallery", "Opera", "Performance"],
+    "Family": ["Kids", "Educational", "Theme Park", "Zoo", "Aquarium", "Museum"],
+    "Comedy": ["Stand-up", "Improv", "Sketch", "Show"],
+    "Tech": ["Conference", "Hackathon", "Workshop", "Meetup", "Seminar"],
+    "Food": ["Festival", "Tasting", "Cooking Class", "Food Tour", "Wine Tasting"]
+  };
+  
+  const availableTags = tagsByCategory[category] || ["Entertainment"];
+  const tagCount = Math.floor(Math.random() * 3) + 1;
+  const selectedTags = [];
+  
+  for (let i = 0; i < tagCount; i++) {
+    if (availableTags.length > 0) {
+      const tagIndex = Math.floor(Math.random() * availableTags.length);
+      selectedTags.push(availableTags[tagIndex]);
+      availableTags.splice(tagIndex, 1);
+    }
+  }
+  
+  return selectedTags;
 };
 
 // Function to search for events by keyword

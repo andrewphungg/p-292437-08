@@ -28,7 +28,7 @@ import { useTicketmasterEvents } from "@/hooks/useTicketmasterEvents";
 
 export default function EventDetail() {
   const { id } = useParams<{ id: string }>();
-  const { getEventById, savedEvents, addSavedEvent, removeSavedEvent } = useUser();
+  const { savedEvents, addSavedEvent, removeSavedEvent } = useUser();
   const [isAttending, setIsAttending] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -58,15 +58,11 @@ export default function EventDetail() {
       }
       
       // Check if event is already saved
-      if (savedEvents && savedEvents.some(e => String(e.id) === id)) {
+      if (savedEvents && savedEvents.includes(id)) {
         setIsSaved(true);
       }
-    } else {
-      // Fallback to user context if not found in Ticketmaster events
-      const fallbackEvent = getEventById(id || "");
-      setEvent(fallbackEvent);
     }
-  }, [id, allEvents, savedEvents, getEventById]);
+  }, [id, allEvents, savedEvents]);
   
   // Mock attendees data
   const attendees = [
@@ -101,17 +97,17 @@ export default function EventDetail() {
   };
   
   const handleSave = () => {
-    if (!event) return;
+    if (!event || !id) return;
     
     const wasSaved = isSaved;
     setIsSaved(!wasSaved);
     
     if (!wasSaved) {
-      addSavedEvent(String(event.id));
+      addSavedEvent(id);
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 600);
     } else {
-      removeSavedEvent(String(event.id));
+      removeSavedEvent(id);
     }
     
     toast(
@@ -122,9 +118,9 @@ export default function EventDetail() {
           onClick={() => {
             setIsSaved(wasSaved);
             if (wasSaved) {
-              addSavedEvent(String(event.id));
+              addSavedEvent(id);
             } else {
-              removeSavedEvent(String(event.id));
+              removeSavedEvent(id);
             }
           }}
         >
@@ -189,7 +185,7 @@ export default function EventDetail() {
   // Format time - safely handle different structures
   const formattedTime = event.startTime 
     ? `${event.startTime}${event.endTime ? ` - ${event.endTime}` : ""}` 
-    : "Time not specified";
+    : (event.time || "Time not specified");
   
   // Format price - safely handle different structures
   const formattedPrice = event.price 
@@ -220,17 +216,6 @@ export default function EventDetail() {
           {event.isTrending && (
             <div className="absolute top-4 left-4">
               <Tag variant="trending">Trending</Tag>
-            </div>
-          )}
-          
-          {/* Source Badge */}
-          {event.source && (
-            <div className="absolute top-4 right-4">
-              <Badge variant="outline" className="bg-white/80 dark:bg-black/50 backdrop-blur-sm">
-                {event.source === 'ticketmaster' ? '🎭 Ticketmaster' : 
-                 event.source === 'eventbrite' ? '📅 Eventbrite' : 
-                 '🎟️ ' + event.source}
-              </Badge>
             </div>
           )}
         </div>
@@ -360,7 +345,7 @@ export default function EventDetail() {
           <div className="mb-8">
             <Button variant="outline" asChild className="w-full rounded-full">
               <a href={event.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center">
-                Visit Official Page <ExternalLink size={16} className="ml-1.5" />
+                Get Tickets <ExternalLink size={16} className="ml-1.5" />
               </a>
             </Button>
           </div>

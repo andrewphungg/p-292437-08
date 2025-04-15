@@ -5,8 +5,10 @@ export interface Event {
   description: string;
   image: string;
   date: string;
+  day?: string; // Added day field
   startTime: string;
   endTime?: string;
+  time?: string; // Added time field for backward compatibility
   location: {
     name: string;
     address: string;

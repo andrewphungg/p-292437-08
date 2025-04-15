@@ -1,102 +1,221 @@
+
 import React, { useState } from "react";
-import { BottomNav } from "@/components/navigation/BottomNav";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Medal, Search, Trophy } from "lucide-react";
+import { motion } from "framer-motion";
 import { getFriendLeaderboard } from "@/data/mockData";
 import { User } from "@/types/user";
+import { cn } from "@/lib/utils";
 
-const Leaderboard = () => {
-  const [leaderboard] = useState<User[]>(getFriendLeaderboard());
-
+export default function Leaderboard() {
+  const allFriends = getFriendLeaderboard();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filter, setFilter] = useState<"all" | "monthly" | "weekly">("all");
+  
+  // Filter friends by search query
+  const filteredFriends = allFriends.filter(
+    friend => friend.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  
+  // Get top 3 friends
+  const topFriends = filteredFriends.slice(0, 3);
+  const remainingFriends = filteredFriends.slice(3);
+  
+  const filterOptions = [
+    { value: "all", label: "All Time" },
+    { value: "monthly", label: "Monthly" },
+    { value: "weekly", label: "Weekly" },
+  ];
+  
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+  
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-white via-sunset-purple/10 to-sunset-pink/20">
-      <div className="flex flex-col items-center w-full pb-24">
-        <header className="text-[#303030] text-[40px] sm:text-[55px] font-semibold text-center w-full bg-white/80 backdrop-blur-md py-5 shadow-sm">
-          <span className="bg-gradient-to-r from-sunset-pink via-sunset-orange to-sunset-yellow bg-clip-text text-transparent">
-            Joople
-          </span>
-        </header>
-
-        <div className="bg-gradient-to-r from-sunset-pink/20 to-sunset-purple/20 w-full py-4 text-center backdrop-blur-sm shadow-sm">
-          <h1 className="text-2xl font-bold text-sunset-purple">
-            Leaderboard
-          </h1>
-        </div>
-
-        <div className="w-full max-w-md mx-auto mt-6 px-4">
-          <div className="bg-white/90 backdrop-blur-md rounded-xl border border-sunset-purple/20 overflow-hidden shadow-lg">
-            {/* Top 3 Winners */}
-            <div className="flex justify-around py-8 px-4 bg-gradient-to-r from-sunset-yellow/60 to-sunset-peach/60">
-              {leaderboard.slice(0, 3).map((user, index) => (
-                <div key={user.id} className="flex flex-col items-center">
-                  <div className={`relative ${index === 0 ? 'order-2' : index === 1 ? 'order-1' : 'order-3'}`}>
-                    <div className="w-16 h-16 rounded-full overflow-hidden border-4 border-white shadow-md">
-                      <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
-                    </div>
-                    <div 
-                      className={`absolute -top-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center text-white font-bold shadow-md
-                        ${index === 0 ? 'bg-[#FFD700]' : index === 1 ? 'bg-[#C0C0C0]' : 'bg-[#CD7F32]'}`}
+    <AppLayout>
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <h1 className="text-2xl font-bold mb-6">Points Leaderboard</h1>
+        
+        <div className="mb-6">
+          <Tabs defaultValue="all" className="w-full" onValueChange={(value) => setFilter(value as any)}>
+            <div className="flex justify-between items-center">
+              <TabsList className="grid grid-cols-3 w-72">
+                {filterOptions.map((option) => (
+                  <TabsTrigger key={option.value} value={option.value} className="text-sm">
+                    {option.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+              
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="search"
+                  placeholder="Search friends..."
+                  className="pl-8 w-48"
+                  value={searchQuery}
+                  onChange={handleSearch}
+                />
+              </div>
+            </div>
+            
+            {filterOptions.map((option) => (
+              <TabsContent key={option.value} value={option.value} className="mt-6">
+                {/* Top 3 Podium */}
+                {topFriends.length > 0 && (
+                  <div className="relative h-56 mb-10">
+                    {/* Second Place */}
+                    {topFriends.length > 1 && (
+                      <motion.div 
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.1, duration: 0.3 }}
+                        className="absolute left-0 bottom-0 w-1/3 flex flex-col items-center"
+                      >
+                        <FriendAvatar friend={topFriends[1]} position={2} />
+                        <div className="bg-violet-100 dark:bg-violet-900/30 h-32 w-full rounded-t-xl flex flex-col items-center justify-end pb-4 px-2">
+                          <p className="font-semibold text-sm truncate max-w-full">{topFriends[1].name}</p>
+                          <p className="text-xs text-muted-foreground mb-1 truncate max-w-full">
+                            {topFriends[1].university || "University not specified"}
+                          </p>
+                          <p className="font-bold text-violet-600 dark:text-violet-400">{topFriends[1].points} pts</p>
+                        </div>
+                      </motion.div>
+                    )}
+                    
+                    {/* First Place */}
+                    <motion.div 
+                      initial={{ y: 20, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      transition={{ duration: 0.3 }}
+                      className="absolute left-1/3 bottom-0 w-1/3 flex flex-col items-center"
                     >
-                      {index + 1}
+                      <FriendAvatar friend={topFriends[0]} position={1} />
+                      <div className="bg-amber-100 dark:bg-amber-900/30 h-44 w-full rounded-t-xl flex flex-col items-center justify-end pb-4 px-2">
+                        <p className="font-semibold text-sm truncate max-w-full">{topFriends[0].name}</p>
+                        <p className="text-xs text-muted-foreground mb-1 truncate max-w-full">
+                          {topFriends[0].university || "University not specified"}
+                        </p>
+                        <p className="font-bold text-amber-600 dark:text-amber-400">{topFriends[0].points} pts</p>
+                      </div>
+                    </motion.div>
+                    
+                    {/* Third Place */}
+                    {topFriends.length > 2 && (
+                      <motion.div 
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.2, duration: 0.3 }}
+                        className="absolute right-0 bottom-0 w-1/3 flex flex-col items-center"
+                      >
+                        <FriendAvatar friend={topFriends[2]} position={3} />
+                        <div className="bg-orange-100 dark:bg-orange-900/30 h-24 w-full rounded-t-xl flex flex-col items-center justify-end pb-4 px-2">
+                          <p className="font-semibold text-sm truncate max-w-full">{topFriends[2].name}</p>
+                          <p className="text-xs text-muted-foreground mb-1 truncate max-w-full">
+                            {topFriends[2].university || "University not specified"}
+                          </p>
+                          <p className="font-bold text-orange-600 dark:text-orange-400">{topFriends[2].points} pts</p>
+                        </div>
+                      </motion.div>
+                    )}
+                  </div>
+                )}
+                
+                {/* Remaining Friends List */}
+                <div className="space-y-3">
+                  {remainingFriends.map((friend, index) => (
+                    <FriendRankCard 
+                      key={friend.id}
+                      friend={friend}
+                      rank={index + 4}
+                      animationDelay={(index + 1) * 0.05}
+                    />
+                  ))}
+                  
+                  {filteredFriends.length === 0 && (
+                    <div className="text-center py-10">
+                      <p className="text-muted-foreground">No friends found matching your search</p>
                     </div>
-                  </div>
-                  <p className="mt-2 font-bold text-sm">{user.name}</p>
-                  <p className="text-xs font-semibold">{user.points} pts</p>
+                  )}
                 </div>
-              ))}
-            </div>
-
-            {/* Rest of the list */}
-            <div className="divide-y divide-gray-100">
-              {leaderboard.slice(3).map((user, index) => (
-                <div key={user.id} className="flex items-center py-3 px-4 hover:bg-gray-50 transition-colors">
-                  <div className="flex-shrink-0 w-10 h-10 mr-3 relative">
-                    <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm">
-                      <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
-                    </div>
-                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-sunset-purple/20 rounded-full flex items-center justify-center text-xs font-medium text-sunset-purple">
-                      {index + 4}
-                    </div>
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium">{user.name}</p>
-                    <p className="text-xs text-gray-500">{user.university}</p>
-                  </div>
-                  <div className="flex-shrink-0 bg-sunset-orange/20 px-3 py-1 rounded-lg">
-                    <p className="text-sunset-orange font-bold text-sm">{user.points} pts</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-white/80 backdrop-blur-md rounded-xl mt-6 p-5 border border-white/50 shadow-lg">
-            <h2 className="text-lg font-bold mb-3 text-sunset-purple">How to Earn Points</h2>
-            <ul className="space-y-3">
-              <li className="flex items-center bg-sunset-pink/10 p-3 rounded-lg">
-                <div className="w-8 h-8 bg-sunset-pink/20 rounded-full flex items-center justify-center mr-3">
-                  <span className="text-sunset-pink font-bold">1</span>
-                </div>
-                <span className="text-gray-800">Attend an event: 75-150 points</span>
-              </li>
-              <li className="flex items-center bg-sunset-orange/10 p-3 rounded-lg">
-                <div className="w-8 h-8 bg-sunset-orange/20 rounded-full flex items-center justify-center mr-3">
-                  <span className="text-sunset-orange font-bold">2</span>
-                </div>
-                <span className="text-gray-800">Share an event: 30-60 points</span>
-              </li>
-              <li className="flex items-center bg-sunset-purple/10 p-3 rounded-lg">
-                <div className="w-8 h-8 bg-sunset-purple/20 rounded-full flex items-center justify-center mr-3">
-                  <span className="text-sunset-purple font-bold">3</span>
-                </div>
-                <span className="text-gray-800">Invite friends: 100 points</span>
-              </li>
-            </ul>
-          </div>
+              </TabsContent>
+            ))}
+          </Tabs>
         </div>
       </div>
+    </AppLayout>
+  );
+}
 
-      <BottomNav />
+interface FriendAvatarProps {
+  friend: User;
+  position: number;
+}
+
+function FriendAvatar({ friend, position }: FriendAvatarProps) {
+  const medalColors = {
+    1: "from-amber-300 to-yellow-500",
+    2: "from-slate-300 to-slate-400",
+    3: "from-amber-700 to-amber-800"
+  };
+  
+  return (
+    <div className="mb-3 relative">
+      <Avatar className="w-16 h-16 border-4 border-white dark:border-gray-900">
+        <AvatarImage src={friend.avatar} />
+        <AvatarFallback>{friend.name[0]}</AvatarFallback>
+      </Avatar>
+      
+      {/* Medal icon */}
+      <div className={cn(
+        "absolute -bottom-2 left-1/2 -translate-x-1/2 rounded-full p-1.5 bg-gradient-to-r",
+        position === 1 ? "from-amber-300 to-yellow-500" : 
+        position === 2 ? "from-slate-300 to-slate-400" :
+        "from-amber-700 to-amber-800"
+      )}>
+        {position === 1 ? (
+          <Trophy size={14} className="text-white" />
+        ) : (
+          <Medal size={14} className="text-white" />
+        )}
+      </div>
     </div>
   );
-};
+}
 
-export default Leaderboard;
+interface FriendRankCardProps {
+  friend: User;
+  rank: number;
+  animationDelay?: number;
+}
+
+function FriendRankCard({ friend, rank, animationDelay = 0 }: FriendRankCardProps) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: animationDelay, duration: 0.2 }}
+    >
+      <Card className="overflow-hidden">
+        <CardContent className="p-4 flex items-center">
+          <div className="font-bold text-lg w-8">{rank}</div>
+          <Avatar className="h-10 w-10 mr-3">
+            <AvatarImage src={friend.avatar} />
+            <AvatarFallback>{friend.name[0]}</AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold truncate">{friend.name}</p>
+            <p className="text-xs text-muted-foreground truncate">
+              {friend.university || "University not specified"}
+            </p>
+          </div>
+          <div className="font-bold text-primary">{friend.points} pts</div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}
