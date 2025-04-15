@@ -1,127 +1,164 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
-import {
-  LocationIcon,
-  PriceIcon,
-  TrendingIcon,
-  ShareIcon,
-  HeartIcon,
-} from "@/components/icons";
-import { useUser } from "@/context/UserContext";
+import { Calendar, MapPin, Users, ArrowUpRight, Heart } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Tag } from "@/components/ui/tag";
 import { Event } from "@/types/event";
-import { ShareModal } from "./ShareModal";
+import { cn } from "@/lib/utils";
 
 interface EventCardProps {
   event: Event;
+  variant?: "default" | "compact";
+  className?: string;
 }
 
-export const EventCard: React.FC<EventCardProps> = ({ event }) => {
-  const { attendEvent, shareEvent, isAttending, hasShared, user } = useUser();
-  const { id, image, title, day, location, price, tags, isTrending, pointsForAttending, pointsForSharing } = event;
+export function EventCard({ event, variant = "default", className }: EventCardProps) {
+  const {
+    id,
+    title,
+    image,
+    date,
+    location,
+    price,
+    category,
+    tags,
+    attendees,
+    isTrending,
+    isEditorsPick,
+    pointsForAttending
+  } = event;
   
-  const attending = isAttending(id);
-  const shared = hasShared(id);
-  const [showShareModal, setShowShareModal] = useState(false);
+  const formattedDate = new Date(date).toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
+  
+  const formattedPrice = price.isFree
+    ? "Free"
+    : `${price.currency}${price.min}${price.max ? ` - ${price.currency}${price.max}` : ""}`;
 
-  const handleShare = (e: React.MouseEvent) => {
+  const [saved, setSaved] = React.useState(false);
+  
+  const handleSave = (e: React.MouseEvent) => {
     e.preventDefault();
-    setShowShareModal(true);
+    e.stopPropagation();
+    setSaved(!saved);
   };
-
-  const handleAttend = (e: React.MouseEvent) => {
-    e.preventDefault();
-    attendEvent(id);
-  };
-
-  const handleShareComplete = () => {
-    shareEvent(id);
-    setShowShareModal(false);
-  };
-
+  
+  if (variant === "compact") {
+    return (
+      <Link to={`/event/${id}`}>
+        <Card className={cn("overflow-hidden hover:shadow-md transition-shadow duration-300", className)}>
+          <div className="relative">
+            <img 
+              src={image} 
+              alt={title} 
+              className="w-full h-32 object-cover"
+            />
+            {isTrending && (
+              <Tag variant="trending" className="absolute top-2 left-2">
+                Trending
+              </Tag>
+            )}
+            {isEditorsPick && (
+              <Tag variant="editors" className="absolute top-2 right-2">
+                Editor's Pick
+              </Tag>
+            )}
+          </div>
+          <div className="p-3">
+            <h3 className="font-medium text-sm line-clamp-1">{title}</h3>
+            <p className="text-xs text-gray-500 mt-1 flex items-center">
+              <Calendar size={12} className="mr-1" /> {formattedDate}
+            </p>
+            <p className="text-xs text-gray-500 mt-1 flex items-center">
+              <MapPin size={12} className="mr-1" /> {location.name}
+            </p>
+          </div>
+        </Card>
+      </Link>
+    );
+  }
+  
   return (
-    <>
-      <Link to={`/event/${id}`} className="block">
-        <article className="bg-white/90 backdrop-blur-md p-[15px] rounded-xl border border-sunset-purple/20 shadow-md hover:shadow-lg transition-shadow">
-          <div className="flex gap-[15px]">
-            <div className="w-[111px] h-[126px] rounded-lg overflow-hidden shadow-sm">
-              <img
-                src={image}
-                alt={title}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="flex-1">
-              <div className="flex justify-between items-start">
-                <h3 className="text-base font-bold text-[#2A3F65]">{title}</h3>
-                <span className="text-sm text-gray-600">{day}</span>
+    <Link to={`/event/${id}`}>
+      <Card className={cn("overflow-hidden hover:shadow-md transition-shadow duration-300", className)}>
+        <div className="flex flex-col md:flex-row">
+          <div className="relative md:w-1/3">
+            <img 
+              src={image} 
+              alt={title} 
+              className="w-full h-48 md:h-full object-cover"
+            />
+            {isTrending && (
+              <Tag variant="trending" className="absolute top-2 left-2">
+                Trending
+              </Tag>
+            )}
+            {isEditorsPick && (
+              <Tag variant="editors" className="absolute top-2 right-2">
+                Editor's Pick
+              </Tag>
+            )}
+          </div>
+          
+          <div className="p-4 flex flex-col flex-1 justify-between">
+            <div>
+              <div className="flex items-start justify-between">
+                <h3 className="font-semibold text-lg line-clamp-2">{title}</h3>
+                <button 
+                  onClick={handleSave}
+                  className={cn(
+                    "p-1.5 rounded-full transition-colors",
+                    saved ? "text-red-500 bg-red-50" : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"
+                  )}
+                >
+                  <Heart size={18} fill={saved ? "currentColor" : "none"} />
+                </button>
               </div>
-
-              <div className="flex items-center gap-2 mt-2.5">
-                <LocationIcon />
-                <span className="text-[10px] text-gray-600">{location}</span>
+              
+              <div className="space-y-1.5 mt-2">
+                <p className="text-sm text-gray-600 flex items-center">
+                  <Calendar size={14} className="mr-2 text-blue-500" />
+                  {formattedDate}
+                </p>
+                
+                <p className="text-sm text-gray-600 flex items-center">
+                  <MapPin size={14} className="mr-2 text-blue-500" />
+                  {location.name}
+                </p>
+                
+                <p className="text-sm text-gray-600 flex items-center">
+                  <Users size={14} className="mr-2 text-blue-500" />
+                  {attendees} attending
+                </p>
               </div>
-
-              <div className="flex items-center gap-2 mt-2.5">
-                <PriceIcon />
-                <span className="text-[10px] text-gray-600">{price}</span>
-              </div>
-
-              <div className="flex gap-[7px] mt-2.5 flex-wrap">
-                {tags.map((tag, index) => (
-                  <span
-                    key={index}
-                    className="bg-gray-100 text-[9px] px-2.5 py-0.5 rounded-lg"
-                  >
-                    {tag}
-                  </span>
+              
+              <div className="flex flex-wrap gap-1.5 mt-3">
+                <Tag variant="category">{category}</Tag>
+                {tags.slice(0, 3).map(tag => (
+                  <Tag key={tag} variant="default">{tag}</Tag>
                 ))}
+                {tags.length > 3 && <span className="text-xs text-gray-500">+{tags.length - 3}</span>}
               </div>
-
-              {isTrending && (
-                <div className="flex items-center gap-2 mt-2.5">
-                  <TrendingIcon />
-                  <span className="text-[10px] text-[#E0A000]">Trending Now</span>
-                </div>
-              )}
-
-              <div className="flex items-center justify-between mt-2.5">
-                <div className="flex gap-2">
-                  <button 
-                    type="button" 
-                    aria-label={shared ? "Shared" : "Share"} 
-                    onClick={handleShare}
-                    className={`flex items-center justify-center ${shared ? 'bg-sunset-pink/30' : ''} p-1 rounded-full hover:bg-sunset-pink/20 transition-colors`}
-                  >
-                    <ShareIcon />
-                    <span className="text-[8px] ml-1">+{pointsForSharing}pts</span>
-                  </button>
-                  <button 
-                    type="button" 
-                    aria-label={attending ? "Not Going" : "Attend"} 
-                    onClick={handleAttend}
-                    className={`flex items-center justify-center ${attending ? 'bg-sunset-orange/30' : ''} p-1 rounded-full hover:bg-sunset-orange/20 transition-colors`}
-                  >
-                    <HeartIcon />
-                    <span className="text-[8px] ml-1">{attending ? "" : "+"}{pointsForAttending}pts</span>
-                  </button>
-                </div>
-                {attending ? (
-                  <span className="text-[10px] bg-sunset-orange/20 px-2 py-0.5 rounded text-sunset-orange">Not Going</span>
-                ) : null}
+            </div>
+            
+            <div className="mt-4 flex items-center justify-between">
+              <div>
+                <p className="font-medium text-blue-600">{formattedPrice}</p>
+                <p className="text-xs text-gray-500">+{pointsForAttending} points</p>
+              </div>
+              
+              <div className="flex items-center text-sm text-blue-600 font-medium">
+                View Details 
+                <ArrowUpRight size={14} className="ml-1" />
               </div>
             </div>
           </div>
-        </article>
-      </Link>
-      
-      <ShareModal 
-        open={showShareModal}
-        onClose={() => setShowShareModal(false)}
-        onShare={handleShareComplete}
-        eventName={title}
-        friends={user.friends}
-      />
-    </>
+        </div>
+      </Card>
+    </Link>
   );
-};
+}

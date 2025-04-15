@@ -2,15 +2,34 @@
 export interface Event {
   id: string;
   title: string;
+  description: string;
   image: string;
-  day: string;
   date: string;
-  time: string;
-  location: string;
-  price: string;
+  startTime: string;
+  endTime?: string;
+  location: {
+    name: string;
+    address: string;
+    city: string;
+    coordinates?: {
+      lat: number;
+      lng: number;
+    };
+  };
+  price: {
+    min: number;
+    max?: number;
+    currency: string;
+    isFree: boolean;
+  };
+  category: string;
   tags: string[];
-  isTrending: boolean;
+  mood: string[];
   attendees: number;
+  source: "ticketmaster" | "eventbrite" | "seatgeek" | "songkick" | "meetup" | "internal";
+  url: string;
+  isTrending: boolean;
+  isEditorsPick: boolean;
   pointsForAttending: number;
   pointsForSharing: number;
 }

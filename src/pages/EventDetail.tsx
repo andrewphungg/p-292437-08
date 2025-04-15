@@ -1,192 +1,280 @@
 
 import React, { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { BottomNav } from "@/components/navigation/BottomNav";
-import { useUser } from "@/context/UserContext";
+import { useParams, Link } from "react-router-dom";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
-import { LocationIcon, PriceIcon, TrendingIcon } from "@/components/icons";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { ShareModal } from "@/components/events/ShareModal";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Tag } from "@/components/ui/tag";
+import { Separator } from "@/components/ui/separator";
+import { ArrowLeft, Calendar, Clock, MapPin, Users, Heart, Share2, ExternalLink } from "lucide-react";
+import { useEvents } from "@/hooks/useEvents";
+import { Event } from "@/types/event";
 
-const EventDetail = () => {
+export default function EventDetail() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const { events, attendEvent, shareEvent, isAttending, hasShared, user } = useUser();
-  const [showShareModal, setShowShareModal] = useState(false);
+  const { data: events = [] } = useEvents();
+  const [isAttending, setIsAttending] = useState(false);
   
-  const event = events.find(e => e.id === id);
+  // Find the event by id
+  const event = events.find(e => e.id === id) as Event | undefined;
+
+  // Mock similar events
+  const similarEvents = events
+    .filter(e => 
+      e.id !== id && 
+      (e.category === event?.category || 
+       e.tags.some(tag => event?.tags.includes(tag)))
+    )
+    .slice(0, 3);
+  
+  // Mock attendees data
+  const attendees = [
+    { id: "u1", name: "Jamie Smith", avatar: "https://i.pravatar.cc/150?img=32" },
+    { id: "u2", name: "Alex Johnson", avatar: "https://i.pravatar.cc/150?img=33" },
+    { id: "u3", name: "Sam Taylor", avatar: "https://i.pravatar.cc/150?img=34" },
+    // More would be here in a real app
+  ];
+  
+  const handleAttend = () => {
+    setIsAttending(!isAttending);
+  };
   
   if (!event) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-white via-sunset-purple/5 to-sunset-pink/10">
-        <p>Event not found</p>
-        <Button onClick={() => navigate("/")} className="mt-4">
-          Back to Events
-        </Button>
-      </div>
+      <AppLayout>
+        <div className="py-20 text-center">
+          <h2 className="text-xl font-medium text-gray-700">Event not found</h2>
+          <p className="text-gray-500 mt-2">The event you're looking for doesn't exist or has been removed.</p>
+          <Button asChild className="mt-6">
+            <Link to="/">Go back home</Link>
+          </Button>
+        </div>
+      </AppLayout>
     );
   }
   
-  const attending = isAttending(event.id);
-  const shared = hasShared(event.id);
-
-  const handleShareComplete = () => {
-    shareEvent(event.id);
-    setShowShareModal(false);
-  };
-
-  return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-white via-sunset-purple/5 to-sunset-pink/10">
-      <div className="flex flex-col w-full pb-24">
-        <div className="relative h-72">
-          <img 
-            src={event.image} 
-            alt={event.title} 
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/30"></div>
-          <button 
-            onClick={() => navigate(-1)} 
-            className="absolute top-4 left-4 bg-white/80 p-2 rounded-full shadow-md backdrop-blur-sm"
-          >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M15 10H5M5 10L10 5M5 10L10 15" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
-        </div>
-
-        <div className="bg-white/90 backdrop-blur-md rounded-t-3xl -mt-6 p-6 flex-1 shadow-lg border-t border-sunset-purple/10">
-          <div className="flex justify-between items-start pt-6">
-            <h1 className="text-2xl font-bold text-[#2A3F65]">{event.title}</h1>
-            <div className="text-right">
-              <div className="text-sm font-medium">{event.day}</div>
-              <div className="text-xs text-gray-500 mt-1">{event.date}, {event.time}</div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 mt-6">
-            <LocationIcon />
-            <span className="text-sm">{event.location}</span>
-          </div>
-
-          <div className="flex items-center gap-2 mt-3">
-            <PriceIcon />
-            <span className="text-sm">{event.price}</span>
-          </div>
-
-          {event.isTrending && (
-            <div className="flex items-center gap-2 mt-3">
-              <TrendingIcon />
-              <span className="text-sm text-[#E0A000]">Trending Now</span>
-            </div>
-          )}
-
-          <div className="flex gap-2 mt-5 flex-wrap">
-            {event.tags.map((tag, index) => (
-              <span
-                key={index}
-                className="bg-white text-xs px-3 py-1 rounded-lg shadow-sm border border-sunset-purple/10"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-
-          <div className="bg-sunset-yellow/10 rounded-xl p-4 mt-6 border border-sunset-yellow/20 shadow-sm">
-            <h2 className="font-bold text-lg mb-2">Event Points</h2>
-            <div className="flex justify-between">
-              <div className="flex items-center">
-                <div className="w-8 h-8 bg-sunset-orange/20 rounded-full flex items-center justify-center mr-2 shadow-sm">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#FF8E50" strokeWidth="2"/>
-                    <path d="M12 6V12L16 14" stroke="#FF8E50" strokeWidth="2" strokeLinecap="round"/>
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-xs">Attend this event</p>
-                  <p className="font-bold">{event.pointsForAttending} points</p>
-                </div>
-              </div>
-              <div className="flex items-center">
-                <div className="w-8 h-8 bg-sunset-pink/20 rounded-full flex items-center justify-center mr-2 shadow-sm">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M16 8L8 16M8 8L16 16" stroke="#FF8DAF" strokeWidth="2" strokeLinecap="round"/>
-                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#FF8DAF" strokeWidth="2"/>
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-xs">Share this event</p>
-                  <p className="font-bold">{event.pointsForSharing} points</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-6">
-            <h2 className="font-bold text-lg mb-2">About</h2>
-            <p className="text-sm">
-              Join fellow graduates for this amazing event! Connect with peers who share your interests and 
-              make meaningful friendships while having fun. This is a perfect opportunity to expand your network.
-            </p>
-
-            <div className="mt-4">
-              <div className="flex items-center mb-1">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-2">
-                  <path d="M8 14C11.3137 14 14 11.3137 14 8C14 4.68629 11.3137 2 8 2C4.68629 2 2 4.68629 2 8C2 11.3137 4.68629 14 8 14Z" fill="#C997D6" fillOpacity="0.2" stroke="#C997D6" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M8 5.5V8L9.5 9.5" stroke="#C997D6" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                <span className="text-sm">{event.attendees} people attending</span>
-              </div>
-              <div className="flex -space-x-2">
-                <Avatar className="w-8 h-8 border-2 border-white">
-                  <AvatarImage src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=100&q=80" alt="Person" className="object-cover" />
-                  <AvatarFallback>TS</AvatarFallback>
-                </Avatar>
-                <Avatar className="w-8 h-8 border-2 border-white">
-                  <AvatarImage src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80" alt="Person" className="object-cover" />
-                  <AvatarFallback>JL</AvatarFallback>
-                </Avatar>
-                <Avatar className="w-8 h-8 border-2 border-white">
-                  <AvatarImage src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="Person" className="object-cover" />
-                  <AvatarFallback>CK</AvatarFallback>
-                </Avatar>
-                <div className="flex items-center justify-center w-8 h-8 rounded-full border-2 border-white bg-sunset-orange text-white text-xs">
-                  +{event.attendees - 3}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex gap-3 mt-8">
-            <Button 
-              onClick={() => attendEvent(event.id)} 
-              className={`flex-1 ${attending ? 'bg-sunset-orange' : 'bg-sunset-orange/80'} hover:bg-sunset-orange shadow-md`}
-            >
-              {attending ? 'Not Going' : 'Attend'} 
-              <span className="ml-1">{attending ? "" : "+"}{event.pointsForAttending}pts</span>
-            </Button>
-            <Button 
-              onClick={() => setShowShareModal(true)} 
-              className={`flex-1 ${shared ? 'bg-sunset-pink' : 'bg-sunset-pink/80'} hover:bg-sunset-pink shadow-md`}
-            >
-              Share
-              <span className="ml-1">+{event.pointsForSharing}pts</span>
-            </Button>
-          </div>
-        </div>
+  const header = (
+    <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-gray-200">
+      <div className="max-w-xl mx-auto px-4 py-3 flex items-center justify-between">
+        <Link to="/" className="p-2 -ml-2 text-gray-700 hover:text-gray-900">
+          <ArrowLeft size={20} />
+        </Link>
+        <h1 className="text-lg font-medium truncate flex-1 text-center">Event Details</h1>
+        <div className="w-8"></div> {/* Spacer for balance */}
       </div>
-
-      <ShareModal
-        open={showShareModal}
-        onClose={() => setShowShareModal(false)}
-        onShare={handleShareComplete}
-        eventName={event.title}
-        friends={user.friends}
-      />
-
-      <BottomNav />
     </div>
   );
-};
-
-export default EventDetail;
+  
+  const formattedDate = new Date(event.date).toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+  
+  const formattedTime = `${event.startTime}${event.endTime ? ` - ${event.endTime}` : ""}`;
+  
+  const formattedPrice = event.price.isFree
+    ? "Free"
+    : `${event.price.currency}${event.price.min}${event.price.max ? ` - ${event.price.currency}${event.price.max}` : ""}`;
+  
+  return (
+    <AppLayout header={header}>
+      <div className="pb-10">
+        {/* Hero Image */}
+        <div className="relative w-full h-64 overflow-hidden rounded-xl mt-4 mb-6">
+          <img
+            src={event.image}
+            alt={event.title}
+            className="w-full h-full object-cover"
+          />
+          {event.isTrending && (
+            <div className="absolute top-4 left-4">
+              <Tag variant="trending">Trending</Tag>
+            </div>
+          )}
+          {event.isEditorsPick && (
+            <div className="absolute top-4 right-4">
+              <Tag variant="editors">Editor's Pick</Tag>
+            </div>
+          )}
+        </div>
+        
+        {/* Event Title & Basic Info */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">{event.title}</h1>
+          
+          <div className="flex items-center flex-wrap gap-y-2">
+            <Badge variant="outline" className="mr-2 bg-blue-50 text-blue-700 hover:bg-blue-100">
+              {event.category}
+            </Badge>
+            <span className="text-sm text-gray-600 flex items-center mr-3">
+              <Users size={16} className="mr-1 text-blue-600" />
+              {event.attendees} attending
+            </span>
+            <span className="text-sm font-medium text-green-600">
+              {formattedPrice}
+            </span>
+          </div>
+        </div>
+        
+        {/* Tags */}
+        <div className="mb-6">
+          <div className="flex flex-wrap gap-2">
+            {event.tags.map((tag) => (
+              <Tag key={tag} variant="default">{tag}</Tag>
+            ))}
+            {event.mood.map((mood) => (
+              <Tag key={mood} variant="mood">{mood}</Tag>
+            ))}
+          </div>
+        </div>
+        
+        {/* Event Details */}
+        <div className="bg-white/90 backdrop-blur-md border border-gray-200 rounded-xl p-4 space-y-4 shadow-sm mb-6">
+          <div className="flex items-start">
+            <Calendar size={20} className="shrink-0 text-blue-600 mr-3 mt-0.5" />
+            <div>
+              <h3 className="font-medium">Date & Time</h3>
+              <p className="text-gray-600 text-sm">{formattedDate}</p>
+              <p className="text-gray-600 text-sm">{formattedTime}</p>
+            </div>
+          </div>
+          
+          <div className="flex items-start">
+            <MapPin size={20} className="shrink-0 text-blue-600 mr-3 mt-0.5" />
+            <div>
+              <h3 className="font-medium">Location</h3>
+              <p className="text-gray-600 text-sm">{event.location.name}</p>
+              <p className="text-gray-600 text-sm">{event.location.address}, {event.location.city}</p>
+            </div>
+          </div>
+          
+          {event.description && (
+            <div className="flex items-start pt-2">
+              <div className="w-full">
+                <h3 className="font-medium mb-1">About this event</h3>
+                <p className="text-gray-600 text-sm">{event.description}</p>
+              </div>
+            </div>
+          )}
+        </div>
+        
+        {/* Action Buttons */}
+        <div className="flex gap-3 mb-8">
+          <Button 
+            onClick={handleAttend}
+            className={`flex-1 ${isAttending ? 'bg-green-600 hover:bg-green-700' : ''}`}
+          >
+            {isAttending ? (
+              <>
+                <Check size={18} className="mr-1" /> Going
+              </>
+            ) : (
+              <>
+                <Calendar size={18} className="mr-1" /> Attend
+              </>
+            )}
+          </Button>
+          
+          <Button variant="outline" className="flex-1">
+            <Share2 size={18} className="mr-1" /> Share
+          </Button>
+          
+          <Button variant="outline" size="icon">
+            <Heart size={18} />
+          </Button>
+        </div>
+        
+        {/* Attendees */}
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold mb-3">Who's going</h2>
+          <div className="flex items-center">
+            <div className="flex -space-x-2 mr-3">
+              {attendees.slice(0, 3).map((attendee) => (
+                <Avatar key={attendee.id} className="border-2 border-white w-8 h-8">
+                  <AvatarImage src={attendee.avatar} alt={attendee.name} />
+                  <AvatarFallback>{attendee.name[0]}</AvatarFallback>
+                </Avatar>
+              ))}
+              {event.attendees > 3 && (
+                <div className="w-8 h-8 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center text-xs font-medium text-gray-600">
+                  +{event.attendees - 3}
+                </div>
+              )}
+            </div>
+            <span className="text-sm text-gray-600">
+              {isAttending ? "You and " : ""}{event.attendees} {event.attendees === 1 ? "person" : "people"} attending
+            </span>
+          </div>
+        </div>
+        
+        {/* Point Rewards */}
+        <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-8">
+          <h3 className="font-medium text-blue-800">Earn Points</h3>
+          <div className="mt-2 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-blue-700">For attending this event</span>
+              <Badge variant="outline" className="bg-blue-100 text-blue-700">
+                +{event.pointsForAttending} points
+              </Badge>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-blue-700">For sharing with friends</span>
+              <Badge variant="outline" className="bg-blue-100 text-blue-700">
+                +{event.pointsForSharing} points
+              </Badge>
+            </div>
+          </div>
+        </div>
+        
+        {/* External Link */}
+        {event.url && (
+          <div className="mb-8">
+            <Button variant="outline" asChild className="w-full">
+              <a href={event.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center">
+                Visit Official Page <ExternalLink size={16} className="ml-1.5" />
+              </a>
+            </Button>
+          </div>
+        )}
+        
+        {/* Similar Events */}
+        {similarEvents.length > 0 && (
+          <div>
+            <Separator className="mb-6" />
+            
+            <h2 className="text-lg font-semibold mb-4">You might also like</h2>
+            <div className="grid grid-cols-2 gap-4">
+              {similarEvents.map(event => (
+                <Link 
+                  key={event.id} 
+                  to={`/event/${event.id}`}
+                  className="bg-white/90 backdrop-blur-md border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                >
+                  <div className="h-24 overflow-hidden">
+                    <img 
+                      src={event.image} 
+                      alt={event.title} 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="p-3">
+                    <h3 className="font-medium text-sm line-clamp-2">{event.title}</h3>
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="text-xs text-gray-500">{new Date(event.date).toLocaleDateString()}</span>
+                      <span className="text-xs font-medium text-green-600">
+                        {event.price.isFree ? "Free" : `${event.price.currency}${event.price.min}+`}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </AppLayout>
+  );
+}

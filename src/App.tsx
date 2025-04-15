@@ -1,74 +1,42 @@
 
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { UserProvider } from "./context/UserContext";
-import { AuthProvider } from "./context/AuthContext";
-import Index from "./pages/Index";
-import Profile from "./pages/Profile";
-import Leaderboard from "./pages/Leaderboard";
+import { ThemeProvider } from "@/providers/ThemeProvider";
+
+// Pages
+import Discover from "./pages/Discover";
 import EventDetail from "./pages/EventDetail";
+import Profile from "./pages/Profile";
 import Premium from "./pages/Premium";
 import NotFound from "./pages/NotFound";
-import Auth from "./pages/Auth";
-import Onboarding from "./pages/Onboarding";
-import { useAuth } from "./context/AuthContext";
 
 const queryClient = new QueryClient();
 
-// Protected route wrapper
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated } = useAuth();
-  
-  if (!isAuthenticated) {
-    return <Navigate to="/auth" replace />;
-  }
-  
-  return <>{children}</>;
-};
-
-// Auth route wrapper (redirects to home if already authenticated)
-const AuthRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated } = useAuth();
-  
-  if (isAuthenticated) {
-    return <Navigate to="/" replace />;
-  }
-  
-  return <>{children}</>;
-};
-
-const AppRoutes = () => {
+const App = () => {
   return (
-    <Routes>
-      <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
-      <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
-      <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-      <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
-      <Route path="/event/:id" element={<ProtectedRoute><EventDetail /></ProtectedRoute>} />
-      <Route path="/premium" element={<ProtectedRoute><Premium /></ProtectedRoute>} />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <ThemeProvider>
+          <TooltipProvider>
+            <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-blue-50">
+              <Routes>
+                <Route path="/" element={<Discover />} />
+                <Route path="/event/:id" element={<EventDetail />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/premium" element={<Premium />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <Toaster />
+              <Sonner />
+            </div>
+          </TooltipProvider>
+        </ThemeProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 };
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <BrowserRouter>
-      <AuthProvider>
-        <UserProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <AppRoutes />
-          </TooltipProvider>
-        </UserProvider>
-      </AuthProvider>
-    </BrowserRouter>
-  </QueryClientProvider>
-);
 
 export default App;
