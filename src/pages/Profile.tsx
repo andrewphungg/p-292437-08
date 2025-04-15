@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useUser } from "@/context/UserContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -9,14 +9,13 @@ import { Link } from "react-router-dom";
 import { Settings, Award, Edit2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
-import { toast } from "sonner";
 import { motion } from "framer-motion";
 
 export default function Profile() {
-  const { user, events } = useUser();
+  const { user, events, updateProfile } = useUser();
   
-  // Mock saved events
-  const savedEvents = events.slice(0, 5);
+  // Get saved events
+  const savedEvents = events.filter(event => user.savedEvents?.includes(event.id)) || [];
   
   // Mock badges with improved design
   const [badges, setBadges] = useState([
@@ -64,58 +63,12 @@ export default function Profile() {
       } else if (badge.category === "food") {
         setAvailableInterests([...availableInterests, ...foodRelatedInterests.filter(i => !availableInterests.find(ai => ai.id === i.id))]);
       }
-
-      toast(
-        <div className="flex justify-between w-full items-center">
-          <span>Added "{badge.name}" badge to your profile!</span>
-          <button
-            className="bg-white/20 hover:bg-white/30 px-2 py-1 rounded text-sm flex items-center transition-colors"
-            onClick={() => {
-              removeBadge(badge.id);
-            }}
-          >
-            <span className="flex items-center">
-              <X size={14} className="mr-1" /> Remove
-            </span>
-          </button>
-        </div>,
-        {
-          position: "bottom-center",
-          duration: 3000,
-          id: `add-badge-${badge.id}`
-        }
-      );
     }
   };
 
   // Function to remove a badge
   const removeBadge = (badgeId: string) => {
-    const removedBadge = badges.find(badge => badge.id === badgeId);
     setBadges(badges.filter(badge => badge.id !== badgeId));
-    
-    if (removedBadge) {
-      toast(
-        <div className="flex justify-between w-full items-center">
-          <span>Badge removed from your profile</span>
-          <button
-            className="bg-white/20 hover:bg-white/30 px-2 py-1 rounded text-sm flex items-center transition-colors"
-            onClick={() => {
-              // Re-add the removed badge
-              if (removedBadge) {
-                setBadges(prev => [...prev, removedBadge]);
-              }
-            }}
-          >
-            <span className="flex items-center">Undo</span>
-          </button>
-        </div>,
-        {
-          position: "bottom-center",
-          duration: 3000,
-          id: `remove-badge-${badgeId}`
-        }
-      );
-    }
   };
   
   const header = (
@@ -288,7 +241,7 @@ export default function Profile() {
                   >
                     <p className="font-medium">You joined Joople!</p>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {new Date(user.joinedAt).toLocaleDateString()}
+                      {new Date(user.joinedAt || new Date()).toLocaleDateString()}
                     </p>
                   </motion.div>
                   
@@ -300,7 +253,7 @@ export default function Profile() {
                   >
                     <p className="font-medium">You earned the Early Adopter badge</p>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {new Date(user.joinedAt).toLocaleDateString()}
+                      {new Date(user.joinedAt || new Date()).toLocaleDateString()}
                     </p>
                   </motion.div>
 

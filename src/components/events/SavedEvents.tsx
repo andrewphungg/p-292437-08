@@ -33,13 +33,13 @@ export function SavedEvents({ savedEvents: initialEvents }: SavedEventsProps) {
       // Remove event from list
       setSavedEvents(prev => prev.filter(event => event.id !== id));
       
-      // Dismiss any existing toast to prevent duplicates
+      // Dismiss any existing toast to prevent stacking
       if (undoToastId) {
         toast.dismiss(undoToastId);
       }
       
       // Show toast with undo button
-      const toastId = toast(
+      const id = toast(
         <div className="flex justify-between w-full items-center">
           <span>Event removed from saved</span>
           <button
@@ -58,7 +58,7 @@ export function SavedEvents({ savedEvents: initialEvents }: SavedEventsProps) {
         }
       );
       
-      setUndoToastId(toastId);
+      setUndoToastId(id);
     }
   };
   

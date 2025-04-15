@@ -12,6 +12,8 @@ export interface User {
   attendedEvents: string[];
   sharedEvents: string[];
   joinedAt?: Date;
+  bio?: string;
+  savedEvents?: string[];
 }
 
 export type Friend = {

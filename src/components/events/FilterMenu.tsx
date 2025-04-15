@@ -1,6 +1,6 @@
 
-import React, { useState } from "react";
-import { X } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { X, Filter } from "lucide-react";
 import { Button } from "../ui/button";
 import { Tag } from "../ui/tag";
 import { Slider } from "@/components/ui/slider";
@@ -12,6 +12,7 @@ interface FilterMenuProps {
   onClose: () => void;
   onApplyFilters?: (filters: FilterOptions) => void;
   open: boolean;
+  defaultFilterOptions?: string[];
 }
 
 export interface FilterOptions {
@@ -22,7 +23,7 @@ export interface FilterOptions {
   dateRange: string;
 }
 
-export function FilterMenu({ onClose, onApplyFilters, open }: FilterMenuProps) {
+export function FilterMenu({ onClose, onApplyFilters, open, defaultFilterOptions = [] }: FilterMenuProps) {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 100]);
@@ -54,14 +55,16 @@ export function FilterMenu({ onClose, onApplyFilters, open }: FilterMenuProps) {
     { id: "creative", name: "Creative", icon: "✨" }
   ];
   
+  // Add default filter options
   const dateRanges = [
+    { id: "all", label: "All Dates" },
+    { id: "trending", label: "Trending" },
+    { id: "this-weekend", label: "This Weekend" },
     { id: "today", label: "Today" },
     { id: "tomorrow", label: "Tomorrow" },
     { id: "this-week", label: "This Week" },
-    { id: "this-weekend", label: "This Weekend" },
     { id: "next-week", label: "Next Week" },
-    { id: "next-month", label: "Next Month" },
-    { id: "all", label: "All Dates" }
+    { id: "next-month", label: "Next Month" }
   ];
   
   const toggleCategory = (category: string) => {
@@ -118,6 +121,31 @@ export function FilterMenu({ onClose, onApplyFilters, open }: FilterMenuProps) {
         </div>
         
         <div className="p-5 space-y-6 overflow-y-auto max-h-[calc(85vh-160px)]">
+          {/* Default Filters */}
+          <div className="space-y-3">
+            <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300">Popular Filters</h4>
+            <div className="flex flex-wrap gap-2">
+              {dateRanges.slice(0, 4).map(filter => (
+                <Button
+                  key={filter.id}
+                  variant={dateRange === filter.id ? "default" : "outline"}
+                  size="sm"
+                  className={cn(
+                    "rounded-full flex items-center gap-1",
+                    dateRange === filter.id 
+                      ? "bg-primary text-white" 
+                      : "text-gray-600 dark:text-gray-300"
+                  )}
+                  onClick={() => setDateRange(filter.id)}
+                >
+                  <span>{filter.label}</span>
+                </Button>
+              ))}
+            </div>
+          </div>
+          
+          <Separator className="dark:bg-gray-800" />
+
           {/* Categories */}
           <div className="space-y-3">
             <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300">Categories</h4>

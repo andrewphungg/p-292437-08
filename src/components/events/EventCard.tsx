@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { HeartConfetti } from "@/components/animations/HeartConfetti";
+import { useUser } from "@/context/UserContext";
 
 interface EventCardProps {
   event: Event;
@@ -38,8 +39,10 @@ export function EventCard({
     isTrending,
     isEditorsPick
   } = event;
+
+  const { user, addSavedEvent, removeSavedEvent } = useUser();
   
-  const [saved, setSaved] = useState(isSaved || false);
+  const [saved, setSaved] = useState(isSaved || user.savedEvents?.includes(id) || false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [hasShownConfetti, setHasShownConfetti] = useState(false);
   const [undoToastId, setUndoToastId] = useState<string | null>(null);
@@ -68,26 +71,38 @@ export function EventCard({
     const wasSaved = saved;
     setSaved(!saved);
     
-    if (!wasSaved && !hasShownConfetti) {
-      setShowConfetti(true);
-      setHasShownConfetti(true);
-      setTimeout(() => setShowConfetti(false), 600);
+    if (!wasSaved) {
+      // Add to saved events
+      addSavedEvent(id);
+      if (!hasShownConfetti) {
+        setShowConfetti(true);
+        setHasShownConfetti(true);
+        setTimeout(() => setShowConfetti(false), 600);
+      }
+    } else {
+      // Remove from saved events
+      removeSavedEvent(id);
     }
     
-    // Dismiss any existing toast
+    // Dismiss any existing toast to prevent stacking
     if (undoToastId) {
       toast.dismiss(undoToastId);
     }
     
     // Show a toast with undo button
-    const toastId = toast(
+    const id = toast(
       <div className="flex justify-between w-full items-center">
         <span>{wasSaved ? "Event removed" : "Event saved"}</span>
         <button
           className="bg-white/20 hover:bg-white/30 px-2 py-1 rounded text-sm flex items-center transition-colors"
           onClick={() => {
             setSaved(wasSaved);
-            toast.dismiss(toastId);
+            if (wasSaved) {
+              addSavedEvent(event.id);
+            } else {
+              removeSavedEvent(event.id);
+            }
+            toast.dismiss(id);
           }}
         >
           <span className="flex items-center">
@@ -99,51 +114,22 @@ export function EventCard({
       {
         position: "bottom-center",
         duration: 3000,
-        id: `save-toast-${id}` // Give unique ID to prevent duplicates
       }
     );
     
-    setUndoToastId(toastId);
+    setUndoToastId(id);
   };
   
   const handleRemove = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
-    // Dismiss any existing toast
+    // Dismiss any existing toast to prevent stacking
     if (undoToastId) {
       toast.dismiss(undoToastId);
     }
     
-    // Show a toast with undo option
     if (onRemove) {
-      const toastId = toast(
-        <div className="flex justify-between w-full items-center">
-          <span>Event removed from saved</span>
-          <button
-            className="bg-white/20 hover:bg-white/30 px-2 py-1 rounded text-sm flex items-center transition-colors"
-            onClick={() => {
-              // This assumes onRemove has a callback for undoing
-              if (onRemove && typeof onRemove === 'function') {
-                // We'll implement proper undo functionality in SavedEvents
-                toast.dismiss(toastId);
-              }
-            }}
-          >
-            <span className="flex items-center">
-              <RefreshCcw size={14} className="mr-1" />
-              Undo
-            </span>
-          </button>
-        </div>,
-        {
-          position: "bottom-center",
-          duration: 3000,
-          id: `remove-toast-${id}` // Give unique ID to prevent duplicates
-        }
-      );
-      
-      setUndoToastId(toastId);
       onRemove();
     }
   };

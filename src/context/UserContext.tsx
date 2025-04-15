@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { User } from "../types/user";
 import { Event } from "../types/event";
@@ -18,6 +19,9 @@ interface UserContextType {
   addFriend: (friendId: string) => void;
   isFriend: (friendId: string) => boolean;
   getEventById: (eventId: string) => Event | undefined;
+  updateProfile: (updates: Partial<User>) => void;
+  addSavedEvent: (eventId: string) => void;
+  removeSavedEvent: (eventId: string) => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -163,6 +167,38 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     return events.find(event => event.id === eventId);
   };
 
+  // Add profile updating function
+  const updateProfile = (updates: Partial<User>) => {
+    setUser(prevUser => ({
+      ...prevUser,
+      ...updates
+    }));
+  };
+
+  // Add saved events functions
+  const addSavedEvent = (eventId: string) => {
+    if (!user.savedEvents) {
+      setUser({
+        ...user,
+        savedEvents: [eventId]
+      });
+    } else if (!user.savedEvents.includes(eventId)) {
+      setUser({
+        ...user,
+        savedEvents: [...user.savedEvents, eventId]
+      });
+    }
+  };
+
+  const removeSavedEvent = (eventId: string) => {
+    if (user.savedEvents && user.savedEvents.includes(eventId)) {
+      setUser({
+        ...user,
+        savedEvents: user.savedEvents.filter(id => id !== eventId)
+      });
+    }
+  };
+
   return (
     <UserContext.Provider 
       value={{ 
@@ -177,7 +213,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         hasShared,
         addFriend,
         isFriend,
-        getEventById
+        getEventById,
+        updateProfile,
+        addSavedEvent,
+        removeSavedEvent
       }}
     >
       {children}
