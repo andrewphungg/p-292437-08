@@ -67,6 +67,14 @@ export function FilterMenu({ onClose, onApplyFilters, open, defaultFilterOptions
     { id: "next-month", label: "Next Month" }
   ];
   
+  // Filter options with icons
+  const filterOptions = [
+    { id: "all", label: "All", icon: "🔍" },
+    { id: "trending", label: "Trending", icon: "🔥" },
+    { id: "weekend", label: "This Weekend", icon: "🗓️" },
+    { id: "upcoming", label: "Upcoming", icon: "⏳" },
+  ];
+  
   const toggleCategory = (category: string) => {
     setSelectedCategories(prev => 
       prev.includes(category) 
@@ -103,9 +111,12 @@ export function FilterMenu({ onClose, onApplyFilters, open, defaultFilterOptions
   };
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => {
-      if (!isOpen) onClose();
-    }}>
+    <Dialog 
+      open={open} 
+      onOpenChange={(isOpen) => {
+        if (!isOpen) onClose();
+      }}
+    >
       <DialogContent className="bg-white dark:bg-gray-900 rounded-3xl max-h-[85vh] p-0 w-full max-w-lg overflow-hidden shadow-xl">
         <div className="sticky top-0 bg-white dark:bg-gray-900 p-4 border-b dark:border-gray-800 flex items-center justify-between z-10 rounded-t-3xl">
           <DialogHeader>
@@ -125,7 +136,7 @@ export function FilterMenu({ onClose, onApplyFilters, open, defaultFilterOptions
           <div className="space-y-3">
             <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300">Popular Filters</h4>
             <div className="flex flex-wrap gap-2">
-              {dateRanges.slice(0, 4).map(filter => (
+              {filterOptions.map(filter => (
                 <Button
                   key={filter.id}
                   variant={dateRange === filter.id ? "default" : "outline"}
@@ -138,7 +149,7 @@ export function FilterMenu({ onClose, onApplyFilters, open, defaultFilterOptions
                   )}
                   onClick={() => setDateRange(filter.id)}
                 >
-                  <span>{filter.label}</span>
+                  <span>{filter.icon} {filter.label}</span>
                 </Button>
               ))}
             </div>
@@ -226,7 +237,7 @@ export function FilterMenu({ onClose, onApplyFilters, open, defaultFilterOptions
               step={1}
               value={[distance]}
               onValueChange={(value) => setDistance(value[0])}
-              className="py-4"
+              className="py-4 bg-transparent"
             />
             <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
               <span>Nearby</span>

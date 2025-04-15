@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Calendar, MapPin, Users, ArrowUpRight, Heart, Trash2, RefreshCcw } from "lucide-react";
@@ -37,12 +36,13 @@ export function EventCard({
     tags,
     attendees,
     isTrending,
-    isEditorsPick
+    isEditorsPick,
+    source
   } = event;
 
   const { user, addSavedEvent, removeSavedEvent } = useUser();
   
-  const [saved, setSaved] = useState(isSaved || user.savedEvents?.includes(id) || false);
+  const [saved, setSaved] = useState(isSaved || (user.savedEvents?.includes(String(id)) || false));
   const [showConfetti, setShowConfetti] = useState(false);
   const [hasShownConfetti, setHasShownConfetti] = useState(false);
   const [undoToastId, setUndoToastId] = useState<string | null>(null);
@@ -73,7 +73,7 @@ export function EventCard({
     
     if (!wasSaved) {
       // Add to saved events
-      addSavedEvent(id);
+      addSavedEvent(String(id));
       if (!hasShownConfetti) {
         setShowConfetti(true);
         setHasShownConfetti(true);
@@ -81,7 +81,7 @@ export function EventCard({
       }
     } else {
       // Remove from saved events
-      removeSavedEvent(id);
+      removeSavedEvent(String(id));
     }
     
     // Dismiss any existing toast to prevent stacking
@@ -90,7 +90,7 @@ export function EventCard({
     }
     
     // Show a toast with undo button
-    const id = toast(
+    const toastId = toast(
       <div className="flex justify-between w-full items-center">
         <span>{wasSaved ? "Event removed" : "Event saved"}</span>
         <button
@@ -98,11 +98,11 @@ export function EventCard({
           onClick={() => {
             setSaved(wasSaved);
             if (wasSaved) {
-              addSavedEvent(event.id);
+              addSavedEvent(String(event.id));
             } else {
-              removeSavedEvent(event.id);
+              removeSavedEvent(String(event.id));
             }
-            toast.dismiss(id);
+            toast.dismiss(toastId);
           }}
         >
           <span className="flex items-center">
@@ -117,7 +117,7 @@ export function EventCard({
       }
     );
     
-    setUndoToastId(id);
+    setUndoToastId(toastId);
   };
   
   const handleRemove = (e: React.MouseEvent) => {
@@ -152,6 +152,34 @@ export function EventCard({
     };
     
     return iconMap[category] || "🎟️";
+  };
+  
+  // Source Icon/Label component
+  const SourceLabel = () => {
+    let icon = "🎟️";
+    let color = "bg-gray-100 text-gray-600";
+    
+    switch(source) {
+      case "ticketmaster":
+        icon = "🎭";
+        color = "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300";
+        break;
+      case "eventbrite":
+        icon = "📅";
+        color = "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-300";
+        break;
+      case "internal":
+      default:
+        icon = "🎟️";
+        color = "bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-300";
+    }
+    
+    return (
+      <div className={`px-2 py-0.5 text-xs rounded-full flex items-center ${color}`}>
+        <span className="mr-1">{icon}</span>
+        <span className="font-medium">{source}</span>
+      </div>
+    );
   };
   
   if (variant === "compact") {
@@ -197,7 +225,10 @@ export function EventCard({
               </motion.button>
             </div>
             <div className="p-3">
-              <h3 className="font-bold text-sm line-clamp-1">{title}</h3>
+              <div className="flex justify-between items-start">
+                <h3 className="font-bold text-sm line-clamp-1">{title}</h3>
+                <SourceLabel />
+              </div>
               <p className="text-xs text-muted-foreground mt-1 flex items-center">
                 <Calendar size={12} className="mr-1 text-primary" /> {formattedDate}
               </p>
@@ -241,6 +272,9 @@ export function EventCard({
                     <span className="mr-1">✨</span> Editor's Pick
                   </Tag>
                 )}
+                <div className="mt-1">
+                  <SourceLabel />
+                </div>
               </div>
             </div>
             

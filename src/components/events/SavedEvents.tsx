@@ -39,7 +39,7 @@ export function SavedEvents({ savedEvents: initialEvents }: SavedEventsProps) {
       }
       
       // Show toast with undo button
-      const id = toast(
+      const toastId = toast(
         <div className="flex justify-between w-full items-center">
           <span>Event removed from saved</span>
           <button
@@ -58,7 +58,7 @@ export function SavedEvents({ savedEvents: initialEvents }: SavedEventsProps) {
         }
       );
       
-      setUndoToastId(id);
+      setUndoToastId(toastId);
     }
   };
   
@@ -112,7 +112,7 @@ export function SavedEvents({ savedEvents: initialEvents }: SavedEventsProps) {
           <EventCard 
             event={event} 
             isSaved={true}
-            onRemove={() => handleRemoveEvent(event.id)}
+            onRemove={() => handleRemoveEvent(String(event.id))}
           />
         </div>
       ))}

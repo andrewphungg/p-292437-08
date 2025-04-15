@@ -1,7 +1,8 @@
+
 import React, { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Bell, Moon, Languages, Shield, HelpCircle, LogOut } from "lucide-react";
+import { ChevronLeft, Bell, Moon, Languages, Shield, HelpCircle, LogOut, Key } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
@@ -9,13 +10,18 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUser } from "@/context/UserContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
+import { useTheme } from "@/providers/ThemeProvider";
+import { UpdateApiKey } from "@/components/settings/ApiKeySetup";
 
 export default function Settings() {
   const { user, updateProfile } = useUser();
+  const { theme, setTheme } = useTheme();
   const [editingName, setEditingName] = useState(user.name);
   const [editingEmail, setEditingEmail] = useState(user.email);
   const [editingBio, setEditingBio] = useState(user.bio || "");
   const navigate = useNavigate();
+  
+  const isDarkMode = theme === "dark";
 
   const handleUpdateProfile = () => {
     updateProfile({
@@ -23,6 +29,10 @@ export default function Settings() {
       email: editingEmail,
       bio: editingBio
     });
+  };
+  
+  const toggleDarkMode = () => {
+    setTheme(isDarkMode ? "light" : "dark");
   };
 
   const header = (
@@ -126,6 +136,12 @@ export default function Settings() {
           </div>
         </section>
         
+        {/* API Settings */}
+        <section>
+          <h2 className="text-lg font-semibold mb-4">API Settings</h2>
+          <UpdateApiKey />
+        </section>
+        
         {/* Notifications */}
         <section>
           <h2 className="text-lg font-semibold mb-4">Notifications</h2>
@@ -157,7 +173,7 @@ export default function Settings() {
                 <Moon size={18} className="text-primary" />
                 <span>Dark Mode</span>
               </div>
-              <Switch />
+              <Switch checked={isDarkMode} onCheckedChange={toggleDarkMode} />
             </div>
             <Separator className="dark:bg-gray-700" />
             <div className="p-4 flex items-center justify-between">

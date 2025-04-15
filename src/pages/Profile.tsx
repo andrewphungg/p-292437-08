@@ -98,7 +98,7 @@ export default function Profile() {
           </Avatar>
           
           <h1 className="mt-4 text-2xl font-bold">{user.name}</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">{user.bio || "Customer"}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{user.bio || ""}</p>
           
           <div className="flex items-center mt-2 text-primary font-medium">
             <Award size={18} className="mr-1" />
