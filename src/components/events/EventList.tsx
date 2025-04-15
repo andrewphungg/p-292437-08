@@ -3,6 +3,7 @@ import React from "react";
 import { EventCard } from "./EventCard";
 import { Event } from "@/types/event";
 import { Skeleton } from "@/components/ui/skeleton";
+import { motion } from "framer-motion";
 
 interface EventListProps {
   events: Event[];
@@ -25,7 +26,7 @@ export function EventList({
 }: EventListProps) {
   if (error) {
     return (
-      <div className="bg-red-50 p-4 rounded-md border border-red-200 text-red-800 text-center">
+      <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-3xl border border-red-200 dark:border-red-900/30 text-red-800 dark:text-red-200 text-center">
         <p>{error}</p>
       </div>
     );
@@ -35,8 +36,8 @@ export function EventList({
     <div className="w-full">
       {title && (
         <div className="mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
-          {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
+          <h2 className="text-xl font-bold text-foreground">{title}</h2>
+          {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
         </div>
       )}
 
@@ -57,21 +58,39 @@ export function EventList({
       ) : events.length > 0 ? (
         variant === "grid" ? (
           <div className="grid grid-cols-2 gap-4">
-            {events.map((event) => (
-              <EventCard key={event.id} event={event} variant="compact" />
+            {events.map((event, index) => (
+              <motion.div
+                key={event.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
+              >
+                <EventCard event={event} variant="compact" />
+              </motion.div>
             ))}
           </div>
         ) : (
-          <div className="space-y-4">
-            {events.map((event) => (
-              <EventCard key={event.id} event={event} />
+          <div className="space-y-6">
+            {events.map((event, index) => (
+              <motion.div
+                key={event.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
+              >
+                <EventCard key={event.id} event={event} />
+              </motion.div>
             ))}
           </div>
         )
       ) : (
-        <div className="text-center py-10">
-          <p className="text-gray-500">{emptyMessage}</p>
-        </div>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-center py-10"
+        >
+          <p className="text-muted-foreground">{emptyMessage}</p>
+        </motion.div>
       )}
     </div>
   );
@@ -80,7 +99,7 @@ export function EventList({
 function EventCardSkeleton({ variant = "default" }: { variant?: "default" | "compact" }) {
   if (variant === "compact") {
     return (
-      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+      <div className="overflow-hidden rounded-3xl border border-border bg-card/80 shadow-sm">
         <Skeleton className="w-full h-32" />
         <div className="p-3">
           <Skeleton className="w-3/4 h-4 mb-2" />
@@ -92,7 +111,7 @@ function EventCardSkeleton({ variant = "default" }: { variant?: "default" | "com
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+    <div className="overflow-hidden rounded-3xl border border-border bg-card/80 shadow-sm">
       <div className="flex flex-col md:flex-row">
         <Skeleton className="w-full md:w-1/3 h-48 md:h-full" />
         <div className="p-4 flex-1">

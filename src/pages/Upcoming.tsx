@@ -7,6 +7,7 @@ import { useEvents } from "@/hooks/useEvents";
 import { FilterOptions } from "@/components/events/FilterMenu";
 import { Calendar, CheckCircle, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 
 export default function Upcoming() {
   const [filters, setFilters] = useState<Partial<FilterOptions>>({});
@@ -19,17 +20,22 @@ export default function Upcoming() {
   const pastEvents = allEvents.slice(3, 6);
   
   const header = (
-    <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-md shadow-sm">
+    <header className="sticky top-0 z-20 bg-white/80 dark:bg-gray-900/90 backdrop-blur-md shadow-sm">
       <div className="text-center py-6">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-sunset-orange via-sunset-yellow to-sunset-peach bg-clip-text text-transparent pb-1">
+        <motion.h1 
+          className="text-3xl font-bold bg-gradient-to-r from-sunset-orange via-sunset-yellow to-sunset-peach bg-clip-text text-transparent pb-1"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
           Joople
-        </h1>
-        <p className="text-sm text-gray-500">
-          Your upcoming events
+        </motion.h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          Your Upcoming Events
         </p>
       </div>
       
-      <div className="flex justify-center border-b border-gray-200 pb-4">
+      <div className="flex justify-center border-b border-gray-200 dark:border-gray-800 pb-4">
         <Button variant="ghost" className="text-sunset-orange flex items-center gap-2">
           <Calendar size={18} />
           <span>Sync Calendar</span>
@@ -61,7 +67,6 @@ export default function Upcoming() {
               title="Your Upcoming Events"
               subtitle="Events you have saved or are interested in"
               emptyMessage="No upcoming events. Explore and save some events you're interested in!"
-              spacing="lg"
             />
           </TabsContent>
           
@@ -72,7 +77,6 @@ export default function Upcoming() {
               title="Events You're Attending"
               subtitle="You've confirmed attendance for these events"
               emptyMessage="You haven't confirmed attendance for any upcoming events yet."
-              spacing="lg"
             />
           </TabsContent>
           
@@ -83,7 +87,6 @@ export default function Upcoming() {
               title="Past Events"
               subtitle="Events you've attended"
               emptyMessage="No past events found."
-              spacing="lg"
             />
           </TabsContent>
         </Tabs>

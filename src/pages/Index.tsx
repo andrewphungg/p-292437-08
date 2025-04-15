@@ -8,6 +8,11 @@ import { RecommendedFriends } from "@/components/friends/RecommendedFriends";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { FilterOptions } from "@/components/events/FilterMenu";
 import { cn } from "@/lib/utils";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { Calendar, MapPin, Music, Tag, Compass } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { EventList } from "@/components/events/EventList";
+import { motion } from "framer-motion";
 
 const Index = () => {
   const { events, suggestedEvents, user } = useUser();
@@ -15,6 +20,7 @@ const Index = () => {
   
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -37,7 +43,11 @@ const Index = () => {
     const matchesCategories = selectedCategories.length === 0 || 
       selectedCategories.some(category => event.tags.includes(category));
       
-    return matchesSearch && matchesCategories;
+    const matchesCategory = selectedCategory === "all" || 
+      event.category === selectedCategory ||
+      event.tags.includes(selectedCategory);
+      
+    return matchesSearch && matchesCategories && matchesCategory;
   });
 
   // Get trending events
@@ -45,111 +55,128 @@ const Index = () => {
   
   // Get weekend events (mock implementation)
   const weekendEvents = events.filter((_, index) => index % 3 === 0).slice(0, 4);
+
+  // Categories for quick filtering
+  const categories = [
+    { id: "all", name: "All", icon: <Compass size={16} /> },
+    { id: "Music", name: "Music", icon: <Music size={16} /> },
+    { id: "Food", name: "Food", icon: <Tag size={16} /> },
+    { id: "Sports", name: "Sports", icon: <Tag size={16} /> },
+    { id: "Arts", name: "Arts", icon: <Tag size={16} /> },
+    { id: "Tech", name: "Tech", icon: <Tag size={16} /> },
+  ];
   
-  return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-white via-sunset-purple/5 to-sunset-pink/10 dark:from-background dark:via-background dark:to-background/95 transition-colors duration-300">
-      <div className="flex flex-col items-center w-full pb-24">
-        <header className="text-[#303030] dark:text-white text-[40px] sm:text-[55px] font-semibold text-center w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md py-5 shadow-sm relative">
-          <span className="bg-gradient-to-r from-primary via-secondary to-sunset-yellow bg-clip-text text-transparent">
-            Joople
-          </span>
-          <div className="absolute top-4 right-4">
-            <ThemeToggle variant="modern" />
-          </div>
-        </header>
-
-        <div className="bg-primary/20 dark:bg-primary/10 w-full py-2 text-center backdrop-blur-sm shadow-sm">
-          <h1 className="text-xl font-bold text-primary dark:text-primary-foreground">
-            Connect with Fellow Graduates
-          </h1>
-        </div>
-
-        <h2 className="text-2xl font-bold text-center mt-[15px] mb-2 text-[#303030] dark:text-white">
-          Welcome, {user.name || "Graduate"}!
-        </h2>
-        <p className="text-sm text-center mb-3 text-[#333] dark:text-gray-300 max-w-xs">
-          Find fun events to meet other graduates!
+  const header = (
+    <header className="sticky top-0 z-20 bg-white/80 dark:bg-gray-900/90 backdrop-blur-md shadow-sm">
+      <div className="relative text-center py-6">
+        <motion.h1 
+          className="text-3xl font-bold bg-gradient-to-r from-sunset-orange via-sunset-yellow to-sunset-peach bg-clip-text text-transparent pb-1"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          Joople
+        </motion.h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          Discover Events For You
         </p>
-
-        <div className="w-full px-5 mb-2">
-          <SearchBar 
-            onSearch={handleSearch} 
-          />
-        </div>
-
-        <div className="w-full max-w-[720px] mt-2 px-5">
-          <Tabs 
-            defaultValue="events" 
-            value={activeTab} 
-            onValueChange={setActiveTab}
-            className="w-full"
-          >
-            <TabsList className="grid grid-cols-2 w-full mb-4 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm shadow-sm rounded-2xl">
-              <TabsTrigger value="events" className="rounded-xl">Events</TabsTrigger>
-              <TabsTrigger value="friends" className="rounded-xl">Find Friends</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="events" className="mt-0 space-y-8">
-              {/* For You Section */}
-              <section>
-                <h2 className="section-title">For You</h2>
-                <div className="flex flex-col gap-6">
-                  {filteredEvents.slice(0, 5).map(event => (
-                    <EventCard key={event.id} event={event} />
-                  ))}
-                  {filteredEvents.length === 0 && (
-                    <p className="text-center py-8 text-gray-500 dark:text-gray-400">
-                      No events match your search criteria
-                    </p>
-                  )}
-                </div>
-              </section>
-              
-              {/* Trending Section */}
-              <section>
-                <h2 className="section-title">Trending</h2>
-                <div className="grid grid-cols-2 gap-4">
-                  {trendingEvents.map(event => (
-                    <div key={event.id} className="rounded-3xl overflow-hidden bg-white dark:bg-gray-800 shadow-sm">
-                      <div className="h-24 overflow-hidden relative">
-                        <img 
-                          src={event.image} 
-                          alt={event.title} 
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="p-3">
-                        <h3 className="font-medium text-sm line-clamp-1">{event.title}</h3>
-                        <div className="flex items-center justify-between mt-1">
-                          <span className="text-xs text-gray-500 dark:text-gray-400">{event.date}</span>
-                          <span className="text-xs font-medium text-green-600 dark:text-green-400">
-                            {typeof event.price === 'string' ? event.price : (event.price.isFree ? 'Free' : `$${event.price.min}`)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-              
-              {/* Weekend Section */}
-              <section>
-                <h2 className="section-title">This Weekend</h2>
-                <div className="flex flex-col gap-6">
-                  {weekendEvents.map(event => (
-                    <EventCard key={event.id} event={event} />
-                  ))}
-                </div>
-              </section>
-            </TabsContent>
-            
-            <TabsContent value="friends" className="mt-0">
-              <RecommendedFriends />
-            </TabsContent>
-          </Tabs>
+        <motion.div 
+          className="absolute right-4 top-1/2 -translate-y-1/2"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <ThemeToggle variant="modern" />
+        </motion.div>
+      </div>
+      
+      <div className="px-4 pb-4">
+        <SearchBar onSearch={handleSearch} placeholder="Search Events & Places" />
+        
+        <div className="mt-4 flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
+          {categories.map((category) => (
+            <motion.div
+              key={category.id}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button
+                variant={selectedCategory === category.id ? "default" : "outline"}
+                size="sm"
+                className={`rounded-full flex items-center gap-1 ${
+                  selectedCategory === category.id 
+                    ? "bg-primary text-white" 
+                    : "text-gray-600 dark:text-gray-300"
+                }`}
+                onClick={() => setSelectedCategory(category.id)}
+              >
+                {category.icon}
+                <span>{category.name}</span>
+              </Button>
+            </motion.div>
+          ))}
         </div>
       </div>
-    </div>
+    </header>
+  );
+  
+  return (
+    <AppLayout header={header}>
+      <div className="py-6 space-y-8">
+        <Tabs defaultValue="events" value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="w-full grid grid-cols-2 mb-6 rounded-xl">
+            <TabsTrigger value="events" className="rounded-xl">Events</TabsTrigger>
+            <TabsTrigger value="friends" className="rounded-xl">Find Friends</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="events" className="mt-0 space-y-8">
+            {/* For You Section */}
+            <section>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-bold">For You</h2>
+                <Button variant="link" size="sm" className="text-primary flex items-center gap-1 -mr-2">
+                  <MapPin size={14} /> Near You
+                </Button>
+              </div>
+              <div className="flex flex-col gap-6">
+                {filteredEvents.slice(0, 5).map(event => (
+                  <EventCard key={event.id} event={event} />
+                ))}
+                {filteredEvents.length === 0 && (
+                  <p className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    No events match your search criteria
+                  </p>
+                )}
+              </div>
+            </section>
+            
+            {/* Trending Section */}
+            <section>
+              <h2 className="section-title font-bold">Trending</h2>
+              <div className="grid grid-cols-2 gap-4">
+                {trendingEvents.map(event => (
+                  <EventCard key={event.id} event={event} variant="compact" />
+                ))}
+              </div>
+            </section>
+            
+            {/* Weekend Section */}
+            <section>
+              <h2 className="section-title font-bold">This Weekend</h2>
+              <div className="flex flex-col gap-6">
+                {weekendEvents.map(event => (
+                  <EventCard key={event.id} event={event} />
+                ))}
+              </div>
+            </section>
+          </TabsContent>
+          
+          <TabsContent value="friends" className="mt-0">
+            <RecommendedFriends />
+          </TabsContent>
+        </Tabs>
+      </div>
+    </AppLayout>
   );
 };
 

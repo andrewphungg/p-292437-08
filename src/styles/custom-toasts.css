@@ -1,0 +1,28 @@
+
+/* Custom toast positioning and styling */
+.top-center-toast {
+  position: fixed !important;
+  top: 5rem !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  max-width: 90vw !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+/* Make sonner toasts centered */
+[data-sonner-toaster][data-position="bottom-center"] {
+  bottom: 20px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  right: auto !important;
+  max-width: 90vw !important;
+}
+
+/* Enhance toast animations */
+[data-sonner-toast] {
+  border-radius: 1rem !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+  backdrop-filter: blur(8px) !important;
+}

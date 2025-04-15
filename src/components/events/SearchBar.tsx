@@ -4,6 +4,7 @@ import { Search, SlidersHorizontal, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { FilterMenu } from "./FilterMenu";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 interface SearchBarProps {
   onSearch?: (query: string) => void;
@@ -45,9 +46,15 @@ export function SearchBar({
   
   return (
     <div className="w-full max-w-lg mx-auto">
-      <form onSubmit={handleSubmit} className="relative">
+      <motion.form 
+        onSubmit={handleSubmit} 
+        className="relative"
+        initial={{ y: 10, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.3 }}
+      >
         <div className="relative flex items-center">
-          <div className="absolute left-3 text-gray-400">
+          <div className="absolute left-4 text-gray-400">
             <Search size={18} />
           </div>
           
@@ -57,36 +64,55 @@ export function SearchBar({
             onChange={handleChange}
             placeholder={placeholder}
             className={cn(
-              "w-full py-3 pl-10 pr-16 rounded-2xl bg-white dark:bg-gray-800 shadow-sm",
+              "w-full py-3.5 pl-12 pr-16 rounded-full bg-white dark:bg-gray-800/80 shadow-sm",
               "border border-gray-200 dark:border-gray-700 placeholder:text-gray-400 dark:placeholder:text-gray-500",
               "text-gray-800 dark:text-gray-100",
-              "focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-transparent"
+              "focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-transparent transition-all"
             )}
           />
           
-          {query && (
-            <button
-              type="button"
-              onClick={handleClear}
-              className="absolute right-12 text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <X size={16} />
-            </button>
-          )}
+          <AnimatedClearButton 
+            isVisible={query.length > 0}
+            onClick={handleClear}
+          />
           
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={toggleFilterMenu}
-            className="absolute right-2 text-primary hover:text-primary/80 hover:bg-transparent"
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
-            <SlidersHorizontal size={18} />
-          </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={toggleFilterMenu}
+              className="absolute right-3 text-primary hover:text-primary/80 hover:bg-transparent"
+            >
+              <SlidersHorizontal size={18} />
+            </Button>
+          </motion.div>
         </div>
-      </form>
+      </motion.form>
       
       {isFilterMenuOpen && <FilterMenu onClose={() => setIsFilterMenuOpen(false)} />}
     </div>
+  );
+}
+
+// Animated clear button component
+function AnimatedClearButton({ isVisible, onClick }: { isVisible: boolean; onClick: () => void }) {
+  return (
+    <motion.button
+      type="button"
+      onClick={onClick}
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ 
+        opacity: isVisible ? 1 : 0, 
+        scale: isVisible ? 1 : 0.8,
+        pointerEvents: isVisible ? 'auto' : 'none'
+      }}
+      className="absolute right-12 text-gray-400 hover:text-gray-600 transition-colors bg-gray-100 dark:bg-gray-700 rounded-full p-1"
+    >
+      <X size={14} />
+    </motion.button>
   );
 }
