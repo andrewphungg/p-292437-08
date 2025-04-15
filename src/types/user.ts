@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   name: string;
@@ -7,15 +8,10 @@ export interface User {
   university: string;
   points: number;
   interests: string[];
-  friends: {
-    id: string;
-    name: string;
-    avatar: string;
-    points: number;
-    interests?: string[];
-  }[];
+  friends: Friend[];
   attendedEvents: string[];
   sharedEvents: string[];
+  joinedAt?: Date;
 }
 
 export type Friend = {

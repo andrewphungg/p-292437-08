@@ -1,4 +1,5 @@
 
+import React, { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
@@ -36,7 +37,7 @@ const queryClient = new QueryClient();
 
 const App = () => {
   // Create global styles on mount
-  React.useEffect(() => {
+  useEffect(() => {
     createGlobalStyle();
   }, []);
 

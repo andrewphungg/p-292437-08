@@ -10,14 +10,14 @@ interface SearchBarProps {
   onSearch?: (query: string) => void;
   defaultQuery?: string;
   placeholder?: string;
-  onFilterToggle?: () => void;
+  onFilterClick?: () => void;
 }
 
 export function SearchBar({ 
   onSearch, 
   defaultQuery = "", 
   placeholder = "Search events", 
-  onFilterToggle 
+  onFilterClick
 }: SearchBarProps) {
   const [query, setQuery] = useState(defaultQuery);
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
@@ -41,7 +41,7 @@ export function SearchBar({
   
   const toggleFilterMenu = () => {
     setIsFilterMenuOpen(!isFilterMenuOpen);
-    onFilterToggle?.();
+    onFilterClick?.();
   };
   
   return (
@@ -93,7 +93,7 @@ export function SearchBar({
         </div>
       </motion.form>
       
-      {isFilterMenuOpen && <FilterMenu onClose={() => setIsFilterMenuOpen(false)} />}
+      {isFilterMenuOpen && <FilterMenu onClose={() => setIsFilterMenuOpen(false)} open={isFilterMenuOpen} />}
     </div>
   );
 }
