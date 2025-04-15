@@ -6,14 +6,16 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { Settings, Award, Calendar, Clock } from "lucide-react";
+import { Award, Calendar, Clock, Settings } from "lucide-react";
 import { EventCard } from "@/components/events/EventCard";
 import { Separator } from "@/components/ui/separator";
 import { Tag } from "@/components/ui/tag";
 import { useEvents } from "@/hooks/useEvents";
+import { useNavigate } from "react-router-dom";
 
 export default function Profile() {
   const { data: allEvents = [] } = useEvents();
+  const navigate = useNavigate();
   
   // Mocked user data - in a real app this would come from context/API
   const user = {
@@ -38,12 +40,21 @@ export default function Profile() {
   // Filter events based on user data
   const attendedEvents = allEvents.filter(event => user.attendedEvents.includes(event.id));
   const savedEvents = allEvents.filter(event => user.savedEvents.includes(event.id));
+
+  const handleSettingsClick = () => {
+    navigate('/settings');
+  };
   
   const header = (
-    <div className="bg-gradient-to-br from-indigo-600 to-blue-700 text-white pt-8 pb-20 px-4">
+    <div className="bg-gradient-to-br from-indigo-600 to-blue-700 text-white pt-8 pb-20 px-4 rounded-b-[40px]">
       <div className="flex justify-between items-center max-w-xl mx-auto">
         <h1 className="text-xl font-bold">My Profile</h1>
-        <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="text-white hover:bg-white/20 rounded-full"
+          onClick={handleSettingsClick}
+        >
           <Settings size={20} />
         </Button>
       </div>
@@ -53,7 +64,7 @@ export default function Profile() {
   return (
     <AppLayout header={header}>
       <div className="-mt-16 relative z-10 max-w-xl mx-auto">
-        <Card className="p-5 shadow-lg border-none bg-white/90 backdrop-blur-md">
+        <Card className="p-5 shadow-lg border-none bg-white/90 backdrop-blur-md rounded-3xl">
           <div className="flex items-center gap-4">
             <Avatar className="h-20 w-20 border-4 border-white shadow-md">
               <AvatarImage src={user.avatar} alt={user.name} />
@@ -65,7 +76,7 @@ export default function Profile() {
                 {user.university}, Class of {user.graduationYear}
               </p>
               <div className="flex items-center gap-2">
-                <Badge variant="outline" className="bg-blue-50 text-blue-700 hover:bg-blue-100">
+                <Badge variant="outline" className="bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-full">
                   {user.personality}
                 </Badge>
                 <span className="text-sm text-indigo-600 font-medium flex items-center">
@@ -80,7 +91,7 @@ export default function Profile() {
               <h3 className="text-sm font-medium text-gray-700 mb-2">Interests</h3>
               <div className="flex flex-wrap gap-2">
                 {user.interests.map((interest) => (
-                  <Tag key={interest} variant="category">{interest}</Tag>
+                  <Tag key={interest} variant="category" className="rounded-full">{interest}</Tag>
                 ))}
               </div>
             </div>
@@ -104,20 +115,20 @@ export default function Profile() {
       
       <div className="mt-6">
         <Tabs defaultValue="upcoming">
-          <TabsList className="w-full grid grid-cols-3">
-            <TabsTrigger value="upcoming">
+          <TabsList className="w-full grid grid-cols-3 rounded-xl">
+            <TabsTrigger value="upcoming" className="rounded-xl">
               <Calendar size={16} className="mr-1.5" /> Upcoming
             </TabsTrigger>
-            <TabsTrigger value="past">
+            <TabsTrigger value="past" className="rounded-xl">
               <Clock size={16} className="mr-1.5" /> Past
             </TabsTrigger>
-            <TabsTrigger value="saved">
+            <TabsTrigger value="saved" className="rounded-xl">
               <Award size={16} className="mr-1.5" /> Saved
             </TabsTrigger>
           </TabsList>
           
           <CardContent className="px-0 py-4">
-            <TabsContent value="upcoming" className="space-y-4 mt-0">
+            <TabsContent value="upcoming" className="space-y-6 mt-0">
               {attendedEvents.length > 0 ? (
                 attendedEvents.map(event => (
                   <EventCard key={event.id} event={event} />
@@ -129,13 +140,13 @@ export default function Profile() {
               )}
             </TabsContent>
             
-            <TabsContent value="past" className="space-y-4 mt-0">
+            <TabsContent value="past" className="space-y-6 mt-0">
               <p className="text-center py-10 text-gray-500">
                 You haven't attended any events yet
               </p>
             </TabsContent>
             
-            <TabsContent value="saved" className="space-y-4 mt-0">
+            <TabsContent value="saved" className="space-y-6 mt-0">
               {savedEvents.length > 0 ? (
                 savedEvents.map(event => (
                   <EventCard key={event.id} event={event} />
@@ -153,7 +164,7 @@ export default function Profile() {
       <Separator className="my-8" />
       
       <div>
-        <Button variant="outline" className="w-full">Sign Out</Button>
+        <Button variant="outline" className="w-full rounded-2xl">Sign Out</Button>
       </div>
     </AppLayout>
   );

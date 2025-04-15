@@ -37,8 +37,8 @@ export default function Discover() {
   const header = (
     <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-md shadow-sm">
       <div className="text-center py-6">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent pb-1">
-          EventCircle
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-sunset-pink via-sunset-orange to-sunset-yellow bg-clip-text text-transparent pb-1">
+          Joople
         </h1>
         <p className="text-sm text-gray-500">
           Connect through shared experiences
@@ -55,11 +55,11 @@ export default function Discover() {
     <AppLayout header={header}>
       <div className="py-6 space-y-8">
         <Tabs defaultValue="for-you" className="w-full">
-          <TabsList className="w-full grid grid-cols-4 mb-6">
-            <TabsTrigger value="for-you">For You</TabsTrigger>
-            <TabsTrigger value="trending">Trending</TabsTrigger>
-            <TabsTrigger value="weekend">Weekend</TabsTrigger>
-            <TabsTrigger value="editors">Editor's</TabsTrigger>
+          <TabsList className="w-full grid grid-cols-4 mb-6 rounded-xl">
+            <TabsTrigger value="for-you" className="rounded-xl">For You</TabsTrigger>
+            <TabsTrigger value="trending" className="rounded-xl">Trending</TabsTrigger>
+            <TabsTrigger value="weekend" className="rounded-xl">Weekend</TabsTrigger>
+            <TabsTrigger value="editors" className="rounded-xl">Editor's</TabsTrigger>
           </TabsList>
           
           <TabsContent value="for-you">

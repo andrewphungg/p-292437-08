@@ -83,16 +83,16 @@ export function FilterMenu({ onClose, onApplyFilters }: FilterMenuProps) {
   };
   
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-end justify-center sm:items-center p-4">
-      <div className="bg-white rounded-t-xl sm:rounded-xl max-h-[80vh] w-full max-w-lg overflow-y-auto">
-        <div className="sticky top-0 bg-white p-4 border-b flex items-center justify-between z-10">
+    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-3xl max-h-[80vh] w-full max-w-lg overflow-y-auto">
+        <div className="sticky top-0 bg-white p-4 border-b flex items-center justify-between z-10 rounded-t-3xl">
           <h3 className="font-medium text-lg">Filter Events</h3>
           <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100">
             <X size={18} />
           </button>
         </div>
         
-        <div className="p-4 space-y-6">
+        <div className="p-5 space-y-6">
           {/* Categories */}
           <div className="space-y-3">
             <h4 className="font-medium text-sm text-gray-700">Categories</h4>
@@ -104,6 +104,7 @@ export function FilterMenu({ onClose, onApplyFilters }: FilterMenuProps) {
                   interactive={true}
                   selected={selectedCategories.includes(category)}
                   onClick={() => toggleCategory(category)}
+                  className="rounded-full"
                 >
                   {category}
                 </Tag>
@@ -124,6 +125,7 @@ export function FilterMenu({ onClose, onApplyFilters }: FilterMenuProps) {
                   interactive={true}
                   selected={selectedMoods.includes(mood)}
                   onClick={() => toggleMood(mood)}
+                  className="rounded-full"
                 >
                   {mood}
                 </Tag>
@@ -187,9 +189,9 @@ export function FilterMenu({ onClose, onApplyFilters }: FilterMenuProps) {
                 <button
                   key={range.id}
                   onClick={() => setDateRange(range.id)}
-                  className={`py-2 px-3 rounded-md text-sm ${
+                  className={`py-2 px-3 rounded-2xl text-sm ${
                     dateRange === range.id
-                      ? 'bg-blue-100 text-blue-800 border border-blue-300'
+                      ? 'bg-sunset-orange/10 text-sunset-orange border border-sunset-orange/20'
                       : 'bg-gray-100 text-gray-700 border border-gray-100 hover:bg-gray-200'
                   }`}
                 >
@@ -200,17 +202,17 @@ export function FilterMenu({ onClose, onApplyFilters }: FilterMenuProps) {
           </div>
         </div>
         
-        <div className="sticky bottom-0 bg-white p-4 border-t flex items-center justify-between gap-4">
+        <div className="sticky bottom-0 bg-white p-4 border-t flex items-center justify-between gap-4 rounded-b-3xl">
           <Button
             variant="outline"
             onClick={handleClear}
-            className="flex-1"
+            className="flex-1 rounded-2xl"
           >
             Clear All
           </Button>
           <Button
             onClick={handleApply}
-            className="flex-1"
+            className="flex-1 bg-sunset-orange hover:bg-sunset-pink rounded-2xl"
           >
             Apply Filters
           </Button>

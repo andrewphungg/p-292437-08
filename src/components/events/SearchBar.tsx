@@ -9,9 +9,15 @@ interface SearchBarProps {
   onSearch?: (query: string) => void;
   defaultQuery?: string;
   placeholder?: string;
+  onFilterToggle?: () => void;
 }
 
-export function SearchBar({ onSearch, defaultQuery = "", placeholder = "Search events" }: SearchBarProps) {
+export function SearchBar({ 
+  onSearch, 
+  defaultQuery = "", 
+  placeholder = "Search events", 
+  onFilterToggle 
+}: SearchBarProps) {
   const [query, setQuery] = useState(defaultQuery);
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
   
@@ -21,9 +27,10 @@ export function SearchBar({ onSearch, defaultQuery = "", placeholder = "Search e
   };
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setQuery(e.target.value);
+    const newQuery = e.target.value;
+    setQuery(newQuery);
     // Optionally trigger search on each keystroke
-    // onSearch?.(e.target.value);
+    onSearch?.(newQuery);
   };
   
   const handleClear = () => {
@@ -33,6 +40,7 @@ export function SearchBar({ onSearch, defaultQuery = "", placeholder = "Search e
   
   const toggleFilterMenu = () => {
     setIsFilterMenuOpen(!isFilterMenuOpen);
+    onFilterToggle?.();
   };
   
   return (
@@ -49,9 +57,9 @@ export function SearchBar({ onSearch, defaultQuery = "", placeholder = "Search e
             onChange={handleChange}
             placeholder={placeholder}
             className={cn(
-              "w-full py-2.5 pl-10 pr-12 rounded-xl bg-white/90 backdrop-blur-sm",
-              "border border-gray-200 shadow-sm placeholder:text-gray-400",
-              "focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent"
+              "w-full py-3 pl-10 pr-16 rounded-2xl bg-white shadow-sm",
+              "border border-gray-200 placeholder:text-gray-400 text-gray-800",
+              "focus:outline-none focus:ring-2 focus:ring-sunset-orange/30 focus:border-transparent"
             )}
           />
           
@@ -70,7 +78,7 @@ export function SearchBar({ onSearch, defaultQuery = "", placeholder = "Search e
             variant="ghost"
             size="sm"
             onClick={toggleFilterMenu}
-            className="absolute right-2 text-gray-500 hover:text-gray-700 hover:bg-transparent"
+            className="absolute right-2 text-sunset-orange hover:text-sunset-pink hover:bg-transparent"
           >
             <SlidersHorizontal size={18} />
           </Button>
