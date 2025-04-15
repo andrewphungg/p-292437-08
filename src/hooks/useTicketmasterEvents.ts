@@ -10,6 +10,7 @@ import {
   getEventsByDateRange
 } from '@/services/ticketmasterService';
 import { Event } from '@/types/event';
+import { toast } from 'sonner';
 
 export function useTicketmasterEvents(options?: {
   keyword?: string;
@@ -44,13 +45,26 @@ export function useTicketmasterEvents(options?: {
     }
   };
 
-  return useQuery({
+  const query = useQuery({
     queryKey: ['ticketmasterEvents', { keyword, category, city, stateCode, startDate, endDate }],
     queryFn,
     enabled,
     staleTime: 1000 * 60 * 15, // 15 minutes
     refetchOnWindowFocus: false,
+    onError: (error) => {
+      console.error('Error fetching events:', error);
+      toast.error('Failed to fetch events. Please try again later.');
+    }
   });
+
+  // Log successful results
+  useEffect(() => {
+    if (query.data) {
+      console.log(`Fetched ${query.data.length} events from Ticketmaster`);
+    }
+  }, [query.data]);
+
+  return query;
 }
 
 // This hook will be used to sync events daily

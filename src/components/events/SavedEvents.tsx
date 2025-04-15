@@ -21,7 +21,7 @@ export function SavedEvents({ savedEvents: initialEvents }: SavedEventsProps) {
   const [undoToastId, setUndoToastId] = useState<string | null>(null);
   
   const handleRemoveEvent = (id: string) => {
-    const eventIndex = savedEvents.findIndex(event => event.id === id);
+    const eventIndex = savedEvents.findIndex(event => String(event.id) === id);
     const eventToRemove = savedEvents[eventIndex];
     
     if (eventToRemove) {
@@ -31,7 +31,7 @@ export function SavedEvents({ savedEvents: initialEvents }: SavedEventsProps) {
       });
       
       // Remove event from list
-      setSavedEvents(prev => prev.filter(event => event.id !== id));
+      setSavedEvents(prev => prev.filter(event => String(event.id) !== id));
       
       // Dismiss any existing toast to prevent stacking
       if (undoToastId) {

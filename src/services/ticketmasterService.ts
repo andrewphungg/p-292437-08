@@ -1,9 +1,12 @@
 
 import { Event } from "@/types/event";
 
-// Get API key from localStorage
+// Default API key
+const DEFAULT_API_KEY = "CYB4SkyODasGUeUeBSlZZDXphPms6AL7";
+
+// Get API key from localStorage or use the default one
 const getApiKey = () => {
-  return localStorage.getItem("ticketmasterApiKey") || "YOUR_TICKETMASTER_API_KEY";
+  return localStorage.getItem("ticketmasterApiKey") || DEFAULT_API_KEY;
 };
 
 // This interface defines the structure of a Ticketmaster event
@@ -75,21 +78,22 @@ export const fetchTicketmasterEvents = async (
   } = {}
 ): Promise<Event[]> => {
   try {
-    // Get the API key from localStorage
+    // Get the API key from localStorage or use default
     const apiKey = getApiKey();
-    
-    // If no API key is set, return empty array
-    if (apiKey === "YOUR_TICKETMASTER_API_KEY") {
-      console.warn("No Ticketmaster API key set. Please set an API key in the settings.");
-      return [];
-    }
     
     // Construct the API URL with parameters
     const baseUrl = "https://app.ticketmaster.com/discovery/v2/events.json";
-    const queryParams = new URLSearchParams({
-      apikey: apiKey,
-      size: "20", // Number of events to retrieve
-      ...params,
+    
+    // Fix: Use proper URLSearchParams constructor
+    const queryParams = new URLSearchParams();
+    queryParams.append("apikey", apiKey);
+    queryParams.append("size", "20");
+    
+    // Add other params
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined) {
+        queryParams.append(key, String(value));
+      }
     });
 
     const response = await fetch(`${baseUrl}?${queryParams.toString()}`);
@@ -98,6 +102,7 @@ export const fetchTicketmasterEvents = async (
     }
 
     const data = await response.json();
+    console.log("Ticketmaster API response:", data);
     
     // Check if events exist
     if (!data._embedded || !data._embedded.events) {

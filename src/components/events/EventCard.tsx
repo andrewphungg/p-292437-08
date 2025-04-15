@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Calendar, MapPin, Users, ArrowUpRight, Heart, Trash2, RefreshCcw } from "lucide-react";
@@ -42,7 +43,9 @@ export function EventCard({
 
   const { user, addSavedEvent, removeSavedEvent } = useUser();
   
-  const [saved, setSaved] = useState(isSaved || (user.savedEvents?.includes(String(id)) || false));
+  // Fix: Convert id to string to match the expected type
+  const eventId = String(id);
+  const [saved, setSaved] = useState(isSaved || (user.savedEvents?.includes(eventId) || false));
   const [showConfetti, setShowConfetti] = useState(false);
   const [hasShownConfetti, setHasShownConfetti] = useState(false);
   const [undoToastId, setUndoToastId] = useState<string | null>(null);
@@ -73,7 +76,7 @@ export function EventCard({
     
     if (!wasSaved) {
       // Add to saved events
-      addSavedEvent(String(id));
+      addSavedEvent(eventId);
       if (!hasShownConfetti) {
         setShowConfetti(true);
         setHasShownConfetti(true);
@@ -81,7 +84,7 @@ export function EventCard({
       }
     } else {
       // Remove from saved events
-      removeSavedEvent(String(id));
+      removeSavedEvent(eventId);
     }
     
     // Dismiss any existing toast to prevent stacking
@@ -98,9 +101,9 @@ export function EventCard({
           onClick={() => {
             setSaved(wasSaved);
             if (wasSaved) {
-              addSavedEvent(String(event.id));
+              addSavedEvent(eventId);
             } else {
-              removeSavedEvent(String(event.id));
+              removeSavedEvent(eventId);
             }
             toast.dismiss(toastId);
           }}

@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { SearchBar } from "@/components/events/SearchBar";
 import { EventCard } from "@/components/events/EventCard";
 import { useUser } from "@/context/UserContext";
@@ -9,15 +9,25 @@ import { cn } from "@/lib/utils";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { MapPin, Music, Tag, Compass, TrendingUp, Calendar, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTicketmasterEvents, useFilteredEvents } from "@/hooks/useTicketmasterEvents";
+import { toast } from "sonner";
 
 const Index = () => {
-  const { events, suggestedEvents, user } = useUser();
+  const { user } = useUser();
   
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [filterMenuOpen, setFilterMenuOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState("all");
   
+  // Use Ticketmaster API to get events
+  const { data: ticketmasterEvents = [], isLoading } = useTicketmasterEvents();
+  
+  // For trending events
+  const { data: weekendEvents = [], isLoading: isLoadingWeekend } = useFilteredEvents({
+    dateRange: 'this-weekend'
+  });
+
   const handleSearch = (query: string) => {
     setSearchQuery(query);
   };
@@ -58,13 +68,13 @@ const Index = () => {
   ];
 
   // Filter events based on search query, selected categories, and active filter
-  const filteredEvents = (suggestedEvents.length > 0 ? suggestedEvents : events).filter(event => {
+  const filteredEvents = (ticketmasterEvents).filter(event => {
     const matchesSearch = searchQuery === "" || 
       event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (typeof event.location === 'object' && event.location.name.toLowerCase().includes(searchQuery.toLowerCase()));
       
     const matchesCategories = selectedCategories.length === 0 || 
-      selectedCategories.some(category => event.tags.includes(category));
+      selectedCategories.some(category => event.tags.includes(category) || event.category === category);
 
     // Additional filter based on the active filter tab
     const matchesActiveFilter = 
@@ -100,10 +110,14 @@ const Index = () => {
   };
 
   // Get trending events
-  const trendingEvents = events.filter(event => event.isTrending).slice(0, 6);
-  
-  // Get weekend events
-  const weekendEvents = events.filter(event => isWeekendEvent(event.date)).slice(0, 4);
+  const trendingEvents = ticketmasterEvents.filter(event => event.isTrending).slice(0, 6);
+
+  useEffect(() => {
+    // Show a toast when events are loaded
+    if (ticketmasterEvents.length > 0 && !isLoading) {
+      toast.success(`Loaded ${ticketmasterEvents.length} events from Ticketmaster`);
+    }
+  }, [ticketmasterEvents.length, isLoading]);
   
   const header = (
     <header className="sticky top-0 z-20 bg-white/80 dark:bg-gray-900/90 backdrop-blur-md shadow-sm">
@@ -190,10 +204,19 @@ const Index = () => {
               </Button>
             </div>
             <div className="flex flex-col gap-6">
-              {filteredEvents.slice(0, 5).map(event => (
-                <EventCard key={event.id} event={event} />
-              ))}
-              {filteredEvents.length === 0 && (
+              {isLoading ? (
+                <div className="text-center py-8">
+                  <div className="animate-pulse flex flex-col items-center">
+                    <div className="h-12 w-12 rounded-full bg-gray-200 dark:bg-gray-700 mb-2"></div>
+                    <div className="h-4 w-40 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
+                    <div className="h-2 w-60 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                  </div>
+                </div>
+              ) : filteredEvents.length > 0 ? (
+                filteredEvents.slice(0, 5).map(event => (
+                  <EventCard key={event.id} event={event} />
+                ))
+              ) : (
                 <p className="text-center py-8 text-gray-500 dark:text-gray-400">
                   No events match your search criteria
                 </p>
@@ -205,9 +228,19 @@ const Index = () => {
           <section>
             <h2 className="section-title font-bold">Trending</h2>
             <div className="grid grid-cols-2 gap-4">
-              {trendingEvents.map(event => (
-                <EventCard key={event.id} event={event} variant="compact" />
-              ))}
+              {isLoading ? (
+                Array(4).fill(0).map((_, i) => (
+                  <div key={i} className="animate-pulse h-48 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+                ))
+              ) : trendingEvents.length > 0 ? (
+                trendingEvents.map(event => (
+                  <EventCard key={event.id} event={event} variant="compact" />
+                ))
+              ) : (
+                <p className="col-span-2 text-center py-8 text-gray-500 dark:text-gray-400">
+                  No trending events available
+                </p>
+              )}
             </div>
           </section>
           
@@ -215,9 +248,19 @@ const Index = () => {
           <section>
             <h2 className="section-title font-bold">This Weekend</h2>
             <div className="flex flex-col gap-6">
-              {weekendEvents.map(event => (
-                <EventCard key={event.id} event={event} />
-              ))}
+              {isLoadingWeekend ? (
+                Array(2).fill(0).map((_, i) => (
+                  <div key={i} className="animate-pulse h-32 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+                ))
+              ) : weekendEvents.length > 0 ? (
+                weekendEvents.map(event => (
+                  <EventCard key={event.id} event={event} />
+                ))
+              ) : (
+                <p className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  No events scheduled for this weekend
+                </p>
+              )}
             </div>
           </section>
         </div>

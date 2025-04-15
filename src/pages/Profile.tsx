@@ -1,278 +1,124 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { useUser } from "@/context/UserContext";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SavedEvents } from "@/components/events/SavedEvents";
-import { Link } from "react-router-dom";
-import { Settings, Award, Edit2, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
+import { useUser } from "@/context/UserContext";
+import { HistoryIcon, BadgeCheck, Calendar, MapPin, Calendar as CalendarIcon, Settings } from "lucide-react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 export default function Profile() {
-  const { user, events, updateProfile } = useUser();
+  const { user, savedEvents } = useUser();
+  const [activeTab, setActiveTab] = useState("saved");
   
-  // Get saved events
-  const savedEvents = events.filter(event => user.savedEvents?.includes(event.id)) || [];
-  
-  // Mock badges with improved design
-  const [badges, setBadges] = useState([
-    { id: "1", name: "Early Adopter", icon: "🌟", color: "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300" },
-    { id: "2", name: "Social Butterfly", icon: "🦋", color: "bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300" },
-    { id: "3", name: "Event Explorer", icon: "🧭", color: "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-300" },
-  ]);
-
-  // Available interests for the user to select
-  const [availableInterests, setAvailableInterests] = useState([
-    { id: "4", name: "Party Animal", icon: "🎉", color: "bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-300", category: "social" },
-    { id: "5", name: "Weekend Warrior", icon: "⚔️", color: "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-300", category: "outdoors" },
-    { id: "6", name: "Music Lover", icon: "🎵", color: "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300", category: "music" },
-    { id: "7", name: "Foodie", icon: "🍽️", color: "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-300", category: "food" },
-    { id: "8", name: "Bookworm", icon: "📚", color: "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-300", category: "education" },
-    { id: "9", name: "Fitness Enthusiast", icon: "💪", color: "bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-300", category: "fitness" },
-    { id: "10", name: "Art Aficionado", icon: "🎨", color: "bg-fuchsia-100 dark:bg-fuchsia-900/30 text-fuchsia-600 dark:text-fuchsia-300", category: "arts" },
-    { id: "11", name: "Nature Explorer", icon: "🏞️", color: "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-300", category: "outdoors" },
-    { id: "12", name: "Tech Geek", icon: "💻", color: "bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-300", category: "tech" },
-  ]);
-
-  // Music-related interests that appear when user selects Music Lover
-  const musicRelatedInterests = [
-    { id: "13", name: "Concert Goer", icon: "🎤", color: "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300", category: "music" },
-    { id: "14", name: "Festival Fan", icon: "🎪", color: "bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-300", category: "music" },
-    { id: "15", name: "Record Collector", icon: "💿", color: "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300", category: "music" },
-  ];
-
-  // Food-related interests that appear when user selects Foodie
-  const foodRelatedInterests = [
-    { id: "16", name: "Culinary Explorer", icon: "🍳", color: "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-300", category: "food" },
-    { id: "17", name: "Wine Enthusiast", icon: "🍷", color: "bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-300", category: "food" },
-    { id: "18", name: "Coffee Connoisseur", icon: "☕", color: "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-300", category: "food" },
-  ];
-
-  // Function to add a badge
-  const addBadge = (badge: any) => {
-    // Check if badge already exists
-    if (!badges.find(b => b.id === badge.id)) {
-      setBadges([...badges, badge]);
-      
-      // Add related interests based on category
-      if (badge.category === "music") {
-        setAvailableInterests([...availableInterests, ...musicRelatedInterests.filter(i => !availableInterests.find(ai => ai.id === i.id))]);
-      } else if (badge.category === "food") {
-        setAvailableInterests([...availableInterests, ...foodRelatedInterests.filter(i => !availableInterests.find(ai => ai.id === i.id))]);
-      }
-    }
-  };
-
-  // Function to remove a badge
-  const removeBadge = (badgeId: string) => {
-    setBadges(badges.filter(badge => badge.id !== badgeId));
-  };
+  // Default bio text if user hasn't set one
+  const bioText = user.bio || "No bio set. Add a short description about yourself in the settings.";
   
   const header = (
-    <div className="relative">
-      <div className="h-32 bg-gradient-to-r from-primary to-primary-foreground/20"></div>
-      <div className="absolute top-0 right-0 p-4">
-        <Link to="/settings">
-          <Button 
-            variant="secondary" 
-            size="icon"
-            className="bg-white/80 dark:bg-gray-800/70 backdrop-blur-sm shadow-md hover:bg-white/90 dark:hover:bg-gray-700/80"
-          >
-            <Settings size={18} className="text-gray-700 dark:text-white" />
-          </Button>
-        </Link>
+    <header className="bg-gradient-to-b from-sunset-purple/20 to-transparent py-8 text-center relative">
+      <div className="relative z-10">
+        <Avatar className="w-24 h-24 mx-auto border-4 border-white shadow-lg">
+          <div className="w-full h-full rounded-full bg-gradient-to-br from-sunset-purple to-sunset-orange flex items-center justify-center text-white text-2xl font-bold">
+            {user.name ? user.name.charAt(0).toUpperCase() : '?'}
+          </div>
+        </Avatar>
+        <h1 className="mt-4 text-2xl font-bold">{user.name || "Your Name"}</h1>
+        <div className="flex items-center justify-center mt-1">
+          <MapPin size={14} className="text-gray-500 mr-1" />
+          <span className="text-gray-500 text-sm">{user.location || "Your Location"}</span>
+        </div>
+        
+        <div className="mt-4 flex justify-center">
+          <Link to="/settings">
+            <Button variant="outline" size="sm" className="rounded-full">
+              <Settings size={14} className="mr-1.5" />
+              Edit Profile
+            </Button>
+          </Link>
+        </div>
       </div>
-    </div>
+    </header>
   );
-
+  
   return (
     <AppLayout header={header}>
-      <div className="relative pb-20">
-        <div className="-mt-14 px-4 flex flex-col items-center">
-          <Avatar className="w-28 h-28 border-4 border-white dark:border-gray-900 shadow-lg">
-            <AvatarImage src={user.avatar} alt={user.name} />
-            <AvatarFallback className="text-2xl bg-gradient-to-br from-primary to-purple-500 text-white">{user.name.charAt(0)}</AvatarFallback>
-          </Avatar>
-          
-          <h1 className="mt-4 text-2xl font-bold">{user.name}</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">{user.bio || ""}</p>
-          
-          <div className="flex items-center mt-2 text-primary font-medium">
-            <Award size={18} className="mr-1" />
-            <span>{user.points} points</span>
+      <div className="py-4">
+        {/* Bio Section - Enhanced to be more distinct */}
+        <Card className="mb-6 overflow-hidden border-none shadow-md">
+          <div className="bg-gradient-to-r from-sunset-purple/10 via-sunset-orange/10 to-sunset-peach/10 px-4 py-3 border-b">
+            <h2 className="font-semibold text-lg flex items-center">
+              <BadgeCheck size={18} className="mr-2 text-primary" />
+              About Me
+            </h2>
           </div>
-          
-          <div className="flex flex-wrap gap-1 mt-3 justify-center">
-            {badges.slice(0, 3).map((badge) => (
-              <div
-                key={badge.id}
-                className={`${badge.color} px-2 py-1 rounded-full text-xs flex items-center`}
-              >
-                <span className="mr-1">{badge.icon}</span>
-                <span>{badge.name}</span>
-              </div>
-            ))}
-            {badges.length > 3 && (
-              <div className="px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-xs">
-                +{badges.length - 3} more
-              </div>
-            )}
-          </div>
-          
-          <div className="w-full max-w-md mt-6">
-            <Tabs defaultValue="saved" className="w-full">
-              <TabsList className="grid grid-cols-3 mb-6 rounded-full">
-                <TabsTrigger value="saved" className="rounded-full">Saved</TabsTrigger>
-                <TabsTrigger value="badges" className="rounded-full">Badges</TabsTrigger>
-                <TabsTrigger value="activity" className="rounded-full">Activity</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="saved">
-                <SavedEvents savedEvents={savedEvents} />
-              </TabsContent>
-              
-              <TabsContent value="badges">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="font-semibold">Your Badges</h3>
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" size="sm" className="rounded-full flex gap-1 items-center">
-                        <Edit2 size={14} />
-                        Edit Badges
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-md rounded-3xl">
-                      <DialogHeader>
-                        <DialogTitle>Manage Your Badges</DialogTitle>
-                      </DialogHeader>
-                      
-                      <div className="py-4">
-                        <h4 className="text-sm font-medium mb-2">Your Badges</h4>
-                        <div className="grid grid-cols-2 gap-2 mb-6">
-                          {badges.map((badge) => (
-                            <motion.div 
-                              key={badge.id}
-                              className={`${badge.color} p-4 rounded-2xl flex items-center justify-between`}
-                              initial={{ scale: 1 }}
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
-                            >
-                              <div className="flex items-center space-x-2">
-                                <div className="text-2xl">{badge.icon}</div>
-                                <div className="font-medium text-sm">{badge.name}</div>
-                              </div>
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className="h-6 w-6 p-0 rounded-full hover:bg-white/20 text-gray-700"
-                                onClick={() => removeBadge(badge.id)}
-                              >
-                                <X size={14} />
-                              </Button>
-                            </motion.div>
-                          ))}
-                        </div>
-                        
-                        <h4 className="text-sm font-medium mb-2">Available Interests</h4>
-                        <div className="grid grid-cols-2 gap-2 max-h-[300px] overflow-y-auto pr-1">
-                          {availableInterests
-                            .filter(interest => !badges.find(b => b.id === interest.id))
-                            .map((interest) => (
-                              <motion.div 
-                                key={interest.id}
-                                className={`${interest.color} p-4 rounded-2xl flex items-center justify-between cursor-pointer`}
-                                onClick={() => addBadge(interest)}
-                                initial={{ scale: 1 }}
-                                whileHover={{ scale: 1.03 }}
-                                whileTap={{ scale: 0.97 }}
-                              >
-                                <div className="flex items-center space-x-2">
-                                  <div className="text-2xl">{interest.icon}</div>
-                                  <div className="font-medium text-sm">{interest.name}</div>
-                                </div>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  className="h-6 w-6 p-0 rounded-full hover:bg-white/20 text-gray-700"
-                                >
-                                  <X size={14} />
-                                </Button>
-                              </motion.div>
-                            ))}
-                        </div>
-                      </div>
-                      
-                      <DialogClose asChild>
-                        <Button className="rounded-full w-full">Done</Button>
-                      </DialogClose>
-                    </DialogContent>
-                  </Dialog>
-                </div>
+          <CardContent className="p-4">
+            <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-xl border border-gray-100 dark:border-gray-800 italic text-gray-700 dark:text-gray-300">
+              {bioText}
+            </div>
+          </CardContent>
+        </Card>
 
-                <div className="grid grid-cols-2 gap-4">
-                  {badges.map((badge, index) => (
-                    <motion.div 
-                      key={badge.id}
-                      className={`${badge.color} p-4 rounded-2xl flex items-center shadow-sm space-x-3`}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3, delay: index * 0.05 }}
-                      whileHover={{ y: -2, transition: { duration: 0.2 } }}
-                    >
-                      <div className="text-2xl">{badge.icon}</div>
-                      <div>
-                        <p className="font-medium">{badge.name}</p>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="activity">
-                <div className="space-y-4">
-                  <motion.div 
-                    className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <p className="font-medium">You joined Joople!</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {new Date(user.joinedAt || new Date()).toLocaleDateString()}
-                    </p>
-                  </motion.div>
-                  
-                  <motion.div 
-                    className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 0.1 }}
-                  >
-                    <p className="font-medium">You earned the Early Adopter badge</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {new Date(user.joinedAt || new Date()).toLocaleDateString()}
-                    </p>
-                  </motion.div>
-
-                  <motion.div 
-                    className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 0.2 }}
-                  >
-                    <p className="font-medium">You attended your first event</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toLocaleDateString()}
-                    </p>
-                  </motion.div>
-                </div>
-              </TabsContent>
-            </Tabs>
-          </div>
-        </div>
+        <Tabs 
+          defaultValue="saved" 
+          value={activeTab} 
+          onValueChange={setActiveTab}
+          className="w-full"
+        >
+          <TabsList className="w-full grid grid-cols-3 mb-6 rounded-xl">
+            <TabsTrigger value="saved" className="rounded-xl">
+              <Calendar size={16} className="mr-1.5" /> Saved
+            </TabsTrigger>
+            <TabsTrigger value="attending" className="rounded-xl">
+              <CalendarIcon size={16} className="mr-1.5" /> Attending
+            </TabsTrigger>
+            <TabsTrigger value="history" className="rounded-xl">
+              <HistoryIcon size={16} className="mr-1.5" /> History
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="saved" className="space-y-4">
+            <SavedEvents savedEvents={savedEvents} />
+          </TabsContent>
+          
+          <TabsContent value="attending">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="py-10 text-center"
+            >
+              <div className="mb-6">
+                <Calendar size={64} className="mx-auto text-gray-300 dark:text-gray-600" />
+              </div>
+              <h3 className="text-lg font-medium mb-2">No Upcoming Events</h3>
+              <p className="text-muted-foreground mb-6">You haven't confirmed attendance for any events yet.</p>
+              <Link to="/">
+                <Button>Browse Events</Button>
+              </Link>
+            </motion.div>
+          </TabsContent>
+          
+          <TabsContent value="history">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="py-10 text-center"
+            >
+              <div className="mb-6">
+                <HistoryIcon size={64} className="mx-auto text-gray-300 dark:text-gray-600" />
+              </div>
+              <h3 className="text-lg font-medium mb-2">No Event History</h3>
+              <p className="text-muted-foreground mb-6">Your attended events will appear here.</p>
+              <Link to="/">
+                <Button>Browse Events</Button>
+              </Link>
+            </motion.div>
+          </TabsContent>
+        </Tabs>
       </div>
     </AppLayout>
   );

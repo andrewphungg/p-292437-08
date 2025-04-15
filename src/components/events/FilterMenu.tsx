@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect, useRef } from "react";
-import { X, Filter } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { X, Filter, Compass, TrendingUp, Calendar, Clock } from "lucide-react";
 import { Button } from "../ui/button";
 import { Tag } from "../ui/tag";
 import { Slider } from "@/components/ui/slider";
@@ -67,12 +67,12 @@ export function FilterMenu({ onClose, onApplyFilters, open, defaultFilterOptions
     { id: "next-month", label: "Next Month" }
   ];
   
-  // Filter options with icons
+  // Default filter options for the dropdown showing same options as Home page
   const filterOptions = [
-    { id: "all", label: "All", icon: "🔍" },
-    { id: "trending", label: "Trending", icon: "🔥" },
-    { id: "weekend", label: "This Weekend", icon: "🗓️" },
-    { id: "upcoming", label: "Upcoming", icon: "⏳" },
+    { id: "all", label: "All", icon: <Compass size={16} /> },
+    { id: "trending", label: "Trending", icon: <TrendingUp size={16} /> },
+    { id: "weekend", label: "This Weekend", icon: <Calendar size={16} /> },
+    { id: "upcoming", label: "Upcoming", icon: <Clock size={16} /> },
   ];
   
   const toggleCategory = (category: string) => {
@@ -132,9 +132,9 @@ export function FilterMenu({ onClose, onApplyFilters, open, defaultFilterOptions
         </div>
         
         <div className="p-5 space-y-6 overflow-y-auto max-h-[calc(85vh-160px)]">
-          {/* Default Filters */}
+          {/* Default Filters - Same as Home page */}
           <div className="space-y-3">
-            <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300">Popular Filters</h4>
+            <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300">Quick Filters</h4>
             <div className="flex flex-wrap gap-2">
               {filterOptions.map(filter => (
                 <Button
@@ -149,7 +149,8 @@ export function FilterMenu({ onClose, onApplyFilters, open, defaultFilterOptions
                   )}
                   onClick={() => setDateRange(filter.id)}
                 >
-                  <span>{filter.icon} {filter.label}</span>
+                  {filter.icon}
+                  <span>{filter.label}</span>
                 </Button>
               ))}
             </div>
@@ -201,7 +202,7 @@ export function FilterMenu({ onClose, onApplyFilters, open, defaultFilterOptions
 
           <Separator className="dark:bg-gray-800" />
           
-          {/* Price Range */}
+          {/* Price Range - Improved slider appearance */}
           <div className="space-y-3">
             <div className="flex justify-between">
               <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300">Price Range</h4>
@@ -225,7 +226,7 @@ export function FilterMenu({ onClose, onApplyFilters, open, defaultFilterOptions
 
           <Separator className="dark:bg-gray-800" />
           
-          {/* Distance */}
+          {/* Distance - Improved slider appearance */}
           <div className="space-y-3">
             <div className="flex justify-between">
               <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300">Distance</h4>
