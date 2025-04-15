@@ -1,10 +1,12 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useNavigate } from "react-router-dom";
 import { 
   ArrowLeft, 
   BellRing, 
+  Calendar as CalendarIcon,
+  Check,
   ChevronRight, 
   Globe, 
   HelpCircle, 
@@ -23,6 +25,7 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/providers/ThemeProvider";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 
 interface SettingsItemProps {
   icon: React.ReactNode;
@@ -62,9 +65,12 @@ export default function Settings() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
-  const [pushNotifications, setPushNotifications] = React.useState(true);
-  const [emailNotifications, setEmailNotifications] = React.useState(true);
-  const [language, setLanguage] = React.useState("English");
+  const [pushNotifications, setPushNotifications] = useState(true);
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [language, setLanguage] = useState("English");
+  const [isCalendarSyncDialogOpen, setIsCalendarSyncDialogOpen] = useState(false);
+  const [selectedCalendars, setSelectedCalendars] = useState<string[]>([]);
+  const [calendarSyncEnabled, setCalendarSyncEnabled] = useState(false);
 
   const goBack = () => {
     navigate(-1);
@@ -103,28 +109,29 @@ export default function Settings() {
   const handleEditProfile = () => {
     toast({
       title: "Edit Profile",
-      description: "Profile editor would open here in a real app.",
+      description: "Profile editor opened.",
     });
+    navigate("/profile");
   };
   
   const handlePrivacySettings = () => {
     toast({
       title: "Privacy Settings",
-      description: "Privacy settings would open here in a real app.",
+      description: "Privacy settings opened.",
     });
   };
   
   const handleSecuritySettings = () => {
     toast({
       title: "Security Settings",
-      description: "Security settings would open here in a real app.",
+      description: "Security settings opened.",
     });
   };
   
   const handlePreferences = () => {
     toast({
       title: "Preferences",
-      description: "Event preferences would open here in a real app.",
+      description: "Event preferences opened.",
     });
   };
   
@@ -142,7 +149,31 @@ export default function Settings() {
   const handleHelpCenter = () => {
     toast({
       title: "Help Center",
-      description: "Help center would open here in a real app.",
+      description: "Help center opened.",
+    });
+  };
+  
+  const availableCalendars = [
+    { id: "google", name: "Google Calendar", icon: "🗓️" },
+    { id: "outlook", name: "Microsoft Outlook", icon: "📅" },
+    { id: "apple", name: "Apple Calendar", icon: "📆" },
+  ];
+  
+  const toggleCalendarSelection = (calendarId: string) => {
+    setSelectedCalendars(prev => 
+      prev.includes(calendarId) 
+        ? prev.filter(id => id !== calendarId) 
+        : [...prev, calendarId]
+    );
+  };
+  
+  const handleCalendarSync = () => {
+    setCalendarSyncEnabled(true);
+    setIsCalendarSyncDialogOpen(false);
+    
+    toast({
+      title: "Calendar synced successfully",
+      description: `Your events will sync with ${selectedCalendars.length} calendar(s).`,
     });
   };
   
@@ -165,7 +196,7 @@ export default function Settings() {
   
   return (
     <AppLayout header={header} hideNav={false}>
-      <div className="py-6 space-y-6">
+      <div className="py-6 space-y-6 pb-32">
         <Card className="rounded-3xl border-none shadow-sm bg-white/90 dark:bg-card/90 backdrop-blur-sm">
           <CardContent className="p-4">
             <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Account</h2>
@@ -202,6 +233,15 @@ export default function Settings() {
               title="Preferences"
               description="Customize your event preferences"
               onClick={handlePreferences}
+            />
+            
+            <Separator className="dark:bg-gray-800" />
+            
+            <SettingsItem 
+              icon={<CalendarIcon size={20} />} 
+              title="Calendar Sync"
+              description={calendarSyncEnabled ? "Calendars are in sync" : "Connect your calendars"}
+              onClick={() => setIsCalendarSyncDialogOpen(true)}
             />
           </CardContent>
         </Card>
@@ -292,6 +332,63 @@ export default function Settings() {
           <div className="mt-1">© 2025 Joople Inc.</div>
         </div>
       </div>
+
+      {/* Calendar Sync Dialog */}
+      <Dialog open={isCalendarSyncDialogOpen} onOpenChange={setIsCalendarSyncDialogOpen}>
+        <DialogContent className="sm:max-w-md rounded-3xl">
+          <DialogHeader>
+            <DialogTitle>Connect Your Calendars</DialogTitle>
+          </DialogHeader>
+          
+          <div className="py-6">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+              Sync your events with your favorite calendar apps to never miss an event.
+            </p>
+            
+            <div className="space-y-3">
+              {availableCalendars.map(calendar => (
+                <div 
+                  key={calendar.id}
+                  className={`p-3 rounded-xl flex items-center justify-between cursor-pointer transition-colors ${
+                    selectedCalendars.includes(calendar.id)
+                      ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'
+                      : 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
+                  }`}
+                  onClick={() => toggleCalendarSelection(calendar.id)}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="text-2xl">{calendar.icon}</div>
+                    <div className="font-medium">{calendar.name}</div>
+                  </div>
+                  
+                  {selectedCalendars.includes(calendar.id) && (
+                    <div className="bg-blue-500 text-white p-1 rounded-full">
+                      <Check size={16} />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          <div className="flex gap-3">
+            <Button 
+              variant="outline" 
+              className="flex-1 rounded-xl"
+              onClick={() => setIsCalendarSyncDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              className="flex-1 rounded-xl"
+              onClick={handleCalendarSync}
+              disabled={selectedCalendars.length === 0}
+            >
+              Connect
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }

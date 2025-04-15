@@ -100,7 +100,9 @@ export function FilterMenu({ onClose, onApplyFilters, open }: FilterMenuProps) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      if (!isOpen) onClose();
+    }}>
       <DialogContent className="bg-white dark:bg-gray-900 rounded-3xl max-h-[85vh] p-0 w-full max-w-lg overflow-hidden shadow-xl">
         <div className="sticky top-0 bg-white dark:bg-gray-900 p-4 border-b dark:border-gray-800 flex items-center justify-between z-10 rounded-t-3xl">
           <DialogHeader>

@@ -20,8 +20,9 @@ export function ThemeToggle({ className, variant = "default" }: ThemeToggleProps
   if (variant === "modern") {
     return (
       <motion.div
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
+        initial={{ scale: 1 }}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
       >
         <Button
           variant="outline"
@@ -30,7 +31,7 @@ export function ThemeToggle({ className, variant = "default" }: ThemeToggleProps
           className={cn(
             "rounded-full bg-background/10 border-primary/20 backdrop-blur-md shadow-md transition-all",
             theme === "dark" 
-              ? "hover:bg-primary/20 text-primary-foreground" 
+              ? "hover:bg-primary/20 text-yellow-300 border-yellow-300/30" 
               : "hover:bg-secondary/20 text-foreground",
             className
           )}
@@ -57,8 +58,9 @@ export function ThemeToggle({ className, variant = "default" }: ThemeToggleProps
   
   return (
     <motion.div
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.9 }}
+      initial={{ scale: 1 }}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
     >
       <Button
         variant="ghost"
@@ -66,6 +68,7 @@ export function ThemeToggle({ className, variant = "default" }: ThemeToggleProps
         onClick={toggleTheme}
         className={cn(
           "rounded-full hover:bg-background/20 transition-all",
+          theme === "dark" ? "text-yellow-300" : "text-gray-700",
           className
         )}
         aria-label="Toggle theme"
@@ -75,12 +78,12 @@ export function ThemeToggle({ className, variant = "default" }: ThemeToggleProps
           initial={{ scale: 0.5, opacity: 0, rotate: -30 }}
           animate={{ scale: 1, opacity: 1, rotate: 0 }}
           exit={{ scale: 0.5, opacity: 0, rotate: 30 }}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: 0.2 }}
         >
           {theme === "dark" ? (
-            <Sun className="h-5 w-5 text-yellow-400" />
+            <Sun className="h-5 w-5" />
           ) : (
-            <Moon className="h-5 w-5 text-gray-500" />
+            <Moon className="h-5 w-5" />
           )}
         </motion.div>
         <span className="sr-only">Toggle theme</span>

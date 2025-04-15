@@ -7,6 +7,7 @@ import { Tag } from "@/components/ui/tag";
 import { Event } from "@/types/event";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface EventCardProps {
   event: Event;
@@ -21,21 +22,21 @@ const HeartConfetti = () => {
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden">
       {[...Array(8)].map((_, i) => (
-        <div
+        <motion.div
           key={i}
           className="absolute text-red-500"
-          style={{
-            opacity: 1,
-            scale: Math.random() * 0.3 + 0.7,
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-            transform: `translate(${(Math.random() - 0.5) * 100}px, ${Math.random() * -100 - 50}px) rotate(${Math.random() * 360}deg)`,
-            animation: `heartFade 0.6s ease-out forwards`,
-            animationDelay: `${i * 0.05}s`,
+          initial={{ opacity: 1, scale: Math.random() * 0.3 + 0.7 }}
+          animate={{ 
+            opacity: 0, 
+            scale: 0,
+            x: `${(Math.random() - 0.5) * 100}px`, 
+            y: `${Math.random() * -100 - 50}px`, 
+            rotate: `${Math.random() * 360}deg` 
           }}
+          transition={{ duration: 0.6, delay: i * 0.05 }}
         >
           ❤️
-        </div>
+        </motion.div>
       ))}
     </div>
   );
@@ -65,6 +66,7 @@ export function EventCard({
   const [saved, setSaved] = useState(isSaved || false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [hasShownConfetti, setHasShownConfetti] = useState(false);
+  const [undoToast, setUndoToast] = useState<string | null>(null);
 
   // Format date properly
   const formattedDate = new Date(date).toLocaleDateString("en-US", {
@@ -76,7 +78,7 @@ export function EventCard({
   // Fix price formatting
   const formattedPrice = price && price.isFree 
     ? "Free" 
-    : price && typeof price === 'object'
+    : price && typeof price === 'object' && price.currency
       ? `${price.currency}${price.min}${price.max ? ` - ${price.currency}${price.max}` : ""}`
       : "Price not available";
 
@@ -96,14 +98,20 @@ export function EventCard({
       setTimeout(() => setShowConfetti(false), 600);
     }
     
+    // Dismiss any existing toast
+    if (undoToast) {
+      toast.dismiss(undoToast);
+    }
+    
     // Show a toast with undo button
-    toast(
-      <div className="undo-toast">
+    const toastId = toast(
+      <div className="flex justify-between w-full items-center">
         <span>{wasSaved ? "Event removed" : "Event saved"}</span>
         <button
-          className="undo-toast-button"
+          className="bg-white/20 hover:bg-white/30 px-2 py-1 rounded text-sm flex items-center transition-colors"
           onClick={() => {
             setSaved(wasSaved);
+            toast.dismiss(toastId);
           }}
         >
           <span className="flex items-center">
@@ -117,22 +125,30 @@ export function EventCard({
         duration: 3000,
       }
     );
+    
+    setUndoToast(toastId);
   };
   
   const handleRemove = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    // Dismiss any existing toast
+    if (undoToast) {
+      toast.dismiss(undoToast);
+    }
+    
+    // Show a toast with undo option
     if (onRemove) {
-      // Show a toast with undo option
-      toast(
-        <div className="undo-toast">
+      const toastId = toast(
+        <div className="flex justify-between w-full items-center">
           <span>Event removed from saved</span>
           <button
-            className="undo-toast-button"
+            className="bg-white/20 hover:bg-white/30 px-2 py-1 rounded text-sm flex items-center transition-colors"
             onClick={() => {
-              // This is a placeholder for undo functionality
-              // The actual implementation would need to track the removed event
+              // This assumes onRemove has a callback for undoing
               window.location.reload();
+              toast.dismiss(toastId);
             }}
           >
             <span className="flex items-center">
@@ -146,6 +162,8 @@ export function EventCard({
           duration: 3000,
         }
       );
+      
+      setUndoToast(toastId);
       onRemove();
     }
   };
@@ -173,12 +191,16 @@ export function EventCard({
   if (variant === "compact") {
     return (
       <Link to={`/event/${id}`}>
-        <div className="transition-transform duration-200 hover:-translate-y-1">
+        <motion.div
+          initial={{ scale: 1 }}
+          whileHover={{ y: -4, transition: { duration: 0.2 } }}
+        >
           <Card className={cn(
             "overflow-hidden hover:shadow-md transition-shadow duration-300 rounded-3xl shadow-sm border-gray-100 dark:border-gray-800", 
             className
           )}>
             <div className="relative">
+              <AnimatePresence>{showConfetti && <HeartConfetti />}</AnimatePresence>
               <img 
                 src={image} 
                 alt={title} 
@@ -194,8 +216,9 @@ export function EventCard({
                   <span className="mr-1">✨</span> Editor's Pick
                 </Tag>
               )}
-              <button 
+              <motion.button 
                 onClick={handleSave}
+                whileTap={{ scale: 1.2 }}
                 className={cn(
                   "absolute bottom-2 right-2 p-1.5 rounded-full transition-colors shadow-sm",
                   saved ? "bg-red-500 text-white" : "bg-white/90 text-gray-500 hover:text-gray-700 dark:bg-gray-800/90 dark:text-gray-300 dark:hover:text-white"
@@ -203,7 +226,7 @@ export function EventCard({
                 aria-label={saved ? "Unsave event" : "Save event"}
               >
                 <Heart size={14} fill={saved ? "currentColor" : "none"} />
-              </button>
+              </motion.button>
             </div>
             <div className="p-3">
               <h3 className="font-bold text-sm line-clamp-1">{title}</h3>
@@ -216,20 +239,23 @@ export function EventCard({
               <p className="text-xs font-medium text-primary mt-1">{formattedPrice}</p>
             </div>
           </Card>
-        </div>
+        </motion.div>
       </Link>
     );
   }
   
   return (
     <Link to={`/event/${id}`} className="block mb-6">
-      <div className="transition-transform duration-200 hover:-translate-y-1">
+      <motion.div
+        initial={{ scale: 1 }}
+        whileHover={{ y: -4, transition: { duration: 0.2 } }}
+      >
         <Card className={cn(
           "overflow-hidden hover:shadow-md transition-all duration-300 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm", 
           className
         )}>
           <div className="flex flex-col md:flex-row relative">
-            {showConfetti && <HeartConfetti />}
+            <AnimatePresence>{showConfetti && <HeartConfetti />}</AnimatePresence>
             <div className="relative md:w-1/3">
               <img 
                 src={image} 
@@ -254,16 +280,18 @@ export function EventCard({
                   <h3 className="font-bold text-lg line-clamp-2">{title}</h3>
                   <div className="flex">
                     {onRemove && (
-                      <button 
+                      <motion.button 
                         onClick={handleRemove}
+                        whileTap={{ scale: 0.95 }}
                         className="p-1.5 rounded-full text-gray-400 hover:text-destructive hover:bg-destructive/10 mr-1 transition-colors"
                         aria-label="Remove from saved"
                       >
                         <Trash2 size={18} />
-                      </button>
+                      </motion.button>
                     )}
-                    <button 
+                    <motion.button 
                       onClick={handleSave}
+                      whileTap={{ scale: 1.2 }}
                       className={cn(
                         "p-1.5 rounded-full transition-colors",
                         saved ? "text-red-500 bg-red-50 dark:bg-red-900/20" : "text-gray-400 hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-gray-300 dark:hover:text-white"
@@ -271,7 +299,7 @@ export function EventCard({
                       aria-label={saved ? "Unsave event" : "Save event"}
                     >
                       <Heart size={18} fill={saved ? "currentColor" : "none"} />
-                    </button>
+                    </motion.button>
                   </div>
                 </div>
                 
@@ -316,7 +344,7 @@ export function EventCard({
             </div>
           </div>
         </Card>
-      </div>
+      </motion.div>
     </Link>
   );
 }

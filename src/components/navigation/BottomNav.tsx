@@ -9,12 +9,12 @@ export const BottomNav = () => {
   const { user } = useUser();
   
   return (
-    <nav className="fixed bg-white/90 backdrop-blur-md border-t border-gray-200 bottom-0 inset-x-0 shadow-lg z-50">
+    <nav className="fixed bg-white/90 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 dark:bg-gray-900/90 bottom-0 inset-x-0 shadow-lg z-50">
       <div className="max-w-md mx-auto">
         <div className="flex justify-between items-center py-3 px-6">
           <Link 
             to="/leaderboard" 
-            className={`flex flex-col items-center ${location.pathname === "/leaderboard" ? "text-sunset-purple" : ""}`}
+            className={`flex flex-col items-center ${location.pathname === "/leaderboard" ? "text-sunset-purple" : "text-gray-700 dark:text-gray-300"}`}
             aria-label="Leaderboard"
           >
             <svg
@@ -26,7 +26,7 @@ export const BottomNav = () => {
             >
               <path
                 d="M18 20V10M12 20V4M6 20V14"
-                stroke={location.pathname === "/leaderboard" ? "#C997D6" : "black"}
+                stroke={location.pathname === "/leaderboard" ? "#C997D6" : "currentColor"}
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -37,7 +37,7 @@ export const BottomNav = () => {
           
           <Link 
             to="/" 
-            className={`flex flex-col items-center ${location.pathname === "/" ? "text-sunset-pink" : ""}`}
+            className={`flex flex-col items-center ${location.pathname === "/" ? "text-sunset-pink" : "text-gray-700 dark:text-gray-300"}`}
             aria-label="Discover"
           >
             <svg
@@ -49,14 +49,14 @@ export const BottomNav = () => {
             >
               <path
                 d="M3 11L12 2L21 11"
-                stroke={location.pathname === "/" ? "#FF8DAF" : "black"}
+                stroke={location.pathname === "/" ? "#FF8DAF" : "currentColor"}
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
               <path
                 d="M5 12V19C5 19.5304 5.21071 20.0391 5.58579 20.4142C5.96086 20.7893 6.46957 21 7 21H10V16C10 15.4696 10.2107 14.9609 10.5858 14.5858C10.9609 14.2107 11.4696 14 12 14C12.5304 14 13.0391 14.2107 13.4142 14.5858C13.7893 14.9609 14 15.4696 14 16V21H17C17.5304 21 18.0391 20.7893 18.4142 20.4142C18.7893 20.0391 19 19.5304 19 19V12"
-                stroke={location.pathname === "/" ? "#FF8DAF" : "black"}
+                stroke={location.pathname === "/" ? "#FF8DAF" : "currentColor"}
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -67,7 +67,7 @@ export const BottomNav = () => {
           
           <Link 
             to="/premium" 
-            className={`flex flex-col items-center ${location.pathname === "/premium" ? "text-sunset-yellow" : ""}`}
+            className={`flex flex-col items-center ${location.pathname === "/premium" ? "text-sunset-yellow" : "text-gray-700 dark:text-gray-300"}`}
             aria-label="Premium"
           >
             <svg
@@ -79,7 +79,7 @@ export const BottomNav = () => {
             >
               <path
                 d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
-                stroke={location.pathname === "/premium" ? "#EEC48F" : "black"}
+                stroke={location.pathname === "/premium" ? "#EEC48F" : "currentColor"}
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -90,10 +90,10 @@ export const BottomNav = () => {
           
           <Link 
             to="/profile" 
-            className={`flex flex-col items-center ${location.pathname === "/profile" ? "text-sunset-orange" : ""}`}
+            className={`flex flex-col items-center ${location.pathname === "/profile" ? "text-sunset-orange" : "text-gray-700 dark:text-gray-300"}`}
             aria-label="Profile"
           >
-            <UserIcon />
+            <UserIcon color={location.pathname === "/profile" ? "#FF7D4D" : "currentColor"} />
             <span className="text-xs font-medium mt-1">Profile</span>
           </Link>
         </div>

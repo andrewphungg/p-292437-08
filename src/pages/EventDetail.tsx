@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -7,14 +6,30 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tag } from "@/components/ui/tag";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Calendar, Clock, MapPin, Users, Heart, Share2, ExternalLink, Check } from "lucide-react";
+import { 
+  ArrowLeft, 
+  Calendar, 
+  Clock, 
+  MapPin, 
+  Users, 
+  Heart, 
+  Share2, 
+  ExternalLink, 
+  Check,
+  RefreshCcw
+} from "lucide-react";
 import { useEvents } from "@/hooks/useEvents";
 import { Event } from "@/types/event";
+import { toast } from "sonner";
+import { HeartConfetti } from "@/components/animations/HeartConfetti";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function EventDetail() {
   const { id } = useParams<{ id: string }>();
   const { data: events = [] } = useEvents();
   const [isAttending, setIsAttending] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
   
   // Find the event by id
   const event = events.find(e => e.id === id) as Event | undefined;
@@ -43,6 +58,58 @@ export default function EventDetail() {
   
   const handleAttend = () => {
     setIsAttending(!isAttending);
+    
+    toast(
+      <div className="flex justify-between w-full items-center">
+        <span>{isAttending ? "You're no longer attending this event" : "You're now attending this event!"}</span>
+        <button
+          className="bg-white/20 hover:bg-white/30 px-2 py-1 rounded text-sm flex items-center transition-colors"
+          onClick={() => {
+            setIsAttending(!isAttending);
+          }}
+        >
+          <span className="flex items-center">
+            <RefreshCcw size={14} className="mr-1" />
+            Undo
+          </span>
+        </button>
+      </div>,
+      {
+        position: "bottom-center",
+        duration: 3000,
+      }
+    );
+  };
+  
+  const handleSave = () => {
+    const wasSaved = isSaved;
+    setIsSaved(!wasSaved);
+    
+    if (!wasSaved) {
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 600);
+    }
+    
+    toast(
+      <div className="flex justify-between w-full items-center">
+        <span>{wasSaved ? "Event removed from saved" : "Event saved!"}</span>
+        <button
+          className="bg-white/20 hover:bg-white/30 px-2 py-1 rounded text-sm flex items-center transition-colors"
+          onClick={() => {
+            setIsSaved(wasSaved);
+          }}
+        >
+          <span className="flex items-center">
+            <RefreshCcw size={14} className="mr-1" />
+            Undo
+          </span>
+        </button>
+      </div>,
+      {
+        position: "bottom-center",
+        duration: 3000,
+      }
+    );
   };
   
   if (!event) {
@@ -79,21 +146,25 @@ export default function EventDetail() {
     day: "numeric",
   });
   
-  // Format time
-  const formattedTime = typeof event.time === 'string' ? 
-    event.time : 
-    `${event.startTime}${event.endTime ? ` - ${event.endTime}` : ""}`;
+  // Format time - safely handle different structures
+  const formattedTime = event.startTime 
+    ? `${event.startTime}${event.endTime ? ` - ${event.endTime}` : ""}` 
+    : "Time not specified";
   
-  // Format price
-  const formattedPrice = typeof event.price === 'string' ? 
-    event.price : 
-    (event.price.isFree ? 
-      "Free" : 
-      `${event.price.currency}${event.price.min}${event.price.max ? ` - ${event.price.currency}${event.price.max}` : ""}`);
+  // Format price - safely handle different structures
+  const formattedPrice = event.price 
+    ? (typeof event.price === 'string' 
+      ? event.price 
+      : (event.price.isFree 
+        ? "Free" 
+        : `${event.price.currency || '$'}${event.price.min}${event.price.max ? ` - ${event.price.currency || '$'}${event.price.max}` : ""}`))
+    : "Price not available";
   
   return (
     <AppLayout header={header}>
-      <div className="pb-10">
+      <div className="pb-10 relative">
+        <AnimatePresence>{showConfetti && <HeartConfetti />}</AnimatePresence>
+        
         {/* Hero Image */}
         <div className="relative w-full h-64 overflow-hidden rounded-3xl mt-4 mb-6">
           <img
@@ -197,9 +268,16 @@ export default function EventDetail() {
             <Share2 size={18} className="mr-1" /> Share
           </Button>
           
-          <Button variant="outline" size="icon" className="rounded-full">
-            <Heart size={18} />
-          </Button>
+          <motion.div whileTap={{ scale: 1.2 }}>
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className={`rounded-full ${isSaved ? 'text-red-500 border-red-200 dark:border-red-800' : ''}`}
+              onClick={handleSave}
+            >
+              <Heart size={18} fill={isSaved ? "currentColor" : "none"} />
+            </Button>
+          </motion.div>
         </div>
         
         {/* Attendees */}

@@ -77,15 +77,16 @@ export function SearchBar({
           />
           
           <motion.div
-            whileHover={{ scale: 1.05 }}
+            initial={{ scale: 1 }}
             whileTap={{ scale: 0.95 }}
+            className="absolute right-3"
           >
             <Button
               type="button"
               variant="ghost"
-              size="sm"
+              size="icon"
               onClick={toggleFilterMenu}
-              className="absolute right-3 text-primary hover:text-primary/80 hover:bg-transparent"
+              className="text-primary hover:text-primary/80 hover:bg-transparent"
             >
               <SlidersHorizontal size={18} />
             </Button>

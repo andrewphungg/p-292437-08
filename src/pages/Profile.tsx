@@ -10,6 +10,7 @@ import { Settings, Award, Bell, Plus, Edit2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 
 export default function Profile() {
   const { user, events } = useUser();
@@ -65,12 +66,22 @@ export default function Profile() {
       }
 
       toast(
-        <div className="undo-toast">
+        <div className="flex justify-between w-full items-center">
           <span>Added "{badge.name}" badge to your profile!</span>
+          <button
+            className="bg-white/20 hover:bg-white/30 px-2 py-1 rounded text-sm flex items-center transition-colors"
+            onClick={() => {
+              removeBadge(badge.id);
+            }}
+          >
+            <span className="flex items-center">
+              <X size={14} className="mr-1" /> Remove
+            </span>
+          </button>
         </div>,
         {
           position: "bottom-center",
-          duration: 2000,
+          duration: 3000,
         }
       );
     }
@@ -78,25 +89,31 @@ export default function Profile() {
 
   // Function to remove a badge
   const removeBadge = (badgeId: string) => {
+    const removedBadge = badges.find(badge => badge.id === badgeId);
     setBadges(badges.filter(badge => badge.id !== badgeId));
-    toast(
-      <div className="undo-toast">
-        <span>Badge removed from your profile</span>
-        <button
-          className="undo-toast-button"
-          onClick={() => {
-            // This is a placeholder for undo functionality
-            window.location.reload();
-          }}
-        >
-          <span className="flex items-center">Undo</span>
-        </button>
-      </div>,
-      {
-        position: "bottom-center",
-        duration: 3000,
-      }
-    );
+    
+    if (removedBadge) {
+      toast(
+        <div className="flex justify-between w-full items-center">
+          <span>Badge removed from your profile</span>
+          <button
+            className="bg-white/20 hover:bg-white/30 px-2 py-1 rounded text-sm flex items-center transition-colors"
+            onClick={() => {
+              // Re-add the removed badge
+              if (removedBadge) {
+                setBadges(prev => [...prev, removedBadge]);
+              }
+            }}
+          >
+            <span className="flex items-center">Undo</span>
+          </button>
+        </div>,
+        {
+          position: "bottom-center",
+          duration: 3000,
+        }
+      );
+    }
   };
   
   const header = (
@@ -107,7 +124,7 @@ export default function Profile() {
           <Button 
             variant="secondary" 
             size="icon"
-            className="bg-white/80 dark:bg-black/50 backdrop-blur-sm shadow-md hover:bg-white/90 dark:hover:bg-black/60"
+            className="bg-white/80 dark:bg-gray-800/70 backdrop-blur-sm shadow-md hover:bg-white/90 dark:hover:bg-gray-700/80"
           >
             <Settings size={18} className="text-gray-700 dark:text-white" />
           </Button>
@@ -126,11 +143,28 @@ export default function Profile() {
           </Avatar>
           
           <h1 className="mt-4 text-2xl font-bold">{user.name}</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Joined {new Date(user.joinedAt).toLocaleDateString()}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{user.university}, Class of {user.graduationYear}</p>
           
           <div className="flex items-center mt-2 text-primary font-medium">
             <Award size={18} className="mr-1" />
             <span>{user.points} points</span>
+          </div>
+          
+          <div className="flex flex-wrap gap-1 mt-3 justify-center">
+            {badges.slice(0, 3).map((badge) => (
+              <div
+                key={badge.id}
+                className={`${badge.color} px-2 py-1 rounded-full text-xs flex items-center`}
+              >
+                <span className="mr-1">{badge.icon}</span>
+                <span>{badge.name}</span>
+              </div>
+            ))}
+            {badges.length > 3 && (
+              <div className="px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-xs">
+                +{badges.length - 3} more
+              </div>
+            )}
           </div>
           
           <div className="w-full max-w-md mt-6">
@@ -164,9 +198,12 @@ export default function Profile() {
                         <h4 className="text-sm font-medium mb-2">Your Badges</h4>
                         <div className="grid grid-cols-2 gap-2 mb-6">
                           {badges.map((badge) => (
-                            <div 
+                            <motion.div 
                               key={badge.id}
-                              className={`${badge.color} p-4 rounded-2xl flex items-center justify-between transition-transform duration-200 hover:scale-102`}
+                              className={`${badge.color} p-4 rounded-2xl flex items-center justify-between`}
+                              initial={{ scale: 1 }}
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
                             >
                               <div className="flex items-center space-x-2">
                                 <div className="text-2xl">{badge.icon}</div>
@@ -180,7 +217,7 @@ export default function Profile() {
                               >
                                 <X size={14} />
                               </Button>
-                            </div>
+                            </motion.div>
                           ))}
                         </div>
                         
@@ -189,10 +226,13 @@ export default function Profile() {
                           {availableInterests
                             .filter(interest => !badges.find(b => b.id === interest.id))
                             .map((interest) => (
-                              <div 
+                              <motion.div 
                                 key={interest.id}
-                                className={`${interest.color} p-4 rounded-2xl flex items-center justify-between cursor-pointer transition-transform duration-200 hover:scale-102 active:scale-98`}
+                                className={`${interest.color} p-4 rounded-2xl flex items-center justify-between cursor-pointer`}
                                 onClick={() => addBadge(interest)}
+                                initial={{ scale: 1 }}
+                                whileHover={{ scale: 1.03 }}
+                                whileTap={{ scale: 0.97 }}
                               >
                                 <div className="flex items-center space-x-2">
                                   <div className="text-2xl">{interest.icon}</div>
@@ -205,7 +245,7 @@ export default function Profile() {
                                 >
                                   <Plus size={14} />
                                 </Button>
-                              </div>
+                              </motion.div>
                             ))}
                         </div>
                       </div>
@@ -219,39 +259,60 @@ export default function Profile() {
 
                 <div className="grid grid-cols-2 gap-4">
                   {badges.map((badge, index) => (
-                    <div 
+                    <motion.div 
                       key={badge.id}
-                      className={`${badge.color} p-4 rounded-2xl flex items-center shadow-sm space-x-3 transition-transform duration-200`}
-                      style={{animationDelay: `${index * 50}ms`}}
+                      className={`${badge.color} p-4 rounded-2xl flex items-center shadow-sm space-x-3`}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: index * 0.05 }}
+                      whileHover={{ y: -2, transition: { duration: 0.2 } }}
                     >
                       <div className="text-2xl">{badge.icon}</div>
                       <div>
                         <p className="font-medium">{badge.name}</p>
                       </div>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               </TabsContent>
               
               <TabsContent value="activity">
                 <div className="space-y-4">
-                  <div 
+                  <motion.div 
                     className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
                   >
                     <p className="font-medium">You joined Joople!</p>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                       {new Date(user.joinedAt).toLocaleDateString()}
                     </p>
-                  </div>
+                  </motion.div>
                   
-                  <div 
+                  <motion.div 
                     className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: 0.1 }}
                   >
                     <p className="font-medium">You earned the Early Adopter badge</p>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                       {new Date(user.joinedAt).toLocaleDateString()}
                     </p>
-                  </div>
+                  </motion.div>
+
+                  <motion.div 
+                    className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: 0.2 }}
+                  >
+                    <p className="font-medium">You attended your first event</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toLocaleDateString()}
+                    </p>
+                  </motion.div>
                 </div>
               </TabsContent>
             </Tabs>

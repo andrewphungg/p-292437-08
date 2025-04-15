@@ -1,71 +1,92 @@
 
-/* Custom toast positioning and styling */
-.top-center-toast {
-  position: fixed !important;
-  top: 5rem !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  max-width: 90vw !important;
-  border-radius: 1rem !important;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
-  backdrop-filter: blur(8px) !important;
-  z-index: 100 !important;
-  transition: all 0.2s ease-in-out !important;
+/* Custom toast styles */
+.custom-sonner {
+  --toast-width: auto !important;
+  max-width: min(600px, 90vw) !important;
+  min-width: min(350px, 90vw) !important;
+  --viewport-padding: 24px !important;
 }
 
-/* Make sonner toasts centered */
-[data-sonner-toaster][data-position="bottom-center"] {
-  bottom: 20px !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  right: auto !important;
-  max-width: 90vw !important;
-}
-
-/* Enhance toast animations - making them less bouncy and more subtle */
-[data-sonner-toast] {
-  border-radius: 1rem !important;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
-  backdrop-filter: blur(8px) !important;
-  transition: all 0.2s ease-out !important;
-}
-
-/* Undo button styling */
-.undo-toast {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  padding: 0.75rem 1.25rem !important;
-  background-color: rgba(0, 0, 0, 0.8) !important;
+.custom-sonner [data-sonner-toast] {
+  padding: 14px 20px !important;
+  border-radius: 16px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  background-color: #333 !important;
   color: white !important;
-  border-radius: 2rem !important;
-  max-width: 400px !important;
-  width: auto !important;
-  margin: 0 auto !important;
+  font-size: 14px !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  opacity: 0.95 !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.custom-sonner [data-sonner-toast][data-theme="dark"] {
+  background-color: rgba(30, 30, 30, 0.9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.custom-sonner [data-sonner-toast] [data-close-button] {
+  color: rgba(255, 255, 255, 0.6) !important;
+  transition: color 0.2s ease !important;
+}
+
+.custom-sonner [data-sonner-toast] [data-close-button]:hover {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.undo-toast {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .undo-toast-button {
-  margin-left: 1rem !important;
-  padding: 0.25rem 0.75rem !important;
-  border-radius: 1rem !important;
-  background-color: rgba(255, 255, 255, 0.2) !important;
-  color: white !important;
-  font-weight: 500 !important;
-  cursor: pointer !important;
-  transition: all 0.15s ease !important;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 0.875rem;
+  transition: background-color 0.2s;
+  cursor: pointer;
 }
 
 .undo-toast-button:hover {
-  background-color: rgba(255, 255, 255, 0.3) !important;
+  background-color: rgba(255, 255, 255, 0.3);
 }
 
-/* Ensure dark mode compatibility for toasts */
-.dark .undo-toast {
-  background-color: rgba(20, 20, 20, 0.9) !important;
-  color: white !important;
+/* Animation modifiers */
+.animate-once {
+  animation-iteration-count: 1 !important;
 }
 
-.dark .undo-toast-button {
-  background-color: rgba(255, 255, 255, 0.15) !important;
-  color: white !important;
+.animate-twice {
+  animation-iteration-count: 2 !important;
+}
+
+.animate-thrice {
+  animation-iteration-count: 3 !important;
+}
+
+.animate-slower {
+  animation-duration: calc(var(--speed) * 2) !important;
+}
+
+.animate-slow {
+  animation-duration: calc(var(--speed) * 1.5) !important;
+}
+
+.animate-fast {
+  animation-duration: calc(var(--speed) * 0.7) !important;
+}
+
+.animate-faster {
+  animation-duration: calc(var(--speed) * 0.5) !important;
+}
+
+/* Fix for bottom navigation so it doesn't refresh */
+.bottom-nav-fixed {
+  transition: opacity 0.2s ease-in-out;
+}
+
+.page-transition {
+  transition: opacity 0.3s ease-in-out;
 }
