@@ -8,15 +8,13 @@ export interface User {
   university: string;
   points: number;
   interests: string[];
-  friends: Friend[];
+  friends: {
+    id: string;
+    name: string;
+    avatar: string;
+    points: number;
+    interests?: string[];
+  }[];
   attendedEvents: string[];
   sharedEvents: string[];
-}
-
-export interface Friend {
-  id: string;
-  name: string;
-  avatar: string;
-  points: number;
-  interests?: string[];
 }
