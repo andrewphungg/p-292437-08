@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tag } from "@/components/ui/tag";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Calendar, Clock, MapPin, Users, Heart, Share2, ExternalLink } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, MapPin, Users, Heart, Share2, ExternalLink, Check } from "lucide-react";
 import { useEvents } from "@/hooks/useEvents";
 import { Event } from "@/types/event";
 
