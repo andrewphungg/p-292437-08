@@ -80,14 +80,14 @@ export function EventCard({
     }
     
     // Show a toast with undo button
-    const id = toast(
+    const toastId = toast(
       <div className="flex justify-between w-full items-center">
         <span>{wasSaved ? "Event removed" : "Event saved"}</span>
         <button
           className="bg-white/20 hover:bg-white/30 px-2 py-1 rounded text-sm flex items-center transition-colors"
           onClick={() => {
             setSaved(wasSaved);
-            toast.dismiss(id);
+            toast.dismiss(toastId);
           }}
         >
           <span className="flex items-center">
@@ -103,7 +103,7 @@ export function EventCard({
       }
     );
     
-    setUndoToastId(id);
+    setUndoToastId(toastId);
   };
   
   const handleRemove = (e: React.MouseEvent) => {
@@ -117,7 +117,7 @@ export function EventCard({
     
     // Show a toast with undo option
     if (onRemove) {
-      const id = toast(
+      const toastId = toast(
         <div className="flex justify-between w-full items-center">
           <span>Event removed from saved</span>
           <button
@@ -126,7 +126,7 @@ export function EventCard({
               // This assumes onRemove has a callback for undoing
               if (onRemove && typeof onRemove === 'function') {
                 // We'll implement proper undo functionality in SavedEvents
-                toast.dismiss(id);
+                toast.dismiss(toastId);
               }
             }}
           >
@@ -143,7 +143,7 @@ export function EventCard({
         }
       );
       
-      setUndoToastId(id);
+      setUndoToastId(toastId);
       onRemove();
     }
   };
@@ -193,7 +193,7 @@ export function EventCard({
                   </Tag>
                 )}
                 {isEditorsPick && (
-                  <Tag variant="editors" className="text-xs">
+                  <Tag variant="editors" className="text-xs mt-1">
                     <span className="mr-1">✨</span> Editor's Pick
                   </Tag>
                 )}
@@ -251,7 +251,7 @@ export function EventCard({
                   </Tag>
                 )}
                 {isEditorsPick && (
-                  <Tag variant="editors" className="text-xs">
+                  <Tag variant="editors" className="text-xs mt-1">
                     <span className="mr-1">✨</span> Editor's Pick
                   </Tag>
                 )}

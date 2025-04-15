@@ -3,21 +3,18 @@ import React, { useState } from "react";
 import { SearchBar } from "@/components/events/SearchBar";
 import { EventCard } from "@/components/events/EventCard";
 import { useUser } from "@/context/UserContext";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { FilterMenu, FilterOptions } from "@/components/events/FilterMenu";
 import { cn } from "@/lib/utils";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { MapPin, Music, Tag, Compass, TrendingUp, Calendar, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { EventList } from "@/components/events/EventList";
 
 const Index = () => {
   const { events, suggestedEvents, user } = useUser();
   
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [filterMenuOpen, setFilterMenuOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState("all");
   
@@ -50,6 +47,16 @@ const Index = () => {
     { id: "upcoming", label: "Upcoming", icon: <Clock size={16} /> },
   ];
 
+  // Categories for quick filtering
+  const categories = [
+    { id: "all", name: "All", icon: <Compass size={16} /> },
+    { id: "Music", name: "Music", icon: <Music size={16} /> },
+    { id: "Food", name: "Food", icon: <Tag size={16} /> },
+    { id: "Sports", name: "Sports", icon: <Tag size={16} /> },
+    { id: "Arts", name: "Arts", icon: <Tag size={16} /> },
+    { id: "Tech", name: "Tech", icon: <Tag size={16} /> },
+  ];
+
   // Filter events based on search query, selected categories, and active filter
   const filteredEvents = (suggestedEvents.length > 0 ? suggestedEvents : events).filter(event => {
     const matchesSearch = searchQuery === "" || 
@@ -58,10 +65,6 @@ const Index = () => {
       
     const matchesCategories = selectedCategories.length === 0 || 
       selectedCategories.some(category => event.tags.includes(category));
-      
-    const matchesCategory = selectedCategory === "all" || 
-      event.category === selectedCategory ||
-      event.tags.includes(selectedCategory);
 
     // Additional filter based on the active filter tab
     const matchesActiveFilter = 
@@ -70,7 +73,7 @@ const Index = () => {
       (activeFilter === "weekend" && isWeekendEvent(event.date)) ||
       (activeFilter === "upcoming" && isUpcomingEvent(event.date));
       
-    return matchesSearch && matchesCategories && matchesCategory && matchesActiveFilter;
+    return matchesSearch && matchesCategories && matchesActiveFilter;
   });
 
   // Helper functions for date filtering
@@ -101,22 +104,12 @@ const Index = () => {
   
   // Get weekend events
   const weekendEvents = events.filter(event => isWeekendEvent(event.date)).slice(0, 4);
-
-  // Categories for quick filtering
-  const categories = [
-    { id: "all", name: "All", icon: <Compass size={16} /> },
-    { id: "Music", name: "Music", icon: <Music size={16} /> },
-    { id: "Food", name: "Food", icon: <Tag size={16} /> },
-    { id: "Sports", name: "Sports", icon: <Tag size={16} /> },
-    { id: "Arts", name: "Arts", icon: <Tag size={16} /> },
-    { id: "Tech", name: "Tech", icon: <Tag size={16} /> },
-  ];
   
   const header = (
     <header className="sticky top-0 z-20 bg-white/80 dark:bg-gray-900/90 backdrop-blur-md shadow-sm">
       <div className="relative text-center py-6">
         <h1 
-          className="text-4xl font-bold bg-gradient-to-r from-sunset-orange via-sunset-yellow to-sunset-peach bg-clip-text text-transparent pb-1"
+          className="text-5xl font-bold bg-gradient-to-r from-sunset-orange via-sunset-yellow to-sunset-peach bg-clip-text text-transparent pb-1"
         >
           Joople
         </h1>
@@ -137,49 +130,47 @@ const Index = () => {
           onFilterClick={openFilterMenu}
         />
         
-        {/* Default filter options */}
-        <div className="mt-4 mb-2">
-          <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
-            {filterOptions.map((filter) => (
-              <Button
-                key={filter.id}
-                variant={activeFilter === filter.id ? "default" : "outline"}
-                size="sm"
-                className={cn(
-                  "rounded-full flex items-center gap-1",
-                  activeFilter === filter.id 
-                    ? "bg-primary text-white" 
-                    : "text-gray-600 dark:text-gray-300"
-                )}
-                onClick={() => setActiveFilter(filter.id)}
-              >
-                {filter.icon}
-                <span>{filter.label}</span>
-              </Button>
-            ))}
-          </div>
-        </div>
-        
-        <div className="mt-2 flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
-          {categories.map((category) => (
-            <div
-              key={category.id}
+        <div className="mt-4 flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
+          {filterOptions.map((filter) => (
+            <Button
+              key={filter.id}
+              variant={activeFilter === filter.id ? "default" : "outline"}
+              size="sm"
+              className={cn(
+                "rounded-full flex items-center gap-1",
+                activeFilter === filter.id 
+                  ? "bg-primary text-white" 
+                  : "text-gray-600 dark:text-gray-300"
+              )}
+              onClick={() => setActiveFilter(filter.id)}
             >
-              <Button
-                variant={selectedCategory === category.id ? "default" : "outline"}
-                size="sm"
-                className={cn(
-                  "rounded-full flex items-center gap-1",
-                  selectedCategory === category.id 
-                    ? "bg-primary text-white" 
-                    : "text-gray-600 dark:text-gray-300"
-                )}
-                onClick={() => setSelectedCategory(category.id)}
-              >
-                {category.icon}
-                <span>{category.name}</span>
-              </Button>
-            </div>
+              {filter.icon}
+              <span>{filter.label}</span>
+            </Button>
+          ))}
+          
+          {categories.slice(1).map((category) => (
+            <Button
+              key={category.id}
+              variant={selectedCategories.includes(category.id) ? "default" : "outline"}
+              size="sm"
+              className={cn(
+                "rounded-full flex items-center gap-1",
+                selectedCategories.includes(category.id) 
+                  ? "bg-primary text-white" 
+                  : "text-gray-600 dark:text-gray-300"
+              )}
+              onClick={() => {
+                if (selectedCategories.includes(category.id)) {
+                  setSelectedCategories(prev => prev.filter(c => c !== category.id));
+                } else {
+                  setSelectedCategories(prev => [...prev, category.id]);
+                }
+              }}
+            >
+              {category.icon}
+              <span>{category.name}</span>
+            </Button>
           ))}
         </div>
       </div>

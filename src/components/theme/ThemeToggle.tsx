@@ -45,7 +45,7 @@ export function ThemeToggle({ className, variant = "default" }: ThemeToggleProps
             transition={{ duration: 0.3 }}
           >
             {theme === "dark" ? (
-              <Sun className="h-5 w-5" />
+              <Sun className="h-5 w-5 text-yellow-300" />
             ) : (
               <Moon className="h-5 w-5" />
             )}

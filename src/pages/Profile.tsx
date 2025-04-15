@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SavedEvents } from "@/components/events/SavedEvents";
 import { Link } from "react-router-dom";
-import { Settings, Award, Bell, Plus, Edit2, X } from "lucide-react";
+import { Settings, Award, Edit2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -82,6 +82,7 @@ export default function Profile() {
         {
           position: "bottom-center",
           duration: 3000,
+          id: `add-badge-${badge.id}`
         }
       );
     }
@@ -111,6 +112,7 @@ export default function Profile() {
         {
           position: "bottom-center",
           duration: 3000,
+          id: `remove-badge-${badgeId}`
         }
       );
     }
@@ -143,7 +145,7 @@ export default function Profile() {
           </Avatar>
           
           <h1 className="mt-4 text-2xl font-bold">{user.name}</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">{user.university}, Class of {user.graduationYear}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{user.bio || "Customer"}</p>
           
           <div className="flex items-center mt-2 text-primary font-medium">
             <Award size={18} className="mr-1" />
@@ -243,7 +245,7 @@ export default function Profile() {
                                   size="sm" 
                                   className="h-6 w-6 p-0 rounded-full hover:bg-white/20 text-gray-700"
                                 >
-                                  <Plus size={14} />
+                                  <X size={14} />
                                 </Button>
                               </motion.div>
                             ))}

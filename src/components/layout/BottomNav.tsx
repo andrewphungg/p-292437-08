@@ -42,12 +42,7 @@ export function BottomNav() {
   ];
 
   return (
-    <motion.nav 
-      className="fixed bottom-0 inset-x-0 z-50 shadow-lg"
-      initial={{ y: 100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.5, type: "spring", stiffness: 120 }}
-    >
+    <div className="fixed bottom-0 inset-x-0 z-50 shadow-lg">
       <div className="max-w-xl mx-auto bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 rounded-t-3xl">
         <div className="flex items-center justify-around p-3 pt-2">
           {navItems.map(item => (
@@ -59,7 +54,7 @@ export function BottomNav() {
           ))}
         </div>
       </div>
-    </motion.nav>
+    </div>
   );
 }
 
@@ -86,11 +81,11 @@ function NavItem({ path, label, icon: Icon, color, bgColor, active }: NavItemPro
           <motion.span
             layoutId="navIndicator"
             className={cn("absolute inset-0 rounded-full z-0", bgColor)}
-            transition={{ type: "spring", duration: 0.5 }}
+            transition={{ type: "spring", duration: 0.4 }}
             style={{ opacity: 0.8 }}
           />
         )}
-        <Icon size={active ? 22 : 20} className={cn("relative z-10 transition-transform", active && "scale-110")} />
+        <Icon size={active ? 22 : 20} className={cn("relative z-10 transition-transform", active && "scale-105")} />
       </div>
       <span className={cn("text-xs font-medium", active && "font-semibold")}>{label}</span>
     </Link>

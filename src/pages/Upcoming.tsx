@@ -26,9 +26,9 @@ export default function Upcoming() {
   
   // Calendar sync functionality
   const availableCalendars = [
-    { id: "google", name: "Google Calendar", icon: "🗓️" },
-    { id: "outlook", name: "Microsoft Outlook", icon: "📅" },
-    { id: "apple", name: "Apple Calendar", icon: "📆" },
+    { id: "google", name: "Google Calendar", icon: "https://upload.wikimedia.org/wikipedia/commons/a/a5/Google_Calendar_icon_%282020%29.svg" },
+    { id: "outlook", name: "Microsoft Outlook", icon: "https://upload.wikimedia.org/wikipedia/commons/d/df/Microsoft_Office_Outlook_%282018–present%29.svg" },
+    { id: "apple", name: "Apple Calendar", icon: "https://upload.wikimedia.org/wikipedia/commons/5/5e/Calendar_iOS.svg" },
   ];
   
   const toggleCalendarSelection = (calendarId: string) => {
@@ -48,7 +48,7 @@ export default function Upcoming() {
     <header className="sticky top-0 z-20 bg-white/80 dark:bg-gray-900/90 backdrop-blur-md shadow-sm">
       <div className="text-center py-6">
         <motion.h1 
-          className="text-4xl font-bold bg-gradient-to-r from-sunset-orange via-sunset-yellow to-sunset-peach bg-clip-text text-transparent pb-1"
+          className="text-5xl font-bold bg-gradient-to-r from-sunset-orange via-sunset-yellow to-sunset-peach bg-clip-text text-transparent pb-1"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
@@ -146,7 +146,9 @@ export default function Upcoming() {
                   onClick={() => toggleCalendarSelection(calendar.id)}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="text-2xl">{calendar.icon}</div>
+                    <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-white">
+                      <img src={calendar.icon} alt={calendar.name} className="w-6 h-6 object-contain" />
+                    </div>
                     <div className="font-medium">{calendar.name}</div>
                   </div>
                   

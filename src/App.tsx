@@ -8,6 +8,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { AuthProvider } from "@/context/AuthContext";
 import { UserProvider } from "@/context/UserContext";
+import { BottomNav } from "@/components/layout/BottomNav";
 
 // Pages
 import Home from "./pages/Index";
@@ -49,7 +50,7 @@ const App: React.FC = () => {
           <AuthProvider>
             <UserProvider>
               <TooltipProvider>
-                <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-blue-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-900/95 transition-colors duration-300">
+                <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-blue-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-900/95 transition-colors duration-300 pb-20">
                   <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/upcoming" element={<Upcoming />} />
@@ -60,6 +61,7 @@ const App: React.FC = () => {
                     <Route path="/explore" element={<Explore />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
+                  <BottomNav />
                   <Toaster />
                   <Sonner position="bottom-center" className="custom-sonner" />
                 </div>
