@@ -57,9 +57,10 @@ export function SearchBar({
             onChange={handleChange}
             placeholder={placeholder}
             className={cn(
-              "w-full py-3 pl-10 pr-16 rounded-2xl bg-white shadow-sm",
-              "border border-gray-200 placeholder:text-gray-400 text-gray-800",
-              "focus:outline-none focus:ring-2 focus:ring-sunset-orange/30 focus:border-transparent"
+              "w-full py-3 pl-10 pr-16 rounded-2xl bg-white dark:bg-gray-800 shadow-sm",
+              "border border-gray-200 dark:border-gray-700 placeholder:text-gray-400 dark:placeholder:text-gray-500",
+              "text-gray-800 dark:text-gray-100",
+              "focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-transparent"
             )}
           />
           
@@ -78,14 +79,14 @@ export function SearchBar({
             variant="ghost"
             size="sm"
             onClick={toggleFilterMenu}
-            className="absolute right-2 text-sunset-orange hover:text-sunset-pink hover:bg-transparent"
+            className="absolute right-2 text-primary hover:text-primary/80 hover:bg-transparent"
           >
             <SlidersHorizontal size={18} />
           </Button>
         </div>
       </form>
       
-      {isFilterMenuOpen && <FilterMenu onClose={toggleFilterMenu} />}
+      {isFilterMenuOpen && <FilterMenu onClose={() => setIsFilterMenuOpen(false)} />}
     </div>
   );
 }

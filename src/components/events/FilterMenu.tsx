@@ -5,6 +5,7 @@ import { Button } from "../ui/button";
 import { Tag } from "../ui/tag";
 import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 
 interface FilterMenuProps {
   onClose: () => void;
@@ -82,12 +83,27 @@ export function FilterMenu({ onClose, onApplyFilters }: FilterMenuProps) {
     setDateRange("all");
   };
   
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+  
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl max-h-[80vh] w-full max-w-lg overflow-y-auto">
-        <div className="sticky top-0 bg-white p-4 border-b flex items-center justify-between z-10 rounded-t-3xl">
+    <div 
+      className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+      onClick={handleBackdropClick}
+    >
+      <div 
+        className="bg-white dark:bg-card rounded-3xl max-h-[85vh] w-full max-w-lg overflow-y-auto"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="sticky top-0 bg-white dark:bg-card p-4 border-b flex items-center justify-between z-10 rounded-t-3xl dark:border-gray-800">
           <h3 className="font-medium text-lg">Filter Events</h3>
-          <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100">
+          <button 
+            onClick={onClose} 
+            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          >
             <X size={18} />
           </button>
         </div>
@@ -95,7 +111,7 @@ export function FilterMenu({ onClose, onApplyFilters }: FilterMenuProps) {
         <div className="p-5 space-y-6">
           {/* Categories */}
           <div className="space-y-3">
-            <h4 className="font-medium text-sm text-gray-700">Categories</h4>
+            <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300">Categories</h4>
             <div className="flex flex-wrap gap-2">
               {categories.map(category => (
                 <Tag
@@ -112,11 +128,11 @@ export function FilterMenu({ onClose, onApplyFilters }: FilterMenuProps) {
             </div>
           </div>
 
-          <Separator />
+          <Separator className="dark:bg-gray-800" />
           
           {/* Moods */}
           <div className="space-y-3">
-            <h4 className="font-medium text-sm text-gray-700">Mood</h4>
+            <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300">Mood</h4>
             <div className="flex flex-wrap gap-2">
               {moods.map(mood => (
                 <Tag
@@ -133,13 +149,13 @@ export function FilterMenu({ onClose, onApplyFilters }: FilterMenuProps) {
             </div>
           </div>
 
-          <Separator />
+          <Separator className="dark:bg-gray-800" />
           
           {/* Price Range */}
           <div className="space-y-3">
             <div className="flex justify-between">
-              <h4 className="font-medium text-sm text-gray-700">Price Range</h4>
-              <span className="text-sm text-gray-500">
+              <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300">Price Range</h4>
+              <span className="text-sm text-gray-500 dark:text-gray-400">
                 ${priceRange[0]} - {priceRange[1] === 100 ? "$100+" : `$${priceRange[1]}`}
               </span>
             </div>
@@ -151,19 +167,19 @@ export function FilterMenu({ onClose, onApplyFilters }: FilterMenuProps) {
               onValueChange={(value) => setPriceRange(value as [number, number])}
               className="py-4"
             />
-            <div className="flex justify-between text-xs text-gray-500">
+            <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
               <span>Free</span>
               <span>$100+</span>
             </div>
           </div>
 
-          <Separator />
+          <Separator className="dark:bg-gray-800" />
           
           {/* Distance */}
           <div className="space-y-3">
             <div className="flex justify-between">
-              <h4 className="font-medium text-sm text-gray-700">Distance</h4>
-              <span className="text-sm text-gray-500">{distance} miles</span>
+              <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300">Distance</h4>
+              <span className="text-sm text-gray-500 dark:text-gray-400">{distance} miles</span>
             </div>
             <Slider 
               defaultValue={[10]} 
@@ -173,27 +189,28 @@ export function FilterMenu({ onClose, onApplyFilters }: FilterMenuProps) {
               onValueChange={(value) => setDistance(value[0])}
               className="py-4"
             />
-            <div className="flex justify-between text-xs text-gray-500">
+            <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
               <span>Nearby</span>
               <span>50 miles</span>
             </div>
           </div>
 
-          <Separator />
+          <Separator className="dark:bg-gray-800" />
           
           {/* Date Range */}
           <div className="space-y-3">
-            <h4 className="font-medium text-sm text-gray-700">When</h4>
+            <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300">When</h4>
             <div className="grid grid-cols-3 gap-2">
               {dateRanges.map(range => (
                 <button
                   key={range.id}
                   onClick={() => setDateRange(range.id)}
-                  className={`py-2 px-3 rounded-2xl text-sm ${
+                  className={cn(
+                    "py-2 px-3 rounded-2xl text-sm transition-colors",
                     dateRange === range.id
-                      ? 'bg-sunset-orange/10 text-sunset-orange border border-sunset-orange/20'
-                      : 'bg-gray-100 text-gray-700 border border-gray-100 hover:bg-gray-200'
-                  }`}
+                      ? 'bg-primary/10 text-primary border border-primary/20'
+                      : 'bg-gray-100 text-gray-700 border border-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-800 dark:hover:bg-gray-700'
+                  )}
                 >
                   {range.label}
                 </button>
@@ -202,7 +219,7 @@ export function FilterMenu({ onClose, onApplyFilters }: FilterMenuProps) {
           </div>
         </div>
         
-        <div className="sticky bottom-0 bg-white p-4 border-t flex items-center justify-between gap-4 rounded-b-3xl">
+        <div className="sticky bottom-0 bg-white dark:bg-card p-4 border-t dark:border-gray-800 flex items-center justify-between gap-4 rounded-b-3xl">
           <Button
             variant="outline"
             onClick={handleClear}
@@ -212,7 +229,7 @@ export function FilterMenu({ onClose, onApplyFilters }: FilterMenuProps) {
           </Button>
           <Button
             onClick={handleApply}
-            className="flex-1 bg-sunset-orange hover:bg-sunset-pink rounded-2xl"
+            className="flex-1 bg-primary hover:bg-primary/90 text-white rounded-2xl"
           >
             Apply Filters
           </Button>
