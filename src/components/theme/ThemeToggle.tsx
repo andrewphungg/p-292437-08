@@ -6,10 +6,35 @@ import { cn } from "@/lib/utils";
 
 interface ThemeToggleProps {
   className?: string;
+  variant?: "default" | "modern";
 }
 
-export function ThemeToggle({ className }: ThemeToggleProps) {
+export function ThemeToggle({ className, variant = "default" }: ThemeToggleProps) {
   const { theme, setTheme } = useTheme();
+  
+  if (variant === "modern") {
+    return (
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+        className={cn(
+          "rounded-full bg-background/10 border-primary/20 backdrop-blur-sm shadow-md transition-all",
+          theme === "dark" 
+            ? "hover:bg-primary/20 text-primary-foreground" 
+            : "hover:bg-secondary/20 text-foreground",
+          className
+        )}
+      >
+        {theme === "dark" ? (
+          <Sun className="h-5 w-5" />
+        ) : (
+          <Moon className="h-5 w-5" />
+        )}
+        <span className="sr-only">Toggle theme</span>
+      </Button>
+    );
+  }
   
   return (
     <Button

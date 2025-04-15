@@ -51,7 +51,7 @@ export default function EventDetail() {
         <div className="py-20 text-center">
           <h2 className="text-xl font-medium text-gray-700 dark:text-gray-300">Event not found</h2>
           <p className="text-gray-500 dark:text-gray-400 mt-2">The event you're looking for doesn't exist or has been removed.</p>
-          <Button asChild className="mt-6">
+          <Button asChild className="mt-6 rounded-full">
             <Link to="/">Go back home</Link>
           </Button>
         </div>
@@ -95,7 +95,7 @@ export default function EventDetail() {
     <AppLayout header={header}>
       <div className="pb-10">
         {/* Hero Image */}
-        <div className="relative w-full h-64 overflow-hidden rounded-xl mt-4 mb-6">
+        <div className="relative w-full h-64 overflow-hidden rounded-3xl mt-4 mb-6">
           <img
             src={event.image}
             alt={event.title}
@@ -113,7 +113,7 @@ export default function EventDetail() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50 mb-2">{event.title}</h1>
           
           <div className="flex items-center flex-wrap gap-y-2">
-            <Badge variant="outline" className="mr-2 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50">
+            <Badge variant="outline" className="mr-2 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-full">
               {event.category || event.tags[0]}
             </Badge>
             <span className="text-sm text-gray-600 dark:text-gray-300 flex items-center mr-3">
@@ -139,11 +139,11 @@ export default function EventDetail() {
         </div>
         
         {/* Event Details */}
-        <div className="bg-white/90 dark:bg-card/90 backdrop-blur-md border border-gray-200 dark:border-gray-800 rounded-xl p-4 space-y-4 shadow-sm mb-6">
+        <div className="bg-white/90 dark:bg-card/90 backdrop-blur-md border border-gray-200 dark:border-gray-800 rounded-3xl p-4 space-y-5 shadow-sm mb-6">
           <div className="flex items-start">
             <Calendar size={20} className="shrink-0 text-blue-600 dark:text-blue-400 mr-3 mt-0.5" />
             <div>
-              <h3 className="font-medium dark:text-white">Date & Time</h3>
+              <h3 className="font-semibold dark:text-white">Date & Time</h3>
               <p className="text-gray-600 dark:text-gray-300 text-sm">{formattedDate}</p>
               <p className="text-gray-600 dark:text-gray-300 text-sm">{formattedTime}</p>
             </div>
@@ -152,7 +152,7 @@ export default function EventDetail() {
           <div className="flex items-start">
             <MapPin size={20} className="shrink-0 text-blue-600 dark:text-blue-400 mr-3 mt-0.5" />
             <div>
-              <h3 className="font-medium dark:text-white">Location</h3>
+              <h3 className="font-semibold dark:text-white">Location</h3>
               {typeof event.location === 'string' ? (
                 <p className="text-gray-600 dark:text-gray-300 text-sm">{event.location}</p>
               ) : (
@@ -169,7 +169,7 @@ export default function EventDetail() {
           {event.description && (
             <div className="flex items-start pt-2">
               <div className="w-full">
-                <h3 className="font-medium mb-1 dark:text-white">About this event</h3>
+                <h3 className="font-semibold mb-2 dark:text-white text-lg border-b pb-1 border-gray-100 dark:border-gray-800">About this event</h3>
                 <p className="text-gray-600 dark:text-gray-300 text-sm">{event.description}</p>
               </div>
             </div>
@@ -180,7 +180,7 @@ export default function EventDetail() {
         <div className="flex gap-3 mb-8">
           <Button 
             onClick={handleAttend}
-            className={`flex-1 rounded-xl ${isAttending ? 'bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700' : ''}`}
+            className={`flex-1 rounded-full ${isAttending ? 'bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700' : ''}`}
           >
             {isAttending ? (
               <>
@@ -193,11 +193,11 @@ export default function EventDetail() {
             )}
           </Button>
           
-          <Button variant="outline" className="flex-1 rounded-xl">
+          <Button variant="outline" className="flex-1 rounded-full">
             <Share2 size={18} className="mr-1" /> Share
           </Button>
           
-          <Button variant="outline" size="icon" className="rounded-xl">
+          <Button variant="outline" size="icon" className="rounded-full">
             <Heart size={18} />
           </Button>
         </div>
@@ -225,29 +225,10 @@ export default function EventDetail() {
           </div>
         </div>
         
-        {/* Point Rewards */}
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/30 rounded-xl p-4 mb-8">
-          <h3 className="font-medium text-blue-800 dark:text-blue-300">Earn Points</h3>
-          <div className="mt-2 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-blue-700 dark:text-blue-400">For attending this event</span>
-              <Badge variant="outline" className="bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">
-                +{event.pointsForAttending} points
-              </Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-blue-700 dark:text-blue-400">For sharing with friends</span>
-              <Badge variant="outline" className="bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">
-                +{event.pointsForSharing} points
-              </Badge>
-            </div>
-          </div>
-        </div>
-        
         {/* External Link */}
         {event.url && (
           <div className="mb-8">
-            <Button variant="outline" asChild className="w-full rounded-xl">
+            <Button variant="outline" asChild className="w-full rounded-full">
               <a href={event.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center">
                 Visit Official Page <ExternalLink size={16} className="ml-1.5" />
               </a>
@@ -266,7 +247,7 @@ export default function EventDetail() {
                 <Link 
                   key={event.id} 
                   to={`/event/${event.id}`}
-                  className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                  className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-3xl overflow-hidden hover:shadow-md transition-shadow"
                 >
                   <div className="h-24 overflow-hidden">
                     <img 
@@ -301,7 +282,7 @@ export default function EventDetail() {
                 <Link 
                   key={event.id} 
                   to={`/event/${event.id}`}
-                  className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                  className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-3xl overflow-hidden hover:shadow-md transition-shadow"
                 >
                   <div className="h-24 overflow-hidden">
                     <img 

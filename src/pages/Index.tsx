@@ -32,7 +32,7 @@ const Index = () => {
   const filteredEvents = (suggestedEvents.length > 0 ? suggestedEvents : events).filter(event => {
     const matchesSearch = searchQuery === "" || 
       event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      event.location.name.toLowerCase().includes(searchQuery.toLowerCase());
+      (typeof event.location === 'object' && event.location.name.toLowerCase().includes(searchQuery.toLowerCase()));
       
     const matchesCategories = selectedCategories.length === 0 || 
       selectedCategories.some(category => event.tags.includes(category));
@@ -47,14 +47,14 @@ const Index = () => {
   const weekendEvents = events.filter((_, index) => index % 3 === 0).slice(0, 4);
   
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-white via-sunset-purple/5 to-sunset-pink/10 dark:from-background dark:via-background dark:to-background/95">
+    <div className="w-full min-h-screen bg-gradient-to-br from-white via-sunset-purple/5 to-sunset-pink/10 dark:from-background dark:via-background dark:to-background/95 transition-colors duration-300">
       <div className="flex flex-col items-center w-full pb-24">
         <header className="text-[#303030] dark:text-white text-[40px] sm:text-[55px] font-semibold text-center w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md py-5 shadow-sm relative">
           <span className="bg-gradient-to-r from-primary via-secondary to-sunset-yellow bg-clip-text text-transparent">
             Joople
           </span>
           <div className="absolute top-4 right-4">
-            <ThemeToggle />
+            <ThemeToggle variant="modern" />
           </div>
         </header>
 
@@ -68,7 +68,7 @@ const Index = () => {
           Welcome, {user.name || "Graduate"}!
         </h2>
         <p className="text-sm text-center mb-3 text-[#333] dark:text-gray-300 max-w-xs">
-          Find fun events to meet other graduates and earn points!
+          Find fun events to meet other graduates!
         </p>
 
         <div className="w-full px-5 mb-2">
@@ -89,10 +89,10 @@ const Index = () => {
               <TabsTrigger value="friends" className="rounded-xl">Find Friends</TabsTrigger>
             </TabsList>
             
-            <TabsContent value="events" className="mt-0">
+            <TabsContent value="events" className="mt-0 space-y-8">
               {/* For You Section */}
-              <section className="mb-8">
-                <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">For You</h2>
+              <section>
+                <h2 className="section-title">For You</h2>
                 <div className="flex flex-col gap-6">
                   {filteredEvents.slice(0, 5).map(event => (
                     <EventCard key={event.id} event={event} />
@@ -106,11 +106,11 @@ const Index = () => {
               </section>
               
               {/* Trending Section */}
-              <section className="mb-8">
-                <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Trending</h2>
+              <section>
+                <h2 className="section-title">Trending</h2>
                 <div className="grid grid-cols-2 gap-4">
                   {trendingEvents.map(event => (
-                    <div key={event.id} className="rounded-2xl overflow-hidden bg-white dark:bg-gray-800 shadow-sm">
+                    <div key={event.id} className="rounded-3xl overflow-hidden bg-white dark:bg-gray-800 shadow-sm">
                       <div className="h-24 overflow-hidden relative">
                         <img 
                           src={event.image} 
@@ -133,45 +133,14 @@ const Index = () => {
               </section>
               
               {/* Weekend Section */}
-              <section className="mb-8">
-                <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">This Weekend</h2>
+              <section>
+                <h2 className="section-title">This Weekend</h2>
                 <div className="flex flex-col gap-6">
                   {weekendEvents.map(event => (
                     <EventCard key={event.id} event={event} />
                   ))}
                 </div>
               </section>
-              
-              {/* Similar Event Recommendations */}
-              {filteredEvents.length > 0 && (
-                <section className="mb-8">
-                  <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
-                    People who attended these events also liked
-                  </h2>
-                  <div className="grid grid-cols-2 gap-4">
-                    {events.slice(6, 10).map(event => (
-                      <div key={event.id} className="rounded-2xl overflow-hidden bg-white dark:bg-gray-800 shadow-sm">
-                        <div className="h-24 overflow-hidden">
-                          <img 
-                            src={event.image} 
-                            alt={event.title} 
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="p-3">
-                          <h3 className="font-medium text-sm line-clamp-1">{event.title}</h3>
-                          <div className="flex items-center justify-between mt-1">
-                            <span className="text-xs text-gray-500 dark:text-gray-400">{event.date}</span>
-                            <span className="text-xs font-medium text-green-600 dark:text-green-400">
-                              {typeof event.price === 'string' ? event.price : (event.price.isFree ? 'Free' : `$${event.price.min}`)}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
             </TabsContent>
             
             <TabsContent value="friends" className="mt-0">
@@ -183,7 +152,5 @@ const Index = () => {
     </div>
   );
 };
-
-// Filter categories moved to FilterMenu component
 
 export default Index;

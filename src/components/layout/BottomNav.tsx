@@ -1,72 +1,64 @@
 
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Home, Search, Calendar, Star, User, Settings } from "lucide-react";
+import { Home, Search, Calendar, Star, User } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/providers/ThemeProvider";
+import { useUser } from "@/context/UserContext";
 
 export function BottomNav() {
   const location = useLocation();
-  const [points, setPoints] = React.useState(125); // This would come from a context or api call in a real app
+  const { theme } = useTheme();
+  const { user } = useUser();
   
   const isActive = (path: string) => location.pathname === path;
   
   return (
-    <>
-      <nav className="fixed bottom-[50px] inset-x-0 z-50 shadow-inner">
-        <div className="max-w-xl mx-auto bg-white/90 backdrop-blur-md border-t border-x border-gray-200 rounded-t-[30px] shadow-lg">
-          <div className="flex items-center justify-around p-4">
-            <NavItem
-              to="/"
-              icon={<Home size={20} />}
-              label="Home"
-              active={isActive("/")}
-              activeColor="text-sunset-pink"
-            />
-            
-            <NavItem
-              to="/explore"
-              icon={<Search size={20} />}
-              label="Explore"
-              active={isActive("/explore")}
-              activeColor="text-sunset-purple"
-            />
-            
-            <NavItem
-              to="/upcoming"
-              icon={<Calendar size={20} />}
-              label="Upcoming"
-              active={isActive("/upcoming")}
-              activeColor="text-sunset-orange"
-            />
-            
-            <NavItem
-              to="/premium"
-              icon={<Star size={20} />}
-              label="Premium"
-              active={isActive("/premium")}
-              activeColor="text-sunset-yellow"
-            />
-            
-            <NavItem
-              to="/profile"
-              icon={<User size={20} />}
-              label="Profile"
-              active={isActive("/profile")}
-              activeColor="text-sunset-peach"
-            />
-          </div>
-        </div>
-      </nav>
-      
-      <div className="fixed bottom-0 inset-x-0 z-50">
-        <div className="max-w-xl mx-auto">
-          <div className="bg-gradient-to-r from-sunset-pink to-sunset-orange text-white text-center py-3 text-sm font-medium shadow-lg">
-            <span>You have </span>
-            <span className="font-bold">{points} points</span>
-          </div>
+    <nav className="fixed bottom-0 inset-x-0 z-50 shadow-lg">
+      <div className="max-w-xl mx-auto bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 rounded-t-3xl">
+        <div className="flex items-center justify-around p-4">
+          <NavItem
+            to="/"
+            icon={<Home size={20} />}
+            label="Home"
+            active={isActive("/")}
+            activeColor="text-primary"
+          />
+          
+          <NavItem
+            to="/explore"
+            icon={<Search size={20} />}
+            label="Explore"
+            active={isActive("/explore")}
+            activeColor="text-secondary"
+          />
+          
+          <NavItem
+            to="/upcoming"
+            icon={<Calendar size={20} />}
+            label="Upcoming"
+            active={isActive("/upcoming")}
+            activeColor="text-green-500"
+          />
+          
+          <NavItem
+            to="/premium"
+            icon={<Star size={20} />}
+            label="Premium"
+            active={isActive("/premium")}
+            activeColor="text-amber-500"
+          />
+          
+          <NavItem
+            to="/profile"
+            icon={<User size={20} />}
+            label="Profile"
+            active={isActive("/profile")}
+            activeColor="text-pink-500"
+          />
         </div>
       </div>
-    </>
+    </nav>
   );
 }
 
@@ -84,12 +76,12 @@ function NavItem({ to, icon, label, active, activeColor }: NavItemProps) {
       to={to}
       className={cn(
         "flex flex-col items-center space-y-1 transition-colors",
-        active ? activeColor : "text-gray-500 hover:text-gray-900"
+        active ? activeColor : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
       )}
     >
       <span className={cn(
         "p-2 rounded-full transition-all",
-        active ? `${activeColor} bg-[#f8f8f8]` : ""
+        active ? `${activeColor} bg-white dark:bg-gray-800` : ""
       )}>
         {icon}
       </span>

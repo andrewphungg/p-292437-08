@@ -91,11 +91,11 @@ export function FilterMenu({ onClose, onApplyFilters }: FilterMenuProps) {
   
   return (
     <div 
-      className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
       onClick={handleBackdropClick}
     >
       <div 
-        className="bg-white dark:bg-card rounded-3xl max-h-[85vh] w-full max-w-lg overflow-y-auto"
+        className="bg-white dark:bg-card rounded-3xl max-h-[85vh] w-full max-w-lg overflow-y-auto animate-scale-in shadow-xl"
         onClick={e => e.stopPropagation()}
       >
         <div className="sticky top-0 bg-white dark:bg-card p-4 border-b flex items-center justify-between z-10 rounded-t-3xl dark:border-gray-800">
@@ -103,6 +103,7 @@ export function FilterMenu({ onClose, onApplyFilters }: FilterMenuProps) {
           <button 
             onClick={onClose} 
             className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            aria-label="Close filter menu"
           >
             <X size={18} />
           </button>

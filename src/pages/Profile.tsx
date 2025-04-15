@@ -1,170 +1,104 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { useUser } from "@/context/UserContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
-import { Award, Calendar, Clock, Settings } from "lucide-react";
-import { EventCard } from "@/components/events/EventCard";
-import { Separator } from "@/components/ui/separator";
-import { Tag } from "@/components/ui/tag";
-import { useEvents } from "@/hooks/useEvents";
-import { useNavigate } from "react-router-dom";
+import { SavedEvents } from "@/components/events/SavedEvents";
+import { Link } from "react-router-dom";
+import { Settings, Award, Share2, Bell } from "lucide-react";
 
 export default function Profile() {
-  const { data: allEvents = [] } = useEvents();
-  const navigate = useNavigate();
+  const { user, events } = useUser();
   
-  // Mocked user data - in a real app this would come from context/API
-  const user = {
-    id: "1",
-    name: "Alex Thompson",
-    avatar: "https://i.pravatar.cc/150?img=33",
-    points: 450,
-    university: "Stanford University",
-    graduationYear: 2023,
-    personality: "outgoing" as const,
-    interests: ["Music", "Tech", "Hiking", "Photography", "Food"],
-    badges: [
-      { id: "b1", name: "Early Adopter", icon: "🌟" },
-      { id: "b2", name: "Social Butterfly", icon: "🦋" },
-      { id: "b3", name: "Concert Lover", icon: "🎵" },
-      { id: "b4", name: "Foodie", icon: "🍜" }
-    ],
-    attendedEvents: [allEvents[0]?.id, allEvents[2]?.id].filter(Boolean),
-    savedEvents: [allEvents[1]?.id, allEvents[3]?.id, allEvents[4]?.id].filter(Boolean)
-  };
+  // Mock saved events
+  const savedEvents = events.slice(0, 5);
   
-  // Filter events based on user data
-  const attendedEvents = allEvents.filter(event => user.attendedEvents.includes(event.id));
-  const savedEvents = allEvents.filter(event => user.savedEvents.includes(event.id));
-
-  const handleSettingsClick = () => {
-    navigate('/settings');
-  };
+  // Mock badges
+  const badges = [
+    { id: "1", name: "Early Adopter", icon: "🌟", color: "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300" },
+    { id: "2", name: "Social Butterfly", icon: "🦋", color: "bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300" },
+    { id: "3", name: "Event Explorer", icon: "🧭", color: "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-300" },
+    { id: "4", name: "Party Animal", icon: "🎉", color: "bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-300" },
+    { id: "5", name: "Weekend Warrior", icon: "⚔️", color: "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-300" },
+  ];
   
   const header = (
-    <div className="bg-gradient-to-br from-indigo-600 to-blue-700 text-white pt-8 pb-20 px-4 rounded-b-[40px]">
-      <div className="flex justify-between items-center max-w-xl mx-auto">
-        <h1 className="text-xl font-bold">My Profile</h1>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="text-white hover:bg-white/20 rounded-full"
-          onClick={handleSettingsClick}
-        >
-          <Settings size={20} />
-        </Button>
+    <div className="relative">
+      <div className="h-32 bg-gradient-to-r from-primary to-primary-foreground/20"></div>
+      <div className="absolute top-0 right-0 p-4">
+        <Link to="/settings" className="p-2 bg-white/50 dark:bg-black/30 rounded-full shadow-sm backdrop-blur-sm">
+          <Settings size={20} className="text-white" />
+        </Link>
       </div>
     </div>
   );
-  
+
   return (
     <AppLayout header={header}>
-      <div className="-mt-16 relative z-10 max-w-xl mx-auto">
-        <Card className="p-5 shadow-lg border-none bg-white/90 backdrop-blur-md rounded-3xl">
-          <div className="flex items-center gap-4">
-            <Avatar className="h-20 w-20 border-4 border-white shadow-md">
-              <AvatarImage src={user.avatar} alt={user.name} />
-              <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <div className="space-y-1">
-              <h2 className="text-xl font-bold">{user.name}</h2>
-              <p className="text-sm text-gray-500">
-                {user.university}, Class of {user.graduationYear}
-              </p>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-full">
-                  {user.personality}
-                </Badge>
-                <span className="text-sm text-indigo-600 font-medium flex items-center">
-                  <Award size={14} className="mr-1" /> {user.points} points
-                </span>
-              </div>
-            </div>
+      <div className="relative pb-20">
+        <div className="-mt-14 px-4 flex flex-col items-center">
+          <Avatar className="w-28 h-28 border-4 border-white dark:border-gray-900 shadow-md">
+            <AvatarImage src={user.avatar} alt={user.name} />
+            <AvatarFallback className="text-2xl">{user.name.charAt(0)}</AvatarFallback>
+          </Avatar>
+          
+          <h1 className="mt-4 text-2xl font-bold">{user.name}</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Joined {new Date(user.joinedAt).toLocaleDateString()}</p>
+          
+          <div className="flex items-center mt-2 text-primary font-medium">
+            <Award size={18} className="mr-1" />
+            <span>{user.points} points</span>
           </div>
           
-          <div className="mt-6 space-y-4">
-            <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Interests</h3>
-              <div className="flex flex-wrap gap-2">
-                {user.interests.map((interest) => (
-                  <Tag key={interest} variant="category" className="rounded-full">{interest}</Tag>
-                ))}
-              </div>
-            </div>
-            
-            <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Badges</h3>
-              <div className="flex flex-wrap gap-3">
-                {user.badges.map((badge) => (
-                  <div key={badge.id} className="flex flex-col items-center">
-                    <div className="h-10 w-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-lg">
-                      {badge.icon}
+          <div className="w-full max-w-md mt-6">
+            <Tabs defaultValue="saved" className="w-full">
+              <TabsList className="grid grid-cols-3 mb-6 rounded-full">
+                <TabsTrigger value="saved" className="rounded-full">Saved</TabsTrigger>
+                <TabsTrigger value="badges" className="rounded-full">Badges</TabsTrigger>
+                <TabsTrigger value="activity" className="rounded-full">Activity</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="saved">
+                <SavedEvents savedEvents={savedEvents} />
+              </TabsContent>
+              
+              <TabsContent value="badges">
+                <div className="grid grid-cols-2 gap-4">
+                  {badges.map((badge) => (
+                    <div 
+                      key={badge.id}
+                      className={`${badge.color} p-4 rounded-2xl flex items-center space-x-3`}
+                    >
+                      <div className="text-2xl">{badge.icon}</div>
+                      <div>
+                        <p className="font-medium">{badge.name}</p>
+                      </div>
                     </div>
-                    <span className="text-xs mt-1">{badge.name}</span>
+                  ))}
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="activity">
+                <div className="space-y-4">
+                  <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm">
+                    <p className="font-medium">You joined Joople!</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {new Date(user.joinedAt).toLocaleDateString()}
+                    </p>
                   </div>
-                ))}
-              </div>
-            </div>
+                  
+                  <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm">
+                    <p className="font-medium">You earned the Early Adopter badge</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {new Date(user.joinedAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
-        </Card>
-      </div>
-      
-      <div className="mt-6">
-        <Tabs defaultValue="upcoming">
-          <TabsList className="w-full grid grid-cols-3 rounded-xl">
-            <TabsTrigger value="upcoming" className="rounded-xl">
-              <Calendar size={16} className="mr-1.5" /> Upcoming
-            </TabsTrigger>
-            <TabsTrigger value="past" className="rounded-xl">
-              <Clock size={16} className="mr-1.5" /> Past
-            </TabsTrigger>
-            <TabsTrigger value="saved" className="rounded-xl">
-              <Award size={16} className="mr-1.5" /> Saved
-            </TabsTrigger>
-          </TabsList>
-          
-          <CardContent className="px-0 py-4">
-            <TabsContent value="upcoming" className="space-y-6 mt-0">
-              {attendedEvents.length > 0 ? (
-                attendedEvents.map(event => (
-                  <EventCard key={event.id} event={event} />
-                ))
-              ) : (
-                <p className="text-center py-10 text-gray-500">
-                  No upcoming events. Explore and join some!
-                </p>
-              )}
-            </TabsContent>
-            
-            <TabsContent value="past" className="space-y-6 mt-0">
-              <p className="text-center py-10 text-gray-500">
-                You haven't attended any events yet
-              </p>
-            </TabsContent>
-            
-            <TabsContent value="saved" className="space-y-6 mt-0">
-              {savedEvents.length > 0 ? (
-                savedEvents.map(event => (
-                  <EventCard key={event.id} event={event} />
-                ))
-              ) : (
-                <p className="text-center py-10 text-gray-500">
-                  No saved events. Find some events you like and save them!
-                </p>
-              )}
-            </TabsContent>
-          </CardContent>
-        </Tabs>
-      </div>
-      
-      <Separator className="my-8" />
-      
-      <div>
-        <Button variant="outline" className="w-full rounded-2xl">Sign Out</Button>
+        </div>
       </div>
     </AppLayout>
   );

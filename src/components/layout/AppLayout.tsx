@@ -15,7 +15,7 @@ export function AppLayout({ children, hideNav = false, header }: AppLayoutProps)
 
   return (
     <div className={cn(
-      "flex flex-col min-h-screen", 
+      "flex flex-col min-h-screen transition-colors duration-300", 
       theme === "dark" 
         ? "bg-gradient-to-br from-background via-background to-background/90" 
         : "bg-gradient-to-br from-white via-blue-50/20 to-indigo-50/30"
