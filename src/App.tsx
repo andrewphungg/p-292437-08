@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/providers/ThemeProvider";
+import { AuthProvider } from "@/context/AuthContext";
 import { UserProvider } from "@/context/UserContext";
 
 // Pages
@@ -24,24 +25,26 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <ThemeProvider>
-          <UserProvider>
-            <TooltipProvider>
-              <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-blue-50">
-                <Routes>
-                  <Route path="/" element={<Discover />} />
-                  <Route path="/explore" element={<Explore />} />
-                  <Route path="/upcoming" element={<Upcoming />} />
-                  <Route path="/event/:id" element={<EventDetail />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/premium" element={<Premium />} />
-                  <Route path="/settings" element={<Settings />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-                <Toaster />
-                <Sonner />
-              </div>
-            </TooltipProvider>
-          </UserProvider>
+          <AuthProvider>
+            <UserProvider>
+              <TooltipProvider>
+                <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-blue-50">
+                  <Routes>
+                    <Route path="/" element={<Discover />} />
+                    <Route path="/explore" element={<Explore />} />
+                    <Route path="/upcoming" element={<Upcoming />} />
+                    <Route path="/event/:id" element={<EventDetail />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/premium" element={<Premium />} />
+                    <Route path="/settings" element={<Settings />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                  <Toaster />
+                  <Sonner />
+                </div>
+              </TooltipProvider>
+            </UserProvider>
+          </AuthProvider>
         </ThemeProvider>
       </BrowserRouter>
     </QueryClientProvider>
