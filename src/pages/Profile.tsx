@@ -6,15 +6,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SavedEvents } from "@/components/events/SavedEvents";
 import { Link } from "react-router-dom";
-import { Settings, Award, Share2, Bell, Plus, Edit2, Check, X } from "lucide-react";
+import { Settings, Award, Bell, Plus, Edit2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { motion, AnimatePresence } from "framer-motion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 export default function Profile() {
   const { user, events } = useUser();
-  const { toast } = useToast();
   
   // Mock saved events
   const savedEvents = events.slice(0, 5);
@@ -66,23 +64,39 @@ export default function Profile() {
         setAvailableInterests([...availableInterests, ...foodRelatedInterests.filter(i => !availableInterests.find(ai => ai.id === i.id))]);
       }
 
-      toast({
-        title: "Badge Added",
-        description: `You've added the "${badge.name}" badge to your profile!`,
-        className: "top-center-toast",
-      });
+      toast(
+        <div className="undo-toast">
+          <span>Added "{badge.name}" badge to your profile!</span>
+        </div>,
+        {
+          position: "bottom-center",
+          duration: 2000,
+        }
+      );
     }
   };
 
   // Function to remove a badge
   const removeBadge = (badgeId: string) => {
     setBadges(badges.filter(badge => badge.id !== badgeId));
-    toast({
-      title: "Badge Removed",
-      description: "Badge has been removed from your profile.",
-      variant: "destructive",
-      className: "top-center-toast",
-    });
+    toast(
+      <div className="undo-toast">
+        <span>Badge removed from your profile</span>
+        <button
+          className="undo-toast-button"
+          onClick={() => {
+            // This is a placeholder for undo functionality
+            window.location.reload();
+          }}
+        >
+          <span className="flex items-center">Undo</span>
+        </button>
+      </div>,
+      {
+        position: "bottom-center",
+        duration: 3000,
+      }
+    );
   };
   
   const header = (
@@ -90,13 +104,13 @@ export default function Profile() {
       <div className="h-32 bg-gradient-to-r from-primary to-primary-foreground/20"></div>
       <div className="absolute top-0 right-0 p-4">
         <Link to="/settings">
-          <motion.div
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            className="p-2 bg-white/50 dark:bg-black/30 rounded-full shadow-sm backdrop-blur-sm"
+          <Button 
+            variant="secondary" 
+            size="icon"
+            className="bg-white/80 dark:bg-black/50 backdrop-blur-sm shadow-md hover:bg-white/90 dark:hover:bg-black/60"
           >
-            <Settings size={20} className="text-white" />
-          </motion.div>
+            <Settings size={18} className="text-gray-700 dark:text-white" />
+          </Button>
         </Link>
       </div>
     </div>
@@ -150,10 +164,9 @@ export default function Profile() {
                         <h4 className="text-sm font-medium mb-2">Your Badges</h4>
                         <div className="grid grid-cols-2 gap-2 mb-6">
                           {badges.map((badge) => (
-                            <motion.div 
+                            <div 
                               key={badge.id}
-                              whileHover={{ scale: 1.02 }}
-                              className={`${badge.color} p-4 rounded-2xl flex items-center justify-between`}
+                              className={`${badge.color} p-4 rounded-2xl flex items-center justify-between transition-transform duration-200 hover:scale-102`}
                             >
                               <div className="flex items-center space-x-2">
                                 <div className="text-2xl">{badge.icon}</div>
@@ -167,7 +180,7 @@ export default function Profile() {
                               >
                                 <X size={14} />
                               </Button>
-                            </motion.div>
+                            </div>
                           ))}
                         </div>
                         
@@ -176,11 +189,9 @@ export default function Profile() {
                           {availableInterests
                             .filter(interest => !badges.find(b => b.id === interest.id))
                             .map((interest) => (
-                              <motion.div 
+                              <div 
                                 key={interest.id}
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                                className={`${interest.color} p-4 rounded-2xl flex items-center justify-between cursor-pointer`}
+                                className={`${interest.color} p-4 rounded-2xl flex items-center justify-between cursor-pointer transition-transform duration-200 hover:scale-102 active:scale-98`}
                                 onClick={() => addBadge(interest)}
                               >
                                 <div className="flex items-center space-x-2">
@@ -194,7 +205,7 @@ export default function Profile() {
                                 >
                                   <Plus size={14} />
                                 </Button>
-                              </motion.div>
+                              </div>
                             ))}
                         </div>
                       </div>
@@ -207,51 +218,40 @@ export default function Profile() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <AnimatePresence initial={false}>
-                    {badges.map((badge, index) => (
-                      <motion.div 
-                        key={badge.id}
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        transition={{ duration: 0.2, delay: index * 0.05 }}
-                        className={`${badge.color} p-4 rounded-2xl flex items-center shadow-sm space-x-3`}
-                      >
-                        <div className="text-2xl">{badge.icon}</div>
-                        <div>
-                          <p className="font-medium">{badge.name}</p>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
+                  {badges.map((badge, index) => (
+                    <div 
+                      key={badge.id}
+                      className={`${badge.color} p-4 rounded-2xl flex items-center shadow-sm space-x-3 transition-transform duration-200`}
+                      style={{animationDelay: `${index * 50}ms`}}
+                    >
+                      <div className="text-2xl">{badge.icon}</div>
+                      <div>
+                        <p className="font-medium">{badge.name}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </TabsContent>
               
               <TabsContent value="activity">
                 <div className="space-y-4">
-                  <motion.div 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
+                  <div 
                     className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm"
                   >
                     <p className="font-medium">You joined Joople!</p>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                       {new Date(user.joinedAt).toLocaleDateString()}
                     </p>
-                  </motion.div>
+                  </div>
                   
-                  <motion.div 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
+                  <div 
                     className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm"
                   >
                     <p className="font-medium">You earned the Early Adopter badge</p>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                       {new Date(user.joinedAt).toLocaleDateString()}
                     </p>
-                  </motion.div>
+                  </div>
                 </div>
               </TabsContent>
             </Tabs>

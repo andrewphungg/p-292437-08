@@ -20,9 +20,26 @@ import Settings from "./pages/Settings";
 // Add custom CSS for centered toast notifications
 import "./styles/custom-toasts.css";
 
+// Add global styles for animations
+const createGlobalStyle = () => {
+  const style = document.createElement('style');
+  style.innerHTML = `
+    @keyframes heartFade {
+      0% { opacity: 1; scale: 1; }
+      100% { opacity: 0; scale: 0; }
+    }
+  `;
+  document.head.appendChild(style);
+};
+
 const queryClient = new QueryClient();
 
 const App = () => {
+  // Create global styles on mount
+  React.useEffect(() => {
+    createGlobalStyle();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>

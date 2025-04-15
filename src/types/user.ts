@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   name: string;
@@ -18,3 +17,11 @@ export interface User {
   attendedEvents: string[];
   sharedEvents: string[];
 }
+
+export type Friend = {
+  id: string;
+  name: string;
+  avatar: string;
+  points: number;
+  interests?: string[];
+};

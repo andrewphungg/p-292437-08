@@ -9,6 +9,8 @@
   border-radius: 1rem !important;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
   backdrop-filter: blur(8px) !important;
+  z-index: 100 !important;
+  transition: all 0.2s ease-in-out !important;
 }
 
 /* Make sonner toasts centered */
@@ -20,9 +22,50 @@
   max-width: 90vw !important;
 }
 
-/* Enhance toast animations */
+/* Enhance toast animations - making them less bouncy and more subtle */
 [data-sonner-toast] {
   border-radius: 1rem !important;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
   backdrop-filter: blur(8px) !important;
+  transition: all 0.2s ease-out !important;
+}
+
+/* Undo button styling */
+.undo-toast {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 0.75rem 1.25rem !important;
+  background-color: rgba(0, 0, 0, 0.8) !important;
+  color: white !important;
+  border-radius: 2rem !important;
+  max-width: 400px !important;
+  width: auto !important;
+  margin: 0 auto !important;
+}
+
+.undo-toast-button {
+  margin-left: 1rem !important;
+  padding: 0.25rem 0.75rem !important;
+  border-radius: 1rem !important;
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+
+.undo-toast-button:hover {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Ensure dark mode compatibility for toasts */
+.dark .undo-toast {
+  background-color: rgba(20, 20, 20, 0.9) !important;
+  color: white !important;
+}
+
+.dark .undo-toast-button {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: white !important;
 }

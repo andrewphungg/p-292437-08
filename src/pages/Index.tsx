@@ -6,13 +6,12 @@ import { useUser } from "@/context/UserContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RecommendedFriends } from "@/components/friends/RecommendedFriends";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
-import { FilterOptions } from "@/components/events/FilterMenu";
+import { FilterMenu, FilterOptions } from "@/components/events/FilterMenu";
 import { cn } from "@/lib/utils";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Calendar, MapPin, Music, Tag, Compass } from "lucide-react";
+import { MapPin, Music, Tag, Compass } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EventList } from "@/components/events/EventList";
-import { motion } from "framer-motion";
 
 const Index = () => {
   const { events, suggestedEvents, user } = useUser();
@@ -21,6 +20,7 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [filterMenuOpen, setFilterMenuOpen] = useState(false);
   
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -32,6 +32,15 @@ const Index = () => {
 
   const handleApplyFilters = (filters: FilterOptions) => {
     setSelectedCategories(filters.categories);
+    setFilterMenuOpen(false);
+  };
+
+  const openFilterMenu = () => {
+    setFilterMenuOpen(true);
+  };
+
+  const closeFilterMenu = () => {
+    setFilterMenuOpen(false);
   };
 
   // Filter events based on search query and selected categories
@@ -69,36 +78,32 @@ const Index = () => {
   const header = (
     <header className="sticky top-0 z-20 bg-white/80 dark:bg-gray-900/90 backdrop-blur-md shadow-sm">
       <div className="relative text-center py-6">
-        <motion.h1 
+        <h1 
           className="text-3xl font-bold bg-gradient-to-r from-sunset-orange via-sunset-yellow to-sunset-peach bg-clip-text text-transparent pb-1"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
         >
           Joople
-        </motion.h1>
+        </h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
           Discover Events For You
         </p>
-        <motion.div 
+        <div 
           className="absolute right-4 top-1/2 -translate-y-1/2"
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
         >
           <ThemeToggle variant="modern" />
-        </motion.div>
+        </div>
       </div>
       
       <div className="px-4 pb-4">
-        <SearchBar onSearch={handleSearch} placeholder="Search Events & Places" />
+        <SearchBar 
+          onSearch={handleSearch} 
+          placeholder="Search Events & Places" 
+          onFilterClick={openFilterMenu}
+        />
         
         <div className="mt-4 flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
           {categories.map((category) => (
-            <motion.div
+            <div
               key={category.id}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
             >
               <Button
                 variant={selectedCategory === category.id ? "default" : "outline"}
@@ -113,7 +118,7 @@ const Index = () => {
                 {category.icon}
                 <span>{category.name}</span>
               </Button>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
@@ -175,6 +180,13 @@ const Index = () => {
             <RecommendedFriends />
           </TabsContent>
         </Tabs>
+
+        {/* Filter Menu */}
+        <FilterMenu 
+          onClose={closeFilterMenu} 
+          onApplyFilters={handleApplyFilters}
+          open={filterMenuOpen}
+        />
       </div>
     </AppLayout>
   );
