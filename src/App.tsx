@@ -9,7 +9,8 @@ import { AuthProvider } from "@/context/AuthContext";
 import { UserProvider } from "@/context/UserContext";
 
 // Pages
-import Home from "./pages/Home";
+import Discover from "./pages/Discover";
+import Explore from "./pages/Explore";
 import Upcoming from "./pages/Upcoming";
 import EventDetail from "./pages/EventDetail";
 import Profile from "./pages/Profile";
@@ -27,9 +28,10 @@ const App = () => {
           <AuthProvider>
             <UserProvider>
               <TooltipProvider>
-                <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-blue-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-950">
+                <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-blue-50">
                   <Routes>
-                    <Route path="/" element={<Home />} />
+                    <Route path="/" element={<Discover />} />
+                    <Route path="/explore" element={<Explore />} />
                     <Route path="/upcoming" element={<Upcoming />} />
                     <Route path="/event/:id" element={<EventDetail />} />
                     <Route path="/profile" element={<Profile />} />
@@ -38,7 +40,7 @@ const App = () => {
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                   <Toaster />
-                  <Sonner position="top-center" closeButton />
+                  <Sonner />
                 </div>
               </TooltipProvider>
             </UserProvider>

@@ -7,22 +7,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tag } from "@/components/ui/tag";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Calendar, MapPin, Users, Heart, Share2, ExternalLink, Check, Clock } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, MapPin, Users, Heart, Share2, ExternalLink, Check } from "lucide-react";
 import { useEvents } from "@/hooks/useEvents";
 import { Event } from "@/types/event";
-import { motion, AnimatePresence } from "framer-motion";
-import confetti from "canvas-confetti";
-import { toast } from "sonner";
 
 export default function EventDetail() {
   const { id } = useParams<{ id: string }>();
   const { data: events = [] } = useEvents();
   const [isAttending, setIsAttending] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [hasAnimated, setHasAnimated] = useState(false);
   
   // Find the event by id
-  const event = events.find(e => e.id === id);
+  const event = events.find(e => e.id === id) as Event | undefined;
 
   // Find similar events (based on same category or shared tags)
   const similarEvents = events
@@ -48,38 +43,6 @@ export default function EventDetail() {
   
   const handleAttend = () => {
     setIsAttending(!isAttending);
-    if (!isAttending) {
-      toast.success("You're now attending this event!");
-    } else {
-      toast.info("You're no longer attending this event.");
-    }
-  };
-  
-  const handleSave = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    const newSaved = !saved;
-    setSaved(newSaved);
-    
-    if (newSaved && !hasAnimated) {
-      // Show heart confetti only on first save
-      setHasAnimated(true);
-      const x = e.clientX / window.innerWidth;
-      const y = e.clientY / window.innerHeight;
-      
-      confetti({
-        particleCount: 40,
-        spread: 60,
-        origin: { x, y },
-        shapes: ['heart'],
-        colors: ['#ff6b6b', '#ff8e8e', '#ffb3b3'],
-      });
-      
-      toast.success("Event saved to your collection!");
-    } else if (!newSaved) {
-      toast.info("Event removed from your collection");
-    }
   };
   
   if (!event) {
@@ -97,20 +60,13 @@ export default function EventDetail() {
   }
   
   const header = (
-    <div className="sticky top-0 z-20 bg-white/80 dark:bg-background/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800">
+    <div className="sticky top-0 z-20 bg-white/80 dark:bg-background/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
       <div className="max-w-xl mx-auto px-4 py-3 flex items-center justify-between">
         <Link to="/" className="p-2 -ml-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100">
           <ArrowLeft size={20} />
         </Link>
         <h1 className="text-lg font-medium truncate flex-1 text-center">Event Details</h1>
-        <motion.button 
-          onClick={handleSave}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          className="p-2 rounded-full text-gray-700 dark:text-gray-300"
-        >
-          <Heart size={20} fill={saved ? "#ef4444" : "none"} stroke={saved ? "#ef4444" : "currentColor"} />
-        </motion.button>
+        <div className="w-8"></div> {/* Spacer for balance */}
       </div>
     </div>
   );
@@ -123,28 +79,23 @@ export default function EventDetail() {
     day: "numeric",
   });
   
-  // Format time from startTime and endTime if they exist
-  const formattedTime = event.startTime ? 
-    (event.endTime ? `${event.startTime} - ${event.endTime}` : event.startTime) : 
-    "Time TBD";
+  // Format time
+  const formattedTime = typeof event.time === 'string' ? 
+    event.time : 
+    `${event.startTime}${event.endTime ? ` - ${event.endTime}` : ""}`;
   
   // Format price
-  const formattedPrice = typeof event.price === 'object' ? 
+  const formattedPrice = typeof event.price === 'string' ? 
+    event.price : 
     (event.price.isFree ? 
       "Free" : 
-      `${event.price.currency}${event.price.min}${event.price.max ? ` - ${event.price.currency}${event.price.max}` : ""}`) :
-    event.price;
+      `${event.price.currency}${event.price.min}${event.price.max ? ` - ${event.price.currency}${event.price.max}` : ""}`);
   
   return (
     <AppLayout header={header}>
       <div className="pb-10">
         {/* Hero Image */}
-        <motion.div 
-          className="relative w-full h-64 overflow-hidden rounded-3xl mt-4 mb-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-        >
+        <div className="relative w-full h-64 overflow-hidden rounded-3xl mt-4 mb-6">
           <img
             src={event.image}
             alt={event.title}
@@ -155,15 +106,10 @@ export default function EventDetail() {
               <Tag variant="trending">Trending</Tag>
             </div>
           )}
-        </motion.div>
+        </div>
         
         {/* Event Title & Basic Info */}
-        <motion.div 
-          className="mb-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.1 }}
-        >
+        <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50 mb-2">{event.title}</h1>
           
           <div className="flex items-center flex-wrap gap-y-2">
@@ -178,15 +124,10 @@ export default function EventDetail() {
               {formattedPrice}
             </span>
           </div>
-        </motion.div>
+        </div>
         
         {/* Tags */}
-        <motion.div 
-          className="mb-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
-        >
+        <div className="mb-6">
           <div className="flex flex-wrap gap-2">
             {event.tags.map((tag) => (
               <Tag key={tag} variant="default">{tag}</Tag>
@@ -195,29 +136,21 @@ export default function EventDetail() {
               <Tag key={mood} variant="mood">{mood}</Tag>
             ))}
           </div>
-        </motion.div>
+        </div>
         
         {/* Event Details */}
-        <motion.div 
-          className="bg-white/90 dark:bg-card/90 backdrop-blur-md border border-gray-200 dark:border-gray-800 rounded-3xl p-5 space-y-5 shadow-md mb-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.3 }}
-        >
+        <div className="bg-white/90 dark:bg-card/90 backdrop-blur-md border border-gray-200 dark:border-gray-800 rounded-3xl p-4 space-y-5 shadow-sm mb-6">
           <div className="flex items-start">
-            <Calendar size={22} className="shrink-0 text-blue-600 dark:text-blue-400 mr-3 mt-0.5" />
+            <Calendar size={20} className="shrink-0 text-blue-600 dark:text-blue-400 mr-3 mt-0.5" />
             <div>
               <h3 className="font-semibold dark:text-white">Date & Time</h3>
               <p className="text-gray-600 dark:text-gray-300 text-sm">{formattedDate}</p>
-              <p className="text-gray-600 dark:text-gray-300 text-sm flex items-center">
-                <Clock size={14} className="mr-1.5 text-gray-400" /> 
-                {formattedTime}
-              </p>
+              <p className="text-gray-600 dark:text-gray-300 text-sm">{formattedTime}</p>
             </div>
           </div>
           
           <div className="flex items-start">
-            <MapPin size={22} className="shrink-0 text-blue-600 dark:text-blue-400 mr-3 mt-0.5" />
+            <MapPin size={20} className="shrink-0 text-blue-600 dark:text-blue-400 mr-3 mt-0.5" />
             <div>
               <h3 className="font-semibold dark:text-white">Location</h3>
               {typeof event.location === 'string' ? (
@@ -236,50 +169,42 @@ export default function EventDetail() {
           {event.description && (
             <div className="flex items-start pt-2">
               <div className="w-full">
-                <h3 className="font-semibold mb-3 dark:text-white text-lg border-b pb-2 border-gray-100 dark:border-gray-800">
-                  About This Event
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">{event.description}</p>
+                <h3 className="font-semibold mb-2 dark:text-white text-lg border-b pb-1 border-gray-100 dark:border-gray-800">About this event</h3>
+                <p className="text-gray-600 dark:text-gray-300 text-sm">{event.description}</p>
               </div>
             </div>
           )}
-        </motion.div>
+        </div>
         
         {/* Action Buttons */}
-        <motion.div 
-          className="flex gap-3 mb-8"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.4 }}
-        >
+        <div className="flex gap-3 mb-8">
           <Button 
             onClick={handleAttend}
-            className={`flex-1 rounded-full py-6 ${isAttending ? 'bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700' : ''}`}
+            className={`flex-1 rounded-full ${isAttending ? 'bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700' : ''}`}
           >
             {isAttending ? (
               <>
-                <Check size={18} className="mr-2" /> Going
+                <Check size={18} className="mr-1" /> Going
               </>
             ) : (
               <>
-                <Calendar size={18} className="mr-2" /> Attend
+                <Calendar size={18} className="mr-1" /> Attend
               </>
             )}
           </Button>
           
-          <Button variant="outline" className="flex-1 rounded-full py-6">
-            <Share2 size={18} className="mr-2" /> Share
+          <Button variant="outline" className="flex-1 rounded-full">
+            <Share2 size={18} className="mr-1" /> Share
           </Button>
-        </motion.div>
+          
+          <Button variant="outline" size="icon" className="rounded-full">
+            <Heart size={18} />
+          </Button>
+        </div>
         
         {/* Attendees */}
-        <motion.div 
-          className="mb-8"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.5 }}
-        >
-          <h2 className="text-lg font-semibold mb-3 dark:text-white">Who's Going</h2>
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold mb-3 dark:text-white">Who's going</h2>
           <div className="flex items-center">
             <div className="flex -space-x-2 mr-3">
               {attendees.slice(0, 3).map((attendee) => (
@@ -298,111 +223,87 @@ export default function EventDetail() {
               {isAttending ? "You and " : ""}{event.attendees} {event.attendees === 1 ? "person" : "people"} attending
             </span>
           </div>
-        </motion.div>
+        </div>
         
         {/* External Link */}
         {event.url && (
-          <motion.div 
-            className="mb-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.6 }}
-          >
+          <div className="mb-8">
             <Button variant="outline" asChild className="w-full rounded-full">
               <a href={event.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center">
                 Visit Official Page <ExternalLink size={16} className="ml-1.5" />
               </a>
             </Button>
-          </motion.div>
+          </div>
         )}
         
         {/* People Also Attended */}
         {alsoAttendedEvents.length > 0 && (
-          <motion.div 
-            className="mb-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.7 }}
-          >
+          <div className="mb-8">
             <Separator className="mb-6 dark:bg-gray-800" />
             
-            <h2 className="text-lg font-semibold mb-4 dark:text-white">People Who Attended Also Went To</h2>
+            <h2 className="text-lg font-semibold mb-4 dark:text-white">People who attended also went to</h2>
             <div className="grid grid-cols-2 gap-4">
               {alsoAttendedEvents.map(event => (
-                <motion.div
-                  key={event.id}
-                  whileHover={{ y: -5, scale: 1.02 }}
-                  transition={{ type: "spring", stiffness: 300 }}
+                <Link 
+                  key={event.id} 
+                  to={`/event/${event.id}`}
+                  className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-3xl overflow-hidden hover:shadow-md transition-shadow"
                 >
-                  <Link 
-                    to={`/event/${event.id}`}
-                    className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-3xl overflow-hidden hover:shadow-md transition-shadow block"
-                  >
-                    <div className="h-24 overflow-hidden">
-                      <img 
-                        src={event.image} 
-                        alt={event.title} 
-                        className="w-full h-full object-cover"
-                      />
+                  <div className="h-24 overflow-hidden">
+                    <img 
+                      src={event.image} 
+                      alt={event.title} 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="p-3">
+                    <h3 className="font-medium text-sm line-clamp-2 dark:text-gray-100">{event.title}</h3>
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="text-xs text-gray-500 dark:text-gray-400">{typeof event.date === 'string' ? event.date : new Date(event.date).toLocaleDateString()}</span>
+                      <span className="text-xs font-medium text-green-600 dark:text-green-400">
+                        {typeof event.price === 'string' ? event.price : (event.price.isFree ? "Free" : `${event.price.currency}${event.price.min}+`)}
+                      </span>
                     </div>
-                    <div className="p-3">
-                      <h3 className="font-medium text-sm line-clamp-2 dark:text-gray-100">{event.title}</h3>
-                      <div className="flex items-center justify-between mt-1">
-                        <span className="text-xs text-gray-500 dark:text-gray-400">{typeof event.date === 'string' ? event.date : new Date(event.date).toLocaleDateString()}</span>
-                        <span className="text-xs font-medium text-green-600 dark:text-green-400">
-                          {typeof event.price === 'object' ? (event.price.isFree ? "Free" : `${event.price.currency}${event.price.min}+`) : event.price}
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                </motion.div>
+                  </div>
+                </Link>
               ))}
             </div>
-          </motion.div>
+          </div>
         )}
         
         {/* Similar Events */}
         {similarEvents.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.8 }}
-          >
+          <div>
             <Separator className="mb-6 dark:bg-gray-800" />
             
-            <h2 className="text-lg font-semibold mb-4 dark:text-white">You Might Also Like</h2>
+            <h2 className="text-lg font-semibold mb-4 dark:text-white">You might also like</h2>
             <div className="grid grid-cols-2 gap-4">
               {similarEvents.map(event => (
-                <motion.div
-                  key={event.id}
-                  whileHover={{ y: -5, scale: 1.02 }}
-                  transition={{ type: "spring", stiffness: 300 }}
+                <Link 
+                  key={event.id} 
+                  to={`/event/${event.id}`}
+                  className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-3xl overflow-hidden hover:shadow-md transition-shadow"
                 >
-                  <Link 
-                    to={`/event/${event.id}`}
-                    className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-3xl overflow-hidden hover:shadow-md transition-shadow block"
-                  >
-                    <div className="h-24 overflow-hidden">
-                      <img 
-                        src={event.image} 
-                        alt={event.title} 
-                        className="w-full h-full object-cover"
-                      />
+                  <div className="h-24 overflow-hidden">
+                    <img 
+                      src={event.image} 
+                      alt={event.title} 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="p-3">
+                    <h3 className="font-medium text-sm line-clamp-2 dark:text-gray-100">{event.title}</h3>
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="text-xs text-gray-500 dark:text-gray-400">{typeof event.date === 'string' ? event.date : new Date(event.date).toLocaleDateString()}</span>
+                      <span className="text-xs font-medium text-green-600 dark:text-green-400">
+                        {typeof event.price === 'string' ? event.price : (event.price.isFree ? "Free" : `${event.price.currency}${event.price.min}+`)}
+                      </span>
                     </div>
-                    <div className="p-3">
-                      <h3 className="font-medium text-sm line-clamp-2 dark:text-gray-100">{event.title}</h3>
-                      <div className="flex items-center justify-between mt-1">
-                        <span className="text-xs text-gray-500 dark:text-gray-400">{typeof event.date === 'string' ? event.date : new Date(event.date).toLocaleDateString()}</span>
-                        <span className="text-xs font-medium text-green-600 dark:text-green-400">
-                          {typeof event.price === 'object' ? (event.price.isFree ? "Free" : `${event.price.currency}${event.price.min}+`) : event.price}
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                </motion.div>
+                  </div>
+                </Link>
               ))}
             </div>
-          </motion.div>
+          </div>
         )}
       </div>
     </AppLayout>
