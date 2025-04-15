@@ -1,8 +1,7 @@
-
 import React, { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Bell, Moon, Language, Shield, HelpCircle, LogOut } from "lucide-react";
+import { ChevronLeft, Bell, Moon, Languages, Shield, HelpCircle, LogOut } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
@@ -163,7 +162,7 @@ export default function Settings() {
             <Separator className="dark:bg-gray-700" />
             <div className="p-4 flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <Language size={18} className="text-primary" />
+                <Languages size={18} className="text-primary" />
                 <span>Language</span>
               </div>
               <span className="text-sm text-gray-500 dark:text-gray-400">English</span>
