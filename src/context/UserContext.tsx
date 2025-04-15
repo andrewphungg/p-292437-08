@@ -6,8 +6,19 @@ import { currentUser as initialUser, mockEvents, getAllFriends } from "../data/m
 import { toast } from "sonner";
 import { useAuth } from "./AuthContext";
 
+// Extend the User interface to include the friends property locally
+type ExtendedUser = User & {
+  friends: {
+    id: string;
+    name: string;
+    avatar: string;
+    points: number;
+    interests?: string[];
+  }[];
+};
+
 interface UserContextType {
-  user: User;
+  user: ExtendedUser;
   events: Event[];
   suggestedEvents: Event[];
   suggestedFriends: User[];
@@ -25,7 +36,10 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const { currentUser: authUser } = useAuth();
-  const [user, setUser] = useState<User>(initialUser);
+  const [user, setUser] = useState<ExtendedUser>({
+    ...(initialUser as any), // Cast to any to avoid TypeScript errors with the friends property
+    friends: initialUser.friends || [] // Ensure friends is defined with a default value
+  });
   const [events, setEvents] = useState<Event[]>(mockEvents);
   const [allUsers, setAllUsers] = useState<User[]>(getAllFriends());
   const [suggestedEvents, setSuggestedEvents] = useState<Event[]>([]);
