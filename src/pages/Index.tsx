@@ -1,7 +1,5 @@
-
 import React, { useState, useEffect } from "react";
 import { SearchBar } from "@/components/events/SearchBar";
-import { EventCard } from "@/components/events/EventCard";
 import { useUser } from "@/context/UserContext";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { FilterMenu, FilterOptions } from "@/components/events/FilterMenu";
@@ -9,11 +7,10 @@ import { cn } from "@/lib/utils";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { MapPin, Music, Tag, Compass, TrendingUp, Calendar, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useTicketmasterEvents, useFilteredEvents, setApiKey } from "@/hooks/useTicketmasterEvents";
+import { useTicketmasterEvents, useFilteredEvents } from "@/hooks/useTicketmasterEvents";
 import { toast } from "sonner";
 import { EventList } from "@/components/events/EventList";
 import { ApiKeySetup } from "@/components/settings/ApiKeySetup";
-import { ApiKeyDialog } from "@/components/ApiKeyDialog";
 
 const Index = () => {
   const { user } = useUser();
@@ -24,22 +21,19 @@ const Index = () => {
   const [activeFilter, setActiveFilter] = useState("all");
   
   const { data: ticketmasterEvents = [], isLoading, refetch } = useTicketmasterEvents({
-    enabled: true
+    enabled: true,
+    stateCode: "CA"
   });
   
   const { data: weekendEvents = [], isLoading: isLoadingWeekend } = useFilteredEvents({
-    dateRange: 'this-weekend'
+    dateRange: 'this-weekend',
+    stateCode: "CA"
   });
 
   const { data: trendingEvents = [], isLoading: isLoadingTrending } = useFilteredEvents({
-    dateRange: 'trending'
+    dateRange: 'trending',
+    stateCode: "CA"
   });
-
-  const handleApiKeyUpdate = (apiKey: string) => {
-    setApiKey(apiKey);
-    refetch();
-    toast.success("API key saved and events refreshing");
-  };
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -132,28 +126,25 @@ const Index = () => {
 
   useEffect(() => {
     if (ticketmasterEvents.length > 0 && !isLoading) {
-      toast.success(`Loaded ${ticketmasterEvents.length} events from Ticketmaster`);
+      toast.success(`Loaded ${ticketmasterEvents.length} events from California`);
     }
   }, [ticketmasterEvents.length, isLoading]);
   
   const header = (
     <header className="sticky top-0 z-20 bg-white/80 dark:bg-gray-900/90 backdrop-blur-md shadow-sm">
-      <div className="relative text-center py-6">
-        <div className="flex justify-between items-center px-4">
-          <div></div>
-          <h1 
-            className="text-5xl font-bold bg-gradient-to-r from-sunset-orange via-sunset-yellow to-sunset-peach bg-clip-text text-transparent pb-1"
-          >
-            Joople
-          </h1>
-          <div className="flex space-x-2">
-            <ApiKeySetup onSave={handleApiKeyUpdate} />
-            <ThemeToggle variant="modern" />
-          </div>
-        </div>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+      <div className="flex flex-col items-center py-6">
+        <h1 
+          className="text-5xl font-bold bg-gradient-to-r from-sunset-orange via-sunset-yellow to-sunset-peach bg-clip-text text-transparent pb-1"
+        >
+          Joople
+        </h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
           Discover Events For You
         </p>
+        <div className="absolute right-4 top-6 flex space-x-2">
+          <ApiKeySetup onSave={() => {}} />
+          <ThemeToggle variant="modern" />
+        </div>
       </div>
       
       <div className="px-4 pb-4">
@@ -212,8 +203,6 @@ const Index = () => {
   
   return (
     <AppLayout header={header}>
-      <ApiKeyDialog onSave={handleApiKeyUpdate} />
-      
       <div className="py-6 space-y-8">
         <div className="space-y-8">
           <section>

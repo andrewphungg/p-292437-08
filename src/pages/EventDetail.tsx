@@ -51,6 +51,9 @@ export default function EventDetail() {
         .slice(0, 3);
       
       setSimilarEvents(similar);
+      
+      // Set page title
+      document.title = `${event.title} | Joople`;
     }
   }, [event, events]);
   
@@ -112,16 +115,14 @@ export default function EventDetail() {
         
         {/* Event header with image */}
         <div className="relative rounded-3xl overflow-hidden mb-6">
-          {event.image && (
-            <div className="relative h-60 md:h-80 bg-gradient-to-b from-gray-900/70 to-gray-900/30">
-              <img 
-                src={event.image} 
-                alt={event.title}
-                className="absolute inset-0 w-full h-full object-cover z-[-1]"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent z-[0]"></div>
-            </div>
-          )}
+          <div className="relative h-60 md:h-80 bg-gradient-to-b from-gray-900/70 to-gray-900/30">
+            <img 
+              src={event.image} 
+              alt={event.title}
+              className="absolute inset-0 w-full h-full object-cover z-[-1]"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent z-[0]"></div>
+          </div>
           
           <div className="relative p-6 md:p-8 text-white z-[1] -mt-32 pt-20 pb-6">
             <div className="flex flex-wrap gap-2 mb-3">
@@ -152,7 +153,7 @@ export default function EventDetail() {
               {event.location && (
                 <div className="flex items-center">
                   <MapPin size={16} className="mr-1.5" />
-                  <span>{formatLocation(event.location)}</span>
+                  <span>{typeof event.location === 'object' ? event.location.name : event.location}</span>
                 </div>
               )}
             </div>
@@ -172,6 +173,19 @@ export default function EventDetail() {
               <div className="prose prose-sm max-w-none dark:prose-invert">
                 <p>{event.description}</p>
               </div>
+
+              <div className="mt-6 pt-4 border-t">
+                <h3 className="font-medium mb-3">Location Details</h3>
+                {typeof event.location === 'object' && (
+                  <div className="text-sm">
+                    <p className="mb-1"><strong>Venue:</strong> {event.location.name}</p>
+                    {event.location.address && (
+                      <p className="mb-1"><strong>Address:</strong> {event.location.address}</p>
+                    )}
+                    <p><strong>City:</strong> {event.location.city}</p>
+                  </div>
+                )}
+              </div>
             </motion.div>
           </div>
           
@@ -187,7 +201,10 @@ export default function EventDetail() {
                 {event.price && (
                   <div className="mb-4">
                     <h3 className="text-sm font-semibold text-muted-foreground mb-1">Price</h3>
-                    <p className="text-xl font-bold">{formatPrice(event.price)}</p>
+                    <p className="text-xl font-bold">
+                      {event.price.isFree ? "Free" : 
+                        `${event.price.currency}${event.price.min}${event.price.max ? ` - ${event.price.currency}${event.price.max}` : ""}`}
+                    </p>
                   </div>
                 )}
                 

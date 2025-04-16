@@ -12,14 +12,14 @@ import {
 import { Event } from '@/types/event';
 import { toast } from 'sonner';
 
-// Update the checkApiKey function to always return true
-// since we're now using the edge function as primary source
+// The API key is now managed solely in the backend
 export const checkApiKey = (): boolean => {
   return true;
 };
 
 export const setApiKey = (key: string): void => {
-  localStorage.setItem("ticketmasterApiKey", key);
+  // This function is kept for backward compatibility but no longer stores keys
+  console.log("API keys are now managed in the backend");
 };
 
 export function useTicketmasterEvents(options?: {
@@ -36,7 +36,7 @@ export function useTicketmasterEvents(options?: {
     keyword,
     category,
     city,
-    stateCode,
+    stateCode = "CA", // Default to California events
     startDate,
     endDate,
     enabled = true,

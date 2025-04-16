@@ -158,6 +158,11 @@ export const fetchTicketmasterEvents = async (
     queryParams.append("size", params.size?.toString() || "50"); // Get more events
     queryParams.append("countryCode", params.countryCode || "US"); // Default to US events
     
+    // Default to California events if no stateCode is provided
+    if (!params.stateCode) {
+      queryParams.append("stateCode", "CA");
+    }
+    
     // Add other params
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && !['size', 'countryCode'].includes(key)) {
@@ -168,6 +173,12 @@ export const fetchTicketmasterEvents = async (
     // Add default radius if not specified
     if (!params.radius) {
       queryParams.append("radius", "50");
+    }
+
+    // Ensure we only get present and future events
+    if (!params.startDateTime) {
+      const now = new Date();
+      queryParams.append("startDateTime", now.toISOString().slice(0, 19) + 'Z');
     }
 
     const apiUrl = `${baseUrl}?${queryParams.toString()}`;
@@ -186,7 +197,7 @@ export const fetchTicketmasterEvents = async (
       // Check if events exist
       if (!data._embedded || !data._embedded.events) {
         console.log("No events found from Ticketmaster API");
-        return generateSampleEvents(50); // Return sample events when no events found
+        return generateSampleEvents(50, "CA"); // Return sample events when no events found, with CA as state
       }
 
       // Map Ticketmaster events to our Event type
@@ -194,11 +205,11 @@ export const fetchTicketmasterEvents = async (
     } catch (error) {
       console.error("Error fetching from real Ticketmaster API:", error);
       // Fallback to sample events
-      return generateSampleEvents(50);
+      return generateSampleEvents(50, "CA");
     }
   } catch (error) {
     console.error("Error in Ticketmaster service:", error);
-    return generateSampleEvents(50); // Return sample events on error
+    return generateSampleEvents(50, "CA"); // Return sample events on error
   }
 };
 
@@ -266,10 +277,14 @@ const mapTicketmasterEvent = (event: TicketmasterEvent): Event => {
   };
 };
 
-// Generate sample events when API fails
-const generateSampleEvents = (count: number): Event[] => {
+// Generate sample events when API fails - updated to use stateCode parameter
+const generateSampleEvents = (count: number, stateCode: string = "CA"): Event[] => {
   const categories = ["Music", "Sports", "Arts", "Family", "Comedy", "Tech", "Food"];
-  const cities = ["San Francisco", "Los Angeles", "New York", "Chicago", "Miami", "Austin", "Seattle", "Boston"];
+  // Modified to use California cities by default
+  const cities = stateCode === "CA" ? 
+    ["San Francisco", "Los Angeles", "San Diego", "Sacramento", "Oakland", "San Jose", "Fresno", "Long Beach"] : 
+    ["San Francisco", "Los Angeles", "New York", "Chicago", "Miami", "Austin", "Seattle", "Boston"];
+  
   const venues = [
     "Madison Square Garden", "Barclays Center", "Chase Center", "Staples Center", 
     "Red Rocks Amphitheatre", "The Fillmore", "Radio City Music Hall", "Hollywood Bowl",
@@ -436,22 +451,22 @@ const getRandomStreet = (): string => {
 
 // Function to search for events by keyword
 export const searchEvents = async (keyword: string): Promise<Event[]> => {
-  return fetchTicketmasterEvents({ keyword, size: 50 });
+  return fetchTicketmasterEvents({ keyword, size: 50, stateCode: "CA" });
 };
 
 // Function to get events by category
 export const getEventsByCategory = async (category: string): Promise<Event[]> => {
-  return fetchTicketmasterEvents({ classificationName: category, size: 50 });
+  return fetchTicketmasterEvents({ classificationName: category, size: 50, stateCode: "CA" });
 };
 
 // Function to get events by location
-export const getEventsByLocation = async (city: string, stateCode?: string): Promise<Event[]> => {
+export const getEventsByLocation = async (city: string, stateCode: string = "CA"): Promise<Event[]> => {
   return fetchTicketmasterEvents({ city, stateCode, size: 50 });
 };
 
 // Function to get events by date range
 export const getEventsByDateRange = async (startDateTime: string, endDateTime?: string): Promise<Event[]> => {
-  return fetchTicketmasterEvents({ startDateTime, endDateTime, size: 50 });
+  return fetchTicketmasterEvents({ startDateTime, endDateTime, size: 50, stateCode: "CA" });
 };
 
 // Function to refresh events data (can be called by a scheduler)
@@ -470,6 +485,7 @@ export const refreshEventsData = async (): Promise<Event[]> => {
     startDateTime,
     endDateTime,
     sort: "date,asc",
-    size: 50
+    size: 50,
+    stateCode: "CA"
   });
 };
