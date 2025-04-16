@@ -12,6 +12,16 @@ import {
 import { Event } from '@/types/event';
 import { toast } from 'sonner';
 
+// Add a function to check and set the API key
+export const checkApiKey = (): boolean => {
+  const apiKey = localStorage.getItem("ticketmasterApiKey");
+  return !!apiKey;
+};
+
+export const setApiKey = (key: string): void => {
+  localStorage.setItem("ticketmasterApiKey", key);
+};
+
 export function useTicketmasterEvents(options?: {
   keyword?: string;
   category?: string;
@@ -50,7 +60,7 @@ export function useTicketmasterEvents(options?: {
   const query = useQuery({
     queryKey: ['ticketmasterEvents', { keyword, category, city, stateCode, startDate, endDate, size }],
     queryFn,
-    enabled,
+    enabled: enabled && checkApiKey(),
     staleTime: 1000 * 60 * 15, // 15 minutes
     refetchOnWindowFocus: false,
     meta: {

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { SearchBar } from "@/components/events/SearchBar";
 import { EventCard } from "@/components/events/EventCard";
@@ -9,10 +8,11 @@ import { cn } from "@/lib/utils";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { MapPin, Music, Tag, Compass, TrendingUp, Calendar, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useTicketmasterEvents, useFilteredEvents } from "@/hooks/useTicketmasterEvents";
+import { useTicketmasterEvents, useFilteredEvents, checkApiKey, setApiKey } from "@/hooks/useTicketmasterEvents";
 import { toast } from "sonner";
 import { EventList } from "@/components/events/EventList";
 import { ApiKeySetup } from "@/components/settings/ApiKeySetup";
+import { ApiKeyDialog } from "@/components/ApiKeyDialog";
 
 const Index = () => {
   const { user } = useUser();
@@ -21,23 +21,32 @@ const Index = () => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [filterMenuOpen, setFilterMenuOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState("all");
+  const [hasCheckedApiKey, setHasCheckedApiKey] = useState(false);
   
-  // Use Ticketmaster API to get events
-  const { data: ticketmasterEvents = [], isLoading, refetch } = useTicketmasterEvents();
+  const { data: ticketmasterEvents = [], isLoading, refetch } = useTicketmasterEvents({
+    enabled: hasCheckedApiKey
+  });
   
-  // For weekend events
   const { data: weekendEvents = [], isLoading: isLoadingWeekend } = useFilteredEvents({
-    dateRange: 'this-weekend'
+    dateRange: 'this-weekend',
+    enabled: hasCheckedApiKey
   });
 
-  // For trending events
   const { data: trendingEvents = [], isLoading: isLoadingTrending } = useFilteredEvents({
-    dateRange: 'trending'
+    dateRange: 'trending',
+    enabled: hasCheckedApiKey
   });
+
+  useEffect(() => {
+    const hasKey = checkApiKey();
+    setHasCheckedApiKey(hasKey);
+  }, []);
 
   const handleApiKeyUpdate = (apiKey: string) => {
-    // Refresh events after API key update
+    setApiKey(apiKey);
+    setHasCheckedApiKey(true);
     refetch();
+    toast.success("API key saved and events refreshing");
   };
 
   const handleSearch = (query: string) => {
@@ -57,7 +66,6 @@ const Index = () => {
     setFilterMenuOpen(false);
   };
 
-  // Add default filtering options
   const filterOptions = [
     { id: "all", label: "All", icon: <Compass size={16} /> },
     { id: "trending", label: "Trending", icon: <TrendingUp size={16} /> },
@@ -65,7 +73,6 @@ const Index = () => {
     { id: "upcoming", label: "Upcoming", icon: <Clock size={16} /> },
   ];
 
-  // Categories for quick filtering
   const categories = [
     { id: "all", name: "All", icon: <Compass size={16} /> },
     { id: "Music", name: "Music", icon: <Music size={16} /> },
@@ -75,21 +82,17 @@ const Index = () => {
     { id: "Miscellaneous", name: "Misc", icon: <Tag size={16} /> },
   ];
 
-  // Filter events based on search query, selected categories, and active filter
   const filteredEvents = (ticketmasterEvents).filter(event => {
-    // Match search query (case insensitive)
     const matchesSearch = searchQuery === "" || 
       event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (typeof event.location === 'object' && event.location.name.toLowerCase().includes(searchQuery.toLowerCase()));
       
-    // Match selected categories
     const matchesCategories = selectedCategories.length === 0 || 
       selectedCategories.some(category => 
         event.category === category || 
         event.tags.some(tag => tag && tag.toLowerCase() === category.toLowerCase())
       );
 
-    // Match active filter tab
     let matchesActiveFilter = false;
     
     switch(activeFilter) {
@@ -112,21 +115,17 @@ const Index = () => {
     return matchesSearch && matchesCategories && matchesActiveFilter;
   });
 
-  // Helper functions for date filtering
   const isWeekendEvent = (dateStr: string) => {
     const date = new Date(dateStr);
     const now = new Date();
     
-    // Get next Friday
     const friday = new Date(now);
-    const dayOfWeek = friday.getDay(); // 0 is Sunday, 6 is Saturday
-    friday.setDate(now.getDate() + ((5 - dayOfWeek + 7) % 7)); // Next Friday
+    const dayOfWeek = friday.getDay();
+    friday.setDate(now.getDate() + ((5 - dayOfWeek + 7) % 7));
     
-    // Get next Sunday
     const sunday = new Date(friday);
     sunday.setDate(friday.getDate() + 2);
     
-    // Check if date is between next Friday and Sunday inclusive
     return date >= friday && date <= sunday;
   };
   
@@ -140,7 +139,6 @@ const Index = () => {
   };
 
   useEffect(() => {
-    // Show a toast when events are loaded
     if (ticketmasterEvents.length > 0 && !isLoading) {
       toast.success(`Loaded ${ticketmasterEvents.length} events from Ticketmaster`);
     }
@@ -222,9 +220,10 @@ const Index = () => {
   
   return (
     <AppLayout header={header}>
+      <ApiKeyDialog onSave={handleApiKeyUpdate} />
+      
       <div className="py-6 space-y-8">
         <div className="space-y-8">
-          {/* For You Section */}
           <section>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold">For You</h2>
@@ -240,7 +239,6 @@ const Index = () => {
             />
           </section>
           
-          {/* Trending Section */}
           <section>
             <h2 className="section-title font-bold mb-4">Trending</h2>
             <EventList 
@@ -251,7 +249,6 @@ const Index = () => {
             />
           </section>
           
-          {/* Weekend Section */}
           <section>
             <h2 className="section-title font-bold mb-4">This Weekend</h2>
             <EventList 
@@ -262,7 +259,6 @@ const Index = () => {
           </section>
         </div>
 
-        {/* Filter Menu */}
         <FilterMenu 
           onClose={closeFilterMenu} 
           onApplyFilters={handleApplyFilters}
