@@ -28,13 +28,11 @@ const Index = () => {
   });
   
   const { data: weekendEvents = [], isLoading: isLoadingWeekend } = useFilteredEvents({
-    dateRange: 'this-weekend',
-    enabled: hasCheckedApiKey
+    dateRange: 'this-weekend'
   });
 
   const { data: trendingEvents = [], isLoading: isLoadingTrending } = useFilteredEvents({
-    dateRange: 'trending',
-    enabled: hasCheckedApiKey
+    dateRange: 'trending'
   });
 
   useEffect(() => {
