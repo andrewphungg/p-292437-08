@@ -1,11 +1,21 @@
-
 import { Event } from "@/types/event";
 import { createClient } from '@supabase/supabase-js';
 
-// Create a Supabase client
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Create a Supabase client - with proper error handling for missing env variables
+let supabase;
+try {
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  
+  // Check if the environment variables are defined
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.warn("Supabase URL or Anon Key is missing. Edge functions will not work.");
+  } else {
+    supabase = createClient(supabaseUrl, supabaseAnonKey);
+  }
+} catch (error) {
+  console.error("Failed to initialize Supabase client:", error);
+}
 
 // Default API key as fallback - this will be used only if the edge function fails
 const DEFAULT_API_KEY = "CYB4SkyODasGUeUeBSlZZDXphPms6AL7";
@@ -13,15 +23,24 @@ const DEFAULT_API_KEY = "CYB4SkyODasGUeUeBSlZZDXphPms6AL7";
 // Get API key from Supabase edge function or fallback to local storage or default
 const getApiKey = async (): Promise<string> => {
   try {
-    // First try to get from Supabase edge function
-    const { data, error } = await supabase.functions.invoke('getTicketmasterApiKey');
-    
-    if (error || !data?.apiKey) {
-      console.warn("Could not fetch API key from Supabase:", error);
-      throw new Error("Failed to retrieve API key from Supabase");
+    // First try to get from Supabase edge function if supabase is initialized
+    if (supabase) {
+      try {
+        const { data, error } = await supabase.functions.invoke('getTicketmasterApiKey');
+        
+        if (error || !data?.apiKey) {
+          console.warn("Could not fetch API key from Supabase:", error);
+          throw new Error("Failed to retrieve API key from Supabase");
+        }
+        
+        return data.apiKey;
+      } catch (err) {
+        console.warn("Error calling Supabase edge function:", err);
+        throw err;
+      }
+    } else {
+      throw new Error("Supabase client not initialized");
     }
-    
-    return data.apiKey;
   } catch (err) {
     console.warn("Falling back to localStorage or default API key:", err);
     
