@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { SearchBar } from "@/components/events/SearchBar";
 import { EventCard } from "@/components/events/EventCard";
 import { useUser } from "@/context/UserContext";
@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { MapPin, Music, Tag, Compass, TrendingUp, Calendar, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useTicketmasterEvents, useFilteredEvents, checkApiKey, setApiKey } from "@/hooks/useTicketmasterEvents";
+import { useTicketmasterEvents, useFilteredEvents, setApiKey } from "@/hooks/useTicketmasterEvents";
 import { toast } from "sonner";
 import { EventList } from "@/components/events/EventList";
 import { ApiKeySetup } from "@/components/settings/ApiKeySetup";
@@ -21,10 +21,9 @@ const Index = () => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [filterMenuOpen, setFilterMenuOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState("all");
-  const [hasCheckedApiKey, setHasCheckedApiKey] = useState(false);
   
   const { data: ticketmasterEvents = [], isLoading, refetch } = useTicketmasterEvents({
-    enabled: hasCheckedApiKey
+    enabled: true
   });
   
   const { data: weekendEvents = [], isLoading: isLoadingWeekend } = useFilteredEvents({
@@ -35,14 +34,8 @@ const Index = () => {
     dateRange: 'trending'
   });
 
-  useEffect(() => {
-    const hasKey = checkApiKey();
-    setHasCheckedApiKey(hasKey);
-  }, []);
-
   const handleApiKeyUpdate = (apiKey: string) => {
     setApiKey(apiKey);
-    setHasCheckedApiKey(true);
     refetch();
     toast.success("API key saved and events refreshing");
   };

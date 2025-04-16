@@ -14,10 +14,10 @@ export const ApiKeyDialog = ({ onSave }: ApiKeyDialogProps) => {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
+    // We're not automatically opening the dialog anymore
+    // since we're using the edge function
     const savedKey = localStorage.getItem("ticketmasterApiKey");
-    if (!savedKey) {
-      setOpen(true);
-    } else {
+    if (savedKey) {
       setApiKey(savedKey);
     }
   }, []);
@@ -44,7 +44,7 @@ export const ApiKeyDialog = ({ onSave }: ApiKeyDialogProps) => {
         </DialogHeader>
         <div className="space-y-4 py-4">
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            To use this app, you need to enter your Ticketmaster API key.
+            You can provide your own Ticketmaster API key or use the app's default key.
             <a 
               href="https://developer-acct.ticketmaster.com/user/register" 
               target="_blank" 

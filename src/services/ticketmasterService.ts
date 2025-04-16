@@ -1,10 +1,40 @@
-import { Event } from "@/types/event";
 
-// Get API key from localStorage or use default
-const getApiKey = (): string => {
-  const storedKey = localStorage.getItem("ticketmasterApiKey");
-  // Default API key as fallback
-  return storedKey || "CYB4SkyODasGUeUeBSlZZDXphPms6AL7";
+import { Event } from "@/types/event";
+import { createClient } from '@supabase/supabase-js';
+
+// Create a Supabase client
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// Default API key as fallback - this will be used only if the edge function fails
+const DEFAULT_API_KEY = "CYB4SkyODasGUeUeBSlZZDXphPms6AL7";
+
+// Get API key from Supabase edge function or fallback to local storage or default
+const getApiKey = async (): Promise<string> => {
+  try {
+    // First try to get from Supabase edge function
+    const { data, error } = await supabase.functions.invoke('getTicketmasterApiKey');
+    
+    if (error || !data?.apiKey) {
+      console.warn("Could not fetch API key from Supabase:", error);
+      throw new Error("Failed to retrieve API key from Supabase");
+    }
+    
+    return data.apiKey;
+  } catch (err) {
+    console.warn("Falling back to localStorage or default API key:", err);
+    
+    // Next try localStorage
+    const storedKey = localStorage.getItem("ticketmasterApiKey");
+    if (storedKey) {
+      return storedKey;
+    }
+    
+    // Finally use default key
+    console.warn("Using default API key as fallback");
+    return DEFAULT_API_KEY;
+  }
 };
 
 // This interface defines the structure of a Ticketmaster event
@@ -100,8 +130,8 @@ export const fetchTicketmasterEvents = async (
     // Construct the API URL with parameters
     const baseUrl = "https://app.ticketmaster.com/discovery/v2/events.json";
     
-    // Get API key from localStorage or use default
-    const API_KEY = getApiKey();
+    // Get API key from Supabase edge function
+    const API_KEY = await getApiKey();
     
     // Use URLSearchParams to create a proper query string
     const queryParams = new URLSearchParams();

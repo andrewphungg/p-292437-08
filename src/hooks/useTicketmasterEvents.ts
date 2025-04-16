@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { 
@@ -11,10 +12,10 @@ import {
 import { Event } from '@/types/event';
 import { toast } from 'sonner';
 
-// Add a function to check and set the API key
+// Update the checkApiKey function to always return true
+// since we're now using the edge function as primary source
 export const checkApiKey = (): boolean => {
-  const apiKey = localStorage.getItem("ticketmasterApiKey");
-  return !!apiKey;
+  return true;
 };
 
 export const setApiKey = (key: string): void => {
@@ -59,7 +60,7 @@ export function useTicketmasterEvents(options?: {
   const query = useQuery({
     queryKey: ['ticketmasterEvents', { keyword, category, city, stateCode, startDate, endDate, size }],
     queryFn,
-    enabled: enabled && checkApiKey(),
+    enabled,
     staleTime: 1000 * 60 * 15, // 15 minutes
     refetchOnWindowFocus: false,
     meta: {
