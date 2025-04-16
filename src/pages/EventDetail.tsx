@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function EventDetail() {
   const { id } = useParams<{ id: string }>();
@@ -28,6 +29,7 @@ export default function EventDetail() {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [similarEvents, setSimilarEvents] = useState<Event[]>([]);
+  const isMobile = useIsMobile();
   
   // Get the current event
   const event = getEventById(id || "");
@@ -67,6 +69,20 @@ export default function EventDetail() {
       </AppLayout>
     );
   }
+  
+  // Format price for display
+  const formatPrice = (price: Event['price']) => {
+    if (!price) return "Price not available";
+    if (price.isFree) return "Free";
+    return `${price.currency}${price.min}${price.max ? ` - ${price.currency}${price.max}` : ""}`;
+  };
+  
+  // Format location for display
+  const formatLocation = (location: Event['location']) => {
+    if (typeof location === 'string') return location;
+    if (typeof location === 'object') return location.name;
+    return "Location not available";
+  };
   
   const handleToggleSave = () => {
     if (isSaved) {
@@ -136,7 +152,7 @@ export default function EventDetail() {
               {event.location && (
                 <div className="flex items-center">
                   <MapPin size={16} className="mr-1.5" />
-                  <span>{event.location}</span>
+                  <span>{formatLocation(event.location)}</span>
                 </div>
               )}
             </div>
@@ -157,21 +173,6 @@ export default function EventDetail() {
                 <p>{event.description}</p>
               </div>
             </motion.div>
-            
-            {/* Additional event info */}
-            {event.additionalInfo && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="bg-card rounded-3xl p-6 shadow-sm"
-              >
-                <h2 className="text-xl font-bold mb-4">Additional Information</h2>
-                <div className="prose prose-sm max-w-none dark:prose-invert">
-                  <p>{event.additionalInfo}</p>
-                </div>
-              </motion.div>
-            )}
           </div>
           
           {/* Sidebar with actions */}
@@ -186,7 +187,7 @@ export default function EventDetail() {
                 {event.price && (
                   <div className="mb-4">
                     <h3 className="text-sm font-semibold text-muted-foreground mb-1">Price</h3>
-                    <p className="text-xl font-bold">{event.price}</p>
+                    <p className="text-xl font-bold">{formatPrice(event.price)}</p>
                   </div>
                 )}
                 
@@ -243,7 +244,7 @@ export default function EventDetail() {
       </div>
       
       {/* Share modal */}
-      {event && ( // Only pass the event object when it exists
+      {event && ( 
         <ShareModal 
           event={event} 
           open={isShareModalOpen} 
