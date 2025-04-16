@@ -123,8 +123,10 @@ export function useFilteredEvents(filters: {
   } else if (dateRange === 'this-weekend') {
     const now = new Date();
     const dayOfWeek = now.getDay();
+    // Calculate days until Friday (day 5)
+    const daysUntilFriday = (5 - dayOfWeek + 7) % 7;
     const friday = new Date(now);
-    friday.setDate(now.getDate() + (5 - dayOfWeek + 7) % 7);
+    friday.setDate(now.getDate() + daysUntilFriday);
     startDate = friday.toISOString().split('T')[0];
     
     const sunday = new Date(friday);
@@ -137,6 +139,21 @@ export function useFilteredEvents(filters: {
     const nextWeek = new Date(now);
     nextWeek.setDate(now.getDate() + 7);
     endDate = nextWeek.toISOString().split('T')[0];
+  } else if (dateRange === 'upcoming') {
+    const now = new Date();
+    startDate = now.toISOString().split('T')[0];
+    
+    const threeMonths = new Date(now);
+    threeMonths.setMonth(now.getMonth() + 3);
+    endDate = threeMonths.toISOString().split('T')[0];
+  } else if (dateRange === 'trending') {
+    // For trending, we'll get all events and filter by isTrending in useTicketmasterEvents
+    const now = new Date();
+    startDate = now.toISOString().split('T')[0];
+    
+    const oneMonth = new Date(now);
+    oneMonth.setMonth(now.getMonth() + 1);
+    endDate = oneMonth.toISOString().split('T')[0];
   }
   
   return useTicketmasterEvents({

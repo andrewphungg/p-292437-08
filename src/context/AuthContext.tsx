@@ -1,168 +1,125 @@
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
-import { User } from "../types/user";
+import React, { createContext, useContext, useState, ReactNode } from "react";
+import { User } from "@/types/user";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 interface AuthContextType {
+  isLoading: boolean;
   isAuthenticated: boolean;
-  isAdmin: boolean;
-  currentUser: User | null;
-  signup: (email: string, password: string) => void;
-  login: (email: string, password: string) => void;
-  adminLogin: (email: string, password: string) => void;
+  user: User | null;
+  login: (email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string, university: string, graduationYear: number) => Promise<void>;
   logout: () => void;
-  updateProfile: (userData: Partial<User>) => void;
+  error: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Admin credentials
-const ADMIN_EMAIL = "admin@joople.com";
-const ADMIN_PASSWORD = "admin123";
-
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Check if user is already authenticated from localStorage
-    const storedAuth = localStorage.getItem("isAuthenticated");
-    const storedAdmin = localStorage.getItem("isAdmin");
-    const storedUser = localStorage.getItem("user");
-    
-    if (storedAuth === "true" && storedUser) {
-      setIsAuthenticated(true);
-      setUser(JSON.parse(storedUser));
-      if (storedAdmin === "true") {
-        setIsAdmin(true);
+  const login = async (email: string, password: string) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Simple mock auth - in a real app, you'd validate with a backend
+      if (email === "test@example.com" && password === "password") {
+        // Mock successful login
+        const mockUser: User = {
+          id: "user-1",
+          name: "Alex Johnson",
+          avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1180&q=80",
+          email: email,
+          graduationYear: 2025,
+          university: "Stanford University",
+          points: 2750,
+          interests: [],
+          friends: [],
+          attendedEvents: [],
+          sharedEvents: [],
+          savedEvents: [],
+        };
+        
+        setUser(mockUser);
+        setIsAuthenticated(true);
+        toast.success("Login successful!");
+        navigate("/"); // Redirect to home page
+      } else {
+        // Mock login failure
+        setError("Invalid email or password");
+        toast.error("Invalid email or password");
       }
-    }
-  }, []);
-
-  const signup = (email: string, password: string) => {
-    // In a real app, this would make an API call to create a user
-    // For now, we'll just simulate a successful signup
-    const newUser: User = {
-      id: `user-${Date.now()}`,
-      name: "",
-      avatar: "",
-      email,
-      graduationYear: new Date().getFullYear(),
-      university: "",
-      points: 0,
-      interests: [],
-      friends: [],
-      attendedEvents: [],
-      sharedEvents: []
-    };
-    
-    setUser(newUser);
-    setIsAuthenticated(true);
-    setIsAdmin(false);
-    localStorage.setItem("isAuthenticated", "true");
-    localStorage.setItem("isAdmin", "false");
-    localStorage.setItem("user", JSON.stringify(newUser));
-    
-    toast.success("Account created successfully!");
-    navigate("/onboarding");
-  };
-
-  const login = (email: string, password: string) => {
-    // Check if these are admin credentials
-    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-      return adminLogin(email, password);
-    }
-
-    // For demo purposes, we'll just simulate a login
-    const savedUser = localStorage.getItem("user");
-    
-    if (savedUser) {
-      const parsedUser = JSON.parse(savedUser);
-      setUser(parsedUser);
-      setIsAuthenticated(true);
-      setIsAdmin(false);
-      localStorage.setItem("isAuthenticated", "true");
-      localStorage.setItem("isAdmin", "false");
-      toast.success("Logged in successfully!");
-      navigate("/");
-    } else {
-      toast.error("Invalid credentials");
+    } catch (err) {
+      setError("An error occurred during login");
+      toast.error("Login failed. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const adminLogin = (email: string, password: string) => {
-    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-      const adminUser: User = {
-        id: "admin-1",
-        name: "Admin",
-        avatar: "",
-        email: ADMIN_EMAIL,
-        graduationYear: new Date().getFullYear(),
-        university: "Admin Panel",
-        points: 9999,
-        interests: ["Admin"],
+  const register = async (name: string, email: string, password: string, university: string, graduationYear: number) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Mock successful registration
+      const mockUser: User = {
+        id: "user-" + Math.floor(Math.random() * 10000),
+        name: name,
+        avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80",
+        email: email,
+        graduationYear: graduationYear,
+        university: university,
+        points: 0,
+        interests: [],
         friends: [],
         attendedEvents: [],
-        sharedEvents: []
+        sharedEvents: [],
+        savedEvents: [],
       };
-
-      setUser(adminUser);
-      setIsAuthenticated(true);
-      setIsAdmin(true);
-      localStorage.setItem("isAuthenticated", "true");
-      localStorage.setItem("isAdmin", "true");
-      localStorage.setItem("user", JSON.stringify(adminUser));
       
-      toast.success("Admin logged in successfully!");
-      navigate("/");
-    } else {
-      toast.error("Invalid admin credentials");
+      setUser(mockUser);
+      setIsAuthenticated(true);
+      toast.success("Registration successful!");
+      navigate("/onboarding"); // Redirect to onboarding page
+    } catch (err) {
+      setError("An error occurred during registration");
+      toast.error("Registration failed. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const logout = () => {
     setUser(null);
     setIsAuthenticated(false);
-    setIsAdmin(false);
-    localStorage.removeItem("isAuthenticated");
-    localStorage.removeItem("isAdmin");
-    localStorage.removeItem("user");
-    navigate("/auth");
-    toast.success("Logged out successfully!");
-  };
-
-  const updateProfile = (userData: Partial<User>) => {
-    if (user) {
-      const updatedUser = { ...user, ...userData };
-      setUser(updatedUser);
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-      toast.success("Profile updated successfully!");
-    }
+    toast.info("You've been logged out");
+    navigate("/auth"); // Redirect to login page
   };
 
   return (
-    <AuthContext.Provider value={{
-      isAuthenticated,
-      isAdmin,
-      currentUser: user,
-      signup,
-      login,
-      adminLogin,
-      logout,
-      updateProfile
-    }}>
+    <AuthContext.Provider value={{ isLoading, isAuthenticated, user, login, register, logout, error }}>
       {children}
     </AuthContext.Provider>
   );
-};
+}
 
-export const useAuth = () => {
+export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
-};
+}

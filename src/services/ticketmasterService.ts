@@ -301,8 +301,10 @@ const generateSampleEvents = (count: number): Event[] => {
       description: getRandomDescription(category),
       image,
       date: dateString,
+      day: eventDate.toLocaleDateString('en-US', { weekday: 'long' }),
       startTime,
       endTime,
+      time: `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`,
       location: {
         name: venue,
         address: `${Math.floor(Math.random() * 999) + 1} ${getRandomStreet()}`,
@@ -334,78 +336,7 @@ const generateSampleEvents = (count: number): Event[] => {
   return events;
 };
 
-// Generate a single sample event
-const generateSampleEvent = (index: number): Event => {
-  const categories = ["Music", "Sports", "Arts", "Family", "Comedy", "Tech", "Food"];
-  const cities = ["San Francisco", "Los Angeles", "New York", "Chicago", "Miami", "Austin", "Seattle", "Boston"];
-  const venues = [
-    "Madison Square Garden", "Barclays Center", "Chase Center", "Staples Center", 
-    "Red Rocks Amphitheatre", "The Fillmore", "Radio City Music Hall", "Hollywood Bowl"
-  ];
-  const eventImages = [
-    "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=800&q=80",
-    "https://images.unsplash.com/photo-1496337589254-7e19d01cec44?auto=format&fit=crop&w=800&q=80",
-    "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=800&q=80",
-    "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80",
-    "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?auto=format&fit=crop&w=800&q=80"
-  ];
-  
-  const category = categories[Math.floor(Math.random() * categories.length)];
-  const city = cities[Math.floor(Math.random() * cities.length)];
-  const venue = venues[Math.floor(Math.random() * venues.length)];
-  const image = eventImages[Math.floor(Math.random() * eventImages.length)];
-  
-  // Random date between now and 3 months from now
-  const startDate = new Date();
-  const endDate = new Date();
-  endDate.setMonth(endDate.getMonth() + 3);
-  const eventDate = new Date(
-    startDate.getTime() + Math.random() * (endDate.getTime() - startDate.getTime())
-  );
-  
-  // Format date as YYYY-MM-DD
-  const dateString = eventDate.toISOString().split('T')[0];
-  const day = eventDate.toLocaleDateString('en-US', { weekday: 'long' });
-  
-  // Random time between 9AM and 10PM
-  const hour = Math.floor(Math.random() * 13) + 9;
-  const minute = Math.floor(Math.random() * 60);
-  const startTime = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:00`;
-  const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')} ${hour >= 12 ? 'PM' : 'AM'}`;
-  
-  return {
-    id: `sample-${index}`,
-    title: getRandomTitle(category),
-    description: getRandomDescription(category),
-    image,
-    date: dateString,
-    day,
-    time,
-    startTime,
-    location: {
-      name: venue,
-      address: `${Math.floor(Math.random() * 999) + 1} ${getRandomStreet()}`,
-      city,
-    },
-    price: {
-      min: Math.floor(Math.random() * 185) + 15,
-      max: Math.floor(Math.random() * 100) + 200,
-      currency: "$",
-      isFree: Math.random() < 0.1,
-    },
-    category,
-    tags: getRandomTags(category),
-    mood: ["Energetic", "Social"],
-    attendees: Math.floor(Math.random() * 200) + 10,
-    source: "ticketmaster",
-    url: "https://www.ticketmaster.com/",
-    isTrending: Math.random() > 0.8,
-    isEditorsPick: Math.random() > 0.9,
-    pointsForAttending: Math.floor(Math.random() * 50) + 30,
-    pointsForSharing: Math.floor(Math.random() * 20) + 10,
-  };
-};
-
+// Helper functions for generating sample events
 const getRandomTitle = (category: string): string => {
   const musicTitles = [
     "Summer Vibes Tour", "Acoustic Sunset Sessions", "Electric Dreams Festival",
@@ -446,32 +377,6 @@ const getRandomStreet = (): string => {
     "Washington Ave", "Mission St", "Valencia St", "Hayes St", "Castro St"
   ];
   return streets[Math.floor(Math.random() * streets.length)];
-};
-
-const getRandomTags = (category: string): string[] => {
-  const tagsByCategory: Record<string, string[]> = {
-    "Music": ["Rock", "Pop", "Jazz", "EDM", "Hip Hop", "Classical", "Country"],
-    "Sports": ["Basketball", "Football", "Soccer", "Baseball", "Tennis", "Golf"],
-    "Arts": ["Theater", "Dance", "Exhibition", "Gallery", "Opera", "Performance"],
-    "Family": ["Kids", "Educational", "Theme Park", "Zoo", "Aquarium", "Museum"],
-    "Comedy": ["Stand-up", "Improv", "Sketch", "Show"],
-    "Tech": ["Conference", "Hackathon", "Workshop", "Meetup", "Seminar"],
-    "Food": ["Festival", "Tasting", "Cooking Class", "Food Tour", "Wine Tasting"]
-  };
-  
-  const availableTags = tagsByCategory[category] || ["Entertainment"];
-  const tagCount = Math.floor(Math.random() * 3) + 1;
-  const selectedTags = [];
-  
-  for (let i = 0; i < tagCount; i++) {
-    if (availableTags.length > 0) {
-      const tagIndex = Math.floor(Math.random() * availableTags.length);
-      selectedTags.push(availableTags[tagIndex]);
-      availableTags.splice(tagIndex, 1);
-    }
-  }
-  
-  return selectedTags;
 };
 
 // Function to search for events by keyword

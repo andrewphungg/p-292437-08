@@ -37,7 +37,8 @@ export function EventCard({
     tags,
     attendees,
     isTrending,
-    isEditorsPick
+    isEditorsPick,
+    url
   } = event;
 
   const { user, addSavedEvent, removeSavedEvent } = useUser();
@@ -153,177 +154,207 @@ export function EventCard({
       "Social": "👥",
       "Fitness": "💪",
       "Comedy": "😂",
-      "Family": "👨‍👩‍👧‍👦"
+      "Family": "👨‍👩‍👧‍👦",
+      "Miscellaneous": "🎪"
     };
     
     return iconMap[category] || "🎟️";
   };
   
+  // Handle external link click
+  const handleBuyTickets = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+  
   // Compact card variant
   if (variant === "compact") {
     return (
+      <div className="group">
+        <motion.div
+          initial={{ scale: 1 }}
+          whileHover={{ y: -2, transition: { duration: 0.2 } }}
+        >
+          <Link to={`/event/${id}`}>
+            <Card className={cn(
+              "overflow-hidden hover:shadow-md transition-shadow duration-300 rounded-3xl shadow-sm border-gray-100 dark:border-gray-800", 
+              className
+            )}>
+              <div className="relative">
+                <AnimatePresence>{showConfetti && <HeartConfetti />}</AnimatePresence>
+                <img 
+                  src={image} 
+                  alt={title} 
+                  className="w-full h-32 object-cover rounded-t-3xl"
+                />
+                <div className="flex flex-col gap-1 absolute top-2 left-2">
+                  {isTrending && (
+                    <Tag variant="trending" className="text-xs">
+                      <span className="mr-1">🔥</span> Trending
+                    </Tag>
+                  )}
+                  {isEditorsPick && (
+                    <Tag variant="editors" className="text-xs mt-1">
+                      <span className="mr-1">✨</span> Editor's Pick
+                    </Tag>
+                  )}
+                </div>
+                <motion.button 
+                  onClick={handleSave}
+                  whileTap={{ scale: 1.1 }}
+                  className={cn(
+                    "absolute bottom-2 right-2 p-1.5 rounded-full transition-colors shadow-sm",
+                    saved ? "bg-red-500 text-white" : "bg-white/90 text-gray-500 hover:text-gray-700 dark:bg-gray-800/90 dark:text-gray-300 dark:hover:text-white"
+                  )}
+                  aria-label={saved ? "Unsave event" : "Save event"}
+                >
+                  <Heart size={14} fill={saved ? "currentColor" : "none"} />
+                </motion.button>
+              </div>
+              <div className="p-3">
+                <div className="flex justify-between items-start">
+                  <h3 className="font-bold text-sm line-clamp-1">{title}</h3>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1 flex items-center">
+                  <Calendar size={12} className="mr-1 text-primary" /> {formattedDate}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1 flex items-center">
+                  <MapPin size={12} className="mr-1 text-primary" /> {locationName}
+                </p>
+                <p className="text-xs font-medium text-primary mt-1">{formattedPrice}</p>
+              </div>
+            </Card>
+          </Link>
+        </motion.div>
+        <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity flex justify-center">
+          <button
+            onClick={handleBuyTickets}
+            className="text-xs flex items-center bg-primary text-white px-3 py-1 rounded-full hover:bg-primary/90 transition-colors"
+          >
+            <span>Buy Tickets</span>
+            <ArrowUpRight size={12} className="ml-1" />
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
+  // Default card variant
+  return (
+    <div className="group">
       <Link to={`/event/${id}`}>
         <motion.div
           initial={{ scale: 1 }}
           whileHover={{ y: -2, transition: { duration: 0.2 } }}
         >
           <Card className={cn(
-            "overflow-hidden hover:shadow-md transition-shadow duration-300 rounded-3xl shadow-sm border-gray-100 dark:border-gray-800", 
+            "overflow-hidden hover:shadow-md transition-all duration-300 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm", 
             className
           )}>
-            <div className="relative">
+            <div className="flex flex-col md:flex-row relative">
               <AnimatePresence>{showConfetti && <HeartConfetti />}</AnimatePresence>
-              <img 
-                src={image} 
-                alt={title} 
-                className="w-full h-32 object-cover rounded-t-3xl"
-              />
-              <div className="flex flex-col gap-1 absolute top-2 left-2">
-                {isTrending && (
-                  <Tag variant="trending" className="text-xs">
-                    <span className="mr-1">🔥</span> Trending
-                  </Tag>
-                )}
-                {isEditorsPick && (
-                  <Tag variant="editors" className="text-xs mt-1">
-                    <span className="mr-1">✨</span> Editor's Pick
-                  </Tag>
-                )}
+              <div className="relative md:w-1/3">
+                <img 
+                  src={image} 
+                  alt={title} 
+                  className="w-full h-48 md:h-full object-cover rounded-t-3xl md:rounded-l-3xl md:rounded-tr-none"
+                />
+                <div className="flex flex-col gap-1 absolute top-2 left-2">
+                  {isTrending && (
+                    <Tag variant="trending" className="text-xs">
+                      <span className="mr-1">🔥</span> Trending
+                    </Tag>
+                  )}
+                  {isEditorsPick && (
+                    <Tag variant="editors" className="text-xs mt-1">
+                      <span className="mr-1">✨</span> Editor's Pick
+                    </Tag>
+                  )}
+                </div>
               </div>
-              <motion.button 
-                onClick={handleSave}
-                whileTap={{ scale: 1.1 }}
-                className={cn(
-                  "absolute bottom-2 right-2 p-1.5 rounded-full transition-colors shadow-sm",
-                  saved ? "bg-red-500 text-white" : "bg-white/90 text-gray-500 hover:text-gray-700 dark:bg-gray-800/90 dark:text-gray-300 dark:hover:text-white"
-                )}
-                aria-label={saved ? "Unsave event" : "Save event"}
-              >
-                <Heart size={14} fill={saved ? "currentColor" : "none"} />
-              </motion.button>
-            </div>
-            <div className="p-3">
-              <div className="flex justify-between items-start">
-                <h3 className="font-bold text-sm line-clamp-1">{title}</h3>
+              
+              <div className="p-5 flex flex-col flex-1 justify-between">
+                <div>
+                  <div className="flex items-start justify-between">
+                    <h3 className="font-bold text-lg line-clamp-2">{title}</h3>
+                    <div className="flex">
+                      {onRemove && (
+                        <motion.button 
+                          onClick={handleRemove}
+                          whileTap={{ scale: 0.95 }}
+                          className="p-1.5 rounded-full text-gray-400 hover:text-destructive hover:bg-destructive/10 mr-1 transition-colors"
+                          aria-label="Remove from saved"
+                        >
+                          <Trash2 size={18} />
+                        </motion.button>
+                      )}
+                      <motion.button 
+                        onClick={handleSave}
+                        whileTap={{ scale: 1.1 }}
+                        className={cn(
+                          "p-1.5 rounded-full transition-colors",
+                          saved ? "text-red-500 bg-red-50 dark:bg-red-900/20" : "text-gray-400 hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-gray-300 dark:hover:text-white"
+                        )}
+                        aria-label={saved ? "Unsave event" : "Save event"}
+                      >
+                        <Heart size={18} fill={saved ? "currentColor" : "none"} />
+                      </motion.button>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-1.5 mt-3">
+                    <p className="text-sm text-gray-600 dark:text-gray-300 flex items-center">
+                      <Calendar size={14} className="mr-2 text-primary" />
+                      {formattedDate}
+                    </p>
+                    
+                    <p className="text-sm text-gray-600 dark:text-gray-300 flex items-center">
+                      <MapPin size={14} className="mr-2 text-primary" />
+                      {locationName}
+                    </p>
+                    
+                    <p className="text-sm text-gray-600 dark:text-gray-300 flex items-center">
+                      <Users size={14} className="mr-2 text-primary" />
+                      {attendees} attending
+                    </p>
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-1.5 mt-4">
+                    <Tag variant="category">
+                      {getCategoryIcon(category)} {category}
+                    </Tag>
+                    {tags.slice(0, 3).map(tag => (
+                      tag && <Tag key={tag} variant="default">{tag}</Tag>
+                    ))}
+                    {tags.length > 3 && <span className="text-xs text-muted-foreground">+{tags.length - 3}</span>}
+                  </div>
+                </div>
+                
+                <div className="mt-4 flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-primary">{formattedPrice}</p>
+                  </div>
+                  
+                  <div className="flex items-center text-sm text-primary font-medium">
+                    View Details 
+                    <ArrowUpRight size={14} className="ml-1" />
+                  </div>
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground mt-1 flex items-center">
-                <Calendar size={12} className="mr-1 text-primary" /> {formattedDate}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1 flex items-center">
-                <MapPin size={12} className="mr-1 text-primary" /> {locationName}
-              </p>
-              <p className="text-xs font-medium text-primary mt-1">{formattedPrice}</p>
             </div>
           </Card>
         </motion.div>
       </Link>
-    );
-  }
-  
-  // Default card variant
-  return (
-    <Link to={`/event/${id}`} className="block mb-6">
-      <motion.div
-        initial={{ scale: 1 }}
-        whileHover={{ y: -2, transition: { duration: 0.2 } }}
-      >
-        <Card className={cn(
-          "overflow-hidden hover:shadow-md transition-all duration-300 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm", 
-          className
-        )}>
-          <div className="flex flex-col md:flex-row relative">
-            <AnimatePresence>{showConfetti && <HeartConfetti />}</AnimatePresence>
-            <div className="relative md:w-1/3">
-              <img 
-                src={image} 
-                alt={title} 
-                className="w-full h-48 md:h-full object-cover rounded-t-3xl md:rounded-l-3xl md:rounded-tr-none"
-              />
-              <div className="flex flex-col gap-1 absolute top-2 left-2">
-                {isTrending && (
-                  <Tag variant="trending" className="text-xs">
-                    <span className="mr-1">🔥</span> Trending
-                  </Tag>
-                )}
-                {isEditorsPick && (
-                  <Tag variant="editors" className="text-xs mt-1">
-                    <span className="mr-1">✨</span> Editor's Pick
-                  </Tag>
-                )}
-              </div>
-            </div>
-            
-            <div className="p-5 flex flex-col flex-1 justify-between">
-              <div>
-                <div className="flex items-start justify-between">
-                  <h3 className="font-bold text-lg line-clamp-2">{title}</h3>
-                  <div className="flex">
-                    {onRemove && (
-                      <motion.button 
-                        onClick={handleRemove}
-                        whileTap={{ scale: 0.95 }}
-                        className="p-1.5 rounded-full text-gray-400 hover:text-destructive hover:bg-destructive/10 mr-1 transition-colors"
-                        aria-label="Remove from saved"
-                      >
-                        <Trash2 size={18} />
-                      </motion.button>
-                    )}
-                    <motion.button 
-                      onClick={handleSave}
-                      whileTap={{ scale: 1.1 }}
-                      className={cn(
-                        "p-1.5 rounded-full transition-colors",
-                        saved ? "text-red-500 bg-red-50 dark:bg-red-900/20" : "text-gray-400 hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-gray-300 dark:hover:text-white"
-                      )}
-                      aria-label={saved ? "Unsave event" : "Save event"}
-                    >
-                      <Heart size={18} fill={saved ? "currentColor" : "none"} />
-                    </motion.button>
-                  </div>
-                </div>
-                
-                <div className="space-y-1.5 mt-3">
-                  <p className="text-sm text-gray-600 dark:text-gray-300 flex items-center">
-                    <Calendar size={14} className="mr-2 text-primary" />
-                    {formattedDate}
-                  </p>
-                  
-                  <p className="text-sm text-gray-600 dark:text-gray-300 flex items-center">
-                    <MapPin size={14} className="mr-2 text-primary" />
-                    {locationName}
-                  </p>
-                  
-                  <p className="text-sm text-gray-600 dark:text-gray-300 flex items-center">
-                    <Users size={14} className="mr-2 text-primary" />
-                    {attendees} attending
-                  </p>
-                </div>
-                
-                <div className="flex flex-wrap gap-1.5 mt-4">
-                  <Tag variant="category">
-                    {getCategoryIcon(category)} {category}
-                  </Tag>
-                  {tags.slice(0, 3).map(tag => (
-                    <Tag key={tag} variant="default">{tag}</Tag>
-                  ))}
-                  {tags.length > 3 && <span className="text-xs text-muted-foreground">+{tags.length - 3}</span>}
-                </div>
-              </div>
-              
-              <div className="mt-4 flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-primary">{formattedPrice}</p>
-                </div>
-                
-                <div className="flex items-center text-sm text-primary font-medium">
-                  View Details 
-                  <ArrowUpRight size={14} className="ml-1" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
-      </motion.div>
-    </Link>
+      <div className="mt-2 text-center opacity-0 group-hover:opacity-100 transition-opacity">
+        <button
+          onClick={handleBuyTickets}
+          className="text-sm font-medium flex items-center mx-auto bg-primary text-white px-4 py-2 rounded-full hover:bg-primary/90 transition-colors"
+        >
+          <span>Get Tickets</span>
+          <ArrowUpRight size={14} className="ml-1" />
+        </button>
+      </div>
+    </div>
   );
 }

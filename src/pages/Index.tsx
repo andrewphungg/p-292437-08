@@ -23,17 +23,18 @@ const Index = () => {
   // Use Ticketmaster API to get events
   const { data: ticketmasterEvents = [], isLoading } = useTicketmasterEvents();
   
-  // For trending events
+  // For weekend events
   const { data: weekendEvents = [], isLoading: isLoadingWeekend } = useFilteredEvents({
     dateRange: 'this-weekend'
   });
 
+  // For trending events
+  const { data: trendingEvents = [], isLoading: isLoadingTrending } = useFilteredEvents({
+    dateRange: 'trending'
+  });
+
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-  };
-
-  const handleCategoryChange = (categories: string[]) => {
-    setSelectedCategories(categories);
   };
 
   const handleApplyFilters = (filters: FilterOptions) => {
@@ -61,27 +62,45 @@ const Index = () => {
   const categories = [
     { id: "all", name: "All", icon: <Compass size={16} /> },
     { id: "Music", name: "Music", icon: <Music size={16} /> },
-    { id: "Food", name: "Food", icon: <Tag size={16} /> },
     { id: "Sports", name: "Sports", icon: <Tag size={16} /> },
     { id: "Arts", name: "Arts", icon: <Tag size={16} /> },
-    { id: "Tech", name: "Tech", icon: <Tag size={16} /> },
+    { id: "Family", name: "Family", icon: <Tag size={16} /> },
+    { id: "Miscellaneous", name: "Misc", icon: <Tag size={16} /> },
   ];
 
   // Filter events based on search query, selected categories, and active filter
   const filteredEvents = (ticketmasterEvents).filter(event => {
+    // Match search query (case insensitive)
     const matchesSearch = searchQuery === "" || 
       event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (typeof event.location === 'object' && event.location.name.toLowerCase().includes(searchQuery.toLowerCase()));
       
+    // Match selected categories
     const matchesCategories = selectedCategories.length === 0 || 
-      selectedCategories.some(category => event.tags.includes(category) || event.category === category);
+      selectedCategories.some(category => 
+        event.category === category || 
+        event.tags.some(tag => tag && tag.toLowerCase() === category.toLowerCase())
+      );
 
-    // Additional filter based on the active filter tab
-    const matchesActiveFilter = 
-      (activeFilter === "all") || 
-      (activeFilter === "trending" && event.isTrending) ||
-      (activeFilter === "weekend" && isWeekendEvent(event.date)) ||
-      (activeFilter === "upcoming" && isUpcomingEvent(event.date));
+    // Match active filter tab
+    let matchesActiveFilter = false;
+    
+    switch(activeFilter) {
+      case "all":
+        matchesActiveFilter = true;
+        break;
+      case "trending":
+        matchesActiveFilter = event.isTrending;
+        break;
+      case "weekend":
+        matchesActiveFilter = isWeekendEvent(event.date);
+        break;
+      case "upcoming":
+        matchesActiveFilter = isUpcomingEvent(event.date);
+        break;
+      default:
+        matchesActiveFilter = true;
+    }
       
     return matchesSearch && matchesCategories && matchesActiveFilter;
   });
@@ -89,15 +108,19 @@ const Index = () => {
   // Helper functions for date filtering
   const isWeekendEvent = (dateStr: string) => {
     const date = new Date(dateStr);
-    const day = date.getDay();
     const now = new Date();
-    const nextWeekend = new Date(now);
     
-    // Set to upcoming weekend
-    nextWeekend.setDate(now.getDate() + (day === 0 ? 7 : 7 - now.getDay()));
+    // Get next Friday
+    const friday = new Date(now);
+    const dayOfWeek = friday.getDay(); // 0 is Sunday, 6 is Saturday
+    friday.setDate(now.getDate() + ((5 - dayOfWeek + 7) % 7)); // Next Friday
     
-    // Check if event is on a weekend (0 = Sunday, 6 = Saturday)
-    return (day === 0 || day === 6) && date <= nextWeekend;
+    // Get next Sunday
+    const sunday = new Date(friday);
+    sunday.setDate(friday.getDate() + 2);
+    
+    // Check if date is between next Friday and Sunday inclusive
+    return date >= friday && date <= sunday;
   };
   
   const isUpcomingEvent = (dateStr: string) => {
@@ -108,9 +131,6 @@ const Index = () => {
     
     return date >= now && date <= twoWeeksLater;
   };
-
-  // Get trending events
-  const trendingEvents = ticketmasterEvents.filter(event => event.isTrending).slice(0, 6);
 
   useEffect(() => {
     // Show a toast when events are loaded
@@ -226,14 +246,14 @@ const Index = () => {
           
           {/* Trending Section */}
           <section>
-            <h2 className="section-title font-bold">Trending</h2>
+            <h2 className="section-title font-bold mb-4">Trending</h2>
             <div className="grid grid-cols-2 gap-4">
-              {isLoading ? (
+              {isLoadingTrending ? (
                 Array(4).fill(0).map((_, i) => (
                   <div key={i} className="animate-pulse h-48 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
                 ))
               ) : trendingEvents.length > 0 ? (
-                trendingEvents.map(event => (
+                trendingEvents.filter(e => e.isTrending).slice(0, 6).map(event => (
                   <EventCard key={event.id} event={event} variant="compact" />
                 ))
               ) : (
@@ -246,14 +266,14 @@ const Index = () => {
           
           {/* Weekend Section */}
           <section>
-            <h2 className="section-title font-bold">This Weekend</h2>
+            <h2 className="section-title font-bold mb-4">This Weekend</h2>
             <div className="flex flex-col gap-6">
               {isLoadingWeekend ? (
                 Array(2).fill(0).map((_, i) => (
                   <div key={i} className="animate-pulse h-32 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
                 ))
               ) : weekendEvents.length > 0 ? (
-                weekendEvents.map(event => (
+                weekendEvents.slice(0, 3).map(event => (
                   <EventCard key={event.id} event={event} />
                 ))
               ) : (
