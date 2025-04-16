@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
@@ -13,6 +13,14 @@ interface ApiKeySetupProps {
 export const ApiKeySetup = ({ onSave }: ApiKeySetupProps) => {
   const [apiKey, setApiKey] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  
+  // Load existing API key when dialog opens
+  useEffect(() => {
+    if (isDialogOpen) {
+      const savedKey = localStorage.getItem("ticketmasterApiKey") || "";
+      setApiKey(savedKey);
+    }
+  }, [isDialogOpen]);
   
   const handleSave = () => {
     if (!apiKey.trim()) {
@@ -94,8 +102,18 @@ export const ApiKeySetup = ({ onSave }: ApiKeySetupProps) => {
 };
 
 // Helper component to update existing API key
-export const UpdateApiKey = () => {
-  const [apiKey, setApiKey] = useState(localStorage.getItem("ticketmasterApiKey") || "");
+interface UpdateApiKeyProps {
+  onUpdate: (apiKey: string) => void;
+}
+
+export const UpdateApiKey = ({ onUpdate }: UpdateApiKeyProps) => {
+  const [apiKey, setApiKey] = useState("");
+  
+  // Load saved API key on component mount
+  useEffect(() => {
+    const savedKey = localStorage.getItem("ticketmasterApiKey") || "";
+    setApiKey(savedKey);
+  }, []);
   
   const handleSave = () => {
     if (!apiKey.trim()) {
@@ -104,10 +122,8 @@ export const UpdateApiKey = () => {
     }
     
     localStorage.setItem("ticketmasterApiKey", apiKey.trim());
+    onUpdate(apiKey.trim());
     toast.success("API key updated successfully");
-    
-    // Force a refresh to apply the new key
-    window.location.reload();
   };
   
   return (

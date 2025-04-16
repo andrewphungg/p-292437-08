@@ -1,8 +1,11 @@
-
 import { Event } from "@/types/event";
 
-// Hard-coded API key for all users
-const API_KEY = "CYB4SkyODasGUeUeBSlZZDXphPms6AL7";
+// Get API key from localStorage or use default
+const getApiKey = (): string => {
+  const storedKey = localStorage.getItem("ticketmasterApiKey");
+  // Default API key as fallback
+  return storedKey || "CYB4SkyODasGUeUeBSlZZDXphPms6AL7";
+};
 
 // This interface defines the structure of a Ticketmaster event
 interface TicketmasterEvent {
@@ -96,6 +99,9 @@ export const fetchTicketmasterEvents = async (
   try {
     // Construct the API URL with parameters
     const baseUrl = "https://app.ticketmaster.com/discovery/v2/events.json";
+    
+    // Get API key from localStorage or use default
+    const API_KEY = getApiKey();
     
     // Use URLSearchParams to create a proper query string
     const queryParams = new URLSearchParams();

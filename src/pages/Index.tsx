@@ -11,6 +11,8 @@ import { MapPin, Music, Tag, Compass, TrendingUp, Calendar, Clock } from "lucide
 import { Button } from "@/components/ui/button";
 import { useTicketmasterEvents, useFilteredEvents } from "@/hooks/useTicketmasterEvents";
 import { toast } from "sonner";
+import { EventList } from "@/components/events/EventList";
+import { ApiKeySetup } from "@/components/settings/ApiKeySetup";
 
 const Index = () => {
   const { user } = useUser();
@@ -21,7 +23,7 @@ const Index = () => {
   const [activeFilter, setActiveFilter] = useState("all");
   
   // Use Ticketmaster API to get events
-  const { data: ticketmasterEvents = [], isLoading } = useTicketmasterEvents();
+  const { data: ticketmasterEvents = [], isLoading, refetch } = useTicketmasterEvents();
   
   // For weekend events
   const { data: weekendEvents = [], isLoading: isLoadingWeekend } = useFilteredEvents({
@@ -32,6 +34,11 @@ const Index = () => {
   const { data: trendingEvents = [], isLoading: isLoadingTrending } = useFilteredEvents({
     dateRange: 'trending'
   });
+
+  const handleApiKeyUpdate = (apiKey: string) => {
+    // Refresh events after API key update
+    refetch();
+  };
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -142,19 +149,21 @@ const Index = () => {
   const header = (
     <header className="sticky top-0 z-20 bg-white/80 dark:bg-gray-900/90 backdrop-blur-md shadow-sm">
       <div className="relative text-center py-6">
-        <h1 
-          className="text-5xl font-bold bg-gradient-to-r from-sunset-orange via-sunset-yellow to-sunset-peach bg-clip-text text-transparent pb-1"
-        >
-          Joople
-        </h1>
+        <div className="flex justify-between items-center px-4">
+          <div></div>
+          <h1 
+            className="text-5xl font-bold bg-gradient-to-r from-sunset-orange via-sunset-yellow to-sunset-peach bg-clip-text text-transparent pb-1"
+          >
+            Joople
+          </h1>
+          <div className="flex space-x-2">
+            <ApiKeySetup onSave={handleApiKeyUpdate} />
+            <ThemeToggle variant="modern" />
+          </div>
+        </div>
         <p className="text-sm text-gray-500 dark:text-gray-400">
           Discover Events For You
         </p>
-        <div 
-          className="absolute right-4 top-1/2 -translate-y-1/2"
-        >
-          <ThemeToggle variant="modern" />
-        </div>
       </div>
       
       <div className="px-4 pb-4">
@@ -223,65 +232,33 @@ const Index = () => {
                 <MapPin size={14} /> Near You
               </Button>
             </div>
-            <div className="flex flex-col gap-6">
-              {isLoading ? (
-                <div className="text-center py-8">
-                  <div className="animate-pulse flex flex-col items-center">
-                    <div className="h-12 w-12 rounded-full bg-gray-200 dark:bg-gray-700 mb-2"></div>
-                    <div className="h-4 w-40 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
-                    <div className="h-2 w-60 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                  </div>
-                </div>
-              ) : filteredEvents.length > 0 ? (
-                filteredEvents.slice(0, 5).map(event => (
-                  <EventCard key={event.id} event={event} />
-                ))
-              ) : (
-                <p className="text-center py-8 text-gray-500 dark:text-gray-400">
-                  No events match your search criteria
-                </p>
-              )}
-            </div>
+            
+            <EventList 
+              events={filteredEvents.slice(0, 5)}
+              loading={isLoading}
+              emptyMessage="No events match your search criteria"
+            />
           </section>
           
           {/* Trending Section */}
           <section>
             <h2 className="section-title font-bold mb-4">Trending</h2>
-            <div className="grid grid-cols-2 gap-4">
-              {isLoadingTrending ? (
-                Array(4).fill(0).map((_, i) => (
-                  <div key={i} className="animate-pulse h-48 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
-                ))
-              ) : trendingEvents.length > 0 ? (
-                trendingEvents.filter(e => e.isTrending).slice(0, 6).map(event => (
-                  <EventCard key={event.id} event={event} variant="compact" />
-                ))
-              ) : (
-                <p className="col-span-2 text-center py-8 text-gray-500 dark:text-gray-400">
-                  No trending events available
-                </p>
-              )}
-            </div>
+            <EventList 
+              events={trendingEvents.filter(e => e.isTrending).slice(0, 6)}
+              loading={isLoadingTrending}
+              variant="grid"
+              emptyMessage="No trending events available"
+            />
           </section>
           
           {/* Weekend Section */}
           <section>
             <h2 className="section-title font-bold mb-4">This Weekend</h2>
-            <div className="flex flex-col gap-6">
-              {isLoadingWeekend ? (
-                Array(2).fill(0).map((_, i) => (
-                  <div key={i} className="animate-pulse h-32 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
-                ))
-              ) : weekendEvents.length > 0 ? (
-                weekendEvents.slice(0, 3).map(event => (
-                  <EventCard key={event.id} event={event} />
-                ))
-              ) : (
-                <p className="text-center py-8 text-gray-500 dark:text-gray-400">
-                  No events scheduled for this weekend
-                </p>
-              )}
-            </div>
+            <EventList 
+              events={weekendEvents.slice(0, 3)}
+              loading={isLoadingWeekend}
+              emptyMessage="No events scheduled for this weekend"
+            />
           </section>
         </div>
 

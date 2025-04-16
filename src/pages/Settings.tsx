@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, Bell, Moon, Languages, Shield, HelpCircle, LogOut, Key } from "lucide-react";
@@ -11,7 +10,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUser } from "@/context/UserContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { useTheme } from "@/providers/ThemeProvider";
-import { UpdateApiKey } from "@/components/settings/ApiKeySetup";
+import { UpdateApiKey, ApiKeySetup } from "@/components/settings/ApiKeySetup";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function Settings() {
   const { user, updateProfile } = useUser();
@@ -20,6 +21,7 @@ export default function Settings() {
   const [editingEmail, setEditingEmail] = useState(user.email);
   const [editingBio, setEditingBio] = useState(user.bio || "");
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   
   const isDarkMode = theme === "dark";
 
@@ -33,6 +35,12 @@ export default function Settings() {
   
   const toggleDarkMode = () => {
     setTheme(isDarkMode ? "light" : "dark");
+  };
+
+  const handleApiKeyUpdate = (apiKey: string) => {
+    queryClient.invalidateQueries({queryKey: ['ticketmasterEvents']});
+    queryClient.invalidateQueries({queryKey: ['eventSync']});
+    toast.success("API key updated and event data refreshed");
   };
 
   const header = (
@@ -53,6 +61,15 @@ export default function Settings() {
   return (
     <AppLayout header={header}>
       <div className="px-4 py-6 space-y-8 max-w-lg mx-auto">
+        {/* API Settings - Moving this section to the top for prominence */}
+        <section>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold">API Settings</h2>
+            <ApiKeySetup onSave={handleApiKeyUpdate} />
+          </div>
+          <UpdateApiKey onUpdate={handleApiKeyUpdate} />
+        </section>
+        
         {/* Account Settings */}
         <section>
           <h2 className="text-lg font-semibold mb-4">Account</h2>
@@ -134,12 +151,6 @@ export default function Settings() {
               )}
             </div>
           </div>
-        </section>
-        
-        {/* API Settings */}
-        <section>
-          <h2 className="text-lg font-semibold mb-4">API Settings</h2>
-          <UpdateApiKey />
         </section>
         
         {/* Notifications */}

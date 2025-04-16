@@ -46,6 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           attendedEvents: [],
           sharedEvents: [],
           savedEvents: [],
+          bio: "",
         };
         
         setUser(mockUser);
