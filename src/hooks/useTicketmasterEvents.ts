@@ -122,8 +122,9 @@ export function useFilteredEvents(filters: {
   location?: string;
   dateRange?: string;
   keyword?: string;
+  stateCode?: string; // Added stateCode parameter to fix type error
 }) {
-  const { category, location, dateRange, keyword } = filters;
+  const { category, location, dateRange, keyword, stateCode = "CA" } = filters;
   
   // Parse date range
   let startDate, endDate;
@@ -170,6 +171,7 @@ export function useFilteredEvents(filters: {
     category,
     city: location,
     keyword,
+    stateCode, // Pass the stateCode to useTicketmasterEvents
     startDate,
     endDate,
     size: 50

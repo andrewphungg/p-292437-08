@@ -134,15 +134,14 @@ const Index = () => {
     <header className="sticky top-0 z-20 bg-white/80 dark:bg-gray-900/90 backdrop-blur-md shadow-sm">
       <div className="flex flex-col items-center py-6">
         <h1 
-          className="text-5xl font-bold bg-gradient-to-r from-sunset-orange via-sunset-yellow to-sunset-peach bg-clip-text text-transparent pb-1"
+          className="text-5xl font-bold bg-gradient-to-r from-sunset-orange via-sunset-yellow to-sunset-peach bg-clip-text text-transparent pb-1 text-center"
         >
           Joople
         </h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 text-center">
           Discover Events For You
         </p>
         <div className="absolute right-4 top-6 flex space-x-2">
-          <ApiKeySetup onSave={() => {}} />
           <ThemeToggle variant="modern" />
         </div>
       </div>
