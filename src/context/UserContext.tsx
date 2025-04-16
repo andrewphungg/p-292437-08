@@ -12,7 +12,7 @@ interface UserContextType {
   events: Event[];
   suggestedEvents: Event[];
   suggestedFriends: User[];
-  savedEvents: Event[]; // Add this field to make it available in the context
+  savedEvents: Event[];
   attendEvent: (eventId: string) => void;
   unattendEvent: (eventId: string) => void;
   shareEvent: (eventId: string) => void;
@@ -29,7 +29,7 @@ interface UserContextType {
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
-  const { currentUser: authUser } = useAuth();
+  const { user: authUser } = useAuth(); // Use user instead of currentUser
   const [user, setUser] = useState<User>(initialUser);
   const [events, setEvents] = useState<Event[]>(mockEvents);
   const [allUsers, setAllUsers] = useState<User[]>(getAllFriends());
@@ -238,7 +238,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         events, 
         suggestedEvents,
         suggestedFriends,
-        savedEvents, // Export saved events
+        savedEvents,
         attendEvent,
         unattendEvent,
         shareEvent,

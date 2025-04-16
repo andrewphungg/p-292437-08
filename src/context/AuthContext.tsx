@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import { User } from "@/types/user";
 import { useNavigate } from "react-router-dom";
@@ -8,10 +7,13 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   user: User | null;
+  currentUser: User | null;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string, university: string, graduationYear: number) => Promise<void>;
+  signup: (email: string, password: string) => Promise<void>;
   logout: () => void;
   error: string | null;
+  updateProfile: (updates: Partial<User>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,12 +30,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null);
 
     try {
-      // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // Simple mock auth - in a real app, you'd validate with a backend
       if (email === "test@example.com" && password === "password") {
-        // Mock successful login
         const mockUser: User = {
           id: "user-1",
           name: "Alex Johnson",
@@ -52,9 +51,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(mockUser);
         setIsAuthenticated(true);
         toast.success("Login successful!");
-        navigate("/"); // Redirect to home page
+        navigate("/");
       } else {
-        // Mock login failure
         setError("Invalid email or password");
         toast.error("Invalid email or password");
       }
@@ -71,10 +69,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null);
 
     try {
-      // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // Mock successful registration
       const mockUser: User = {
         id: "user-" + Math.floor(Math.random() * 10000),
         name: name,
@@ -93,10 +89,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(mockUser);
       setIsAuthenticated(true);
       toast.success("Registration successful!");
-      navigate("/onboarding"); // Redirect to onboarding page
+      navigate("/onboarding");
     } catch (err) {
       setError("An error occurred during registration");
       toast.error("Registration failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const signup = async (email: string, password: string) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      const mockUser: User = {
+        id: "user-" + Math.floor(Math.random() * 10000),
+        name: "New User",
+        avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80",
+        email: email,
+        graduationYear: new Date().getFullYear() + 1,
+        university: "University",
+        points: 0,
+        interests: [],
+        friends: [],
+        attendedEvents: [],
+        sharedEvents: [],
+        savedEvents: [],
+      };
+      
+      setUser(mockUser);
+      setIsAuthenticated(true);
+      toast.success("Signup successful!");
+      navigate("/onboarding");
+    } catch (err) {
+      setError("An error occurred during signup");
+      toast.error("Signup failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -106,11 +136,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setIsAuthenticated(false);
     toast.info("You've been logged out");
-    navigate("/auth"); // Redirect to login page
+    navigate("/auth");
+  };
+
+  const updateProfile = (updates: Partial<User>) => {
+    setUser(prev => {
+      if (!prev) return prev;
+      return { ...prev, ...updates };
+    });
+    toast.success("Profile updated successfully!");
   };
 
   return (
-    <AuthContext.Provider value={{ isLoading, isAuthenticated, user, login, register, logout, error }}>
+    <AuthContext.Provider value={{ 
+      isLoading, 
+      isAuthenticated, 
+      user,
+      currentUser: user,
+      login, 
+      register,
+      signup,
+      logout, 
+      error,
+      updateProfile
+    }}>
       {children}
     </AuthContext.Provider>
   );

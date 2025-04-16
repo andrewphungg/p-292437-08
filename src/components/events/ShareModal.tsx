@@ -7,7 +7,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Check, Search, Share, X, Facebook, Twitter, Mail, Link as LinkIcon } from "lucide-react";
-import { getAllFriends } from "@/data/mockData";
+import { getAllFriends } from "@/data/mockData"; // Now this import will work
 import { toast } from "sonner";
 
 interface ShareModalProps {

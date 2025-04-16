@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -16,12 +15,10 @@ export default function Leaderboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState<"all" | "monthly" | "weekly">("all");
   
-  // Filter friends by search query
   const filteredFriends = allFriends.filter(
     friend => friend.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
   
-  // Get top 3 friends
   const topFriends = filteredFriends.slice(0, 3);
   const remainingFriends = filteredFriends.slice(3);
   
@@ -65,10 +62,8 @@ export default function Leaderboard() {
             
             {filterOptions.map((option) => (
               <TabsContent key={option.value} value={option.value} className="mt-6">
-                {/* Top 3 Podium */}
                 {topFriends.length > 0 && (
                   <div className="relative h-56 mb-10">
-                    {/* Second Place */}
                     {topFriends.length > 1 && (
                       <motion.div 
                         initial={{ y: 20, opacity: 0 }}
@@ -87,7 +82,6 @@ export default function Leaderboard() {
                       </motion.div>
                     )}
                     
-                    {/* First Place */}
                     <motion.div 
                       initial={{ y: 20, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
@@ -104,7 +98,6 @@ export default function Leaderboard() {
                       </div>
                     </motion.div>
                     
-                    {/* Third Place */}
                     {topFriends.length > 2 && (
                       <motion.div 
                         initial={{ y: 20, opacity: 0 }}
@@ -125,7 +118,6 @@ export default function Leaderboard() {
                   </div>
                 )}
                 
-                {/* Remaining Friends List */}
                 <div className="space-y-3">
                   {remainingFriends.map((friend, index) => (
                     <FriendRankCard 
@@ -170,7 +162,6 @@ function FriendAvatar({ friend, position }: FriendAvatarProps) {
         <AvatarFallback>{friend.name[0]}</AvatarFallback>
       </Avatar>
       
-      {/* Medal icon */}
       <div className={cn(
         "absolute -bottom-2 left-1/2 -translate-x-1/2 rounded-full p-1.5 bg-gradient-to-r",
         position === 1 ? "from-amber-300 to-yellow-500" : 
