@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { useTicketmasterEvents, useFilteredEvents } from "@/hooks/useTicketmasterEvents";
 import { toast } from "sonner";
 import { EventList } from "@/components/events/EventList";
-import { ApiKeySetup } from "@/components/settings/ApiKeySetup";
 
 const Index = () => {
   const { user } = useUser();
@@ -153,7 +152,7 @@ const Index = () => {
           onFilterClick={openFilterMenu}
         />
         
-        <div className="mt-4 flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
+        <div className="mt-4 flex justify-center gap-2 overflow-x-auto pb-2 hide-scrollbar">
           {filterOptions.map((filter) => (
             <Button
               key={filter.id}
